@@ -1,0 +1,7 @@
+[tool.poetry]
+name = "general_news_crawler"
+version = "0.1.0"
+description = ""
+authors = ["Daniel Vilas Perulan <dvilas@csic.es>", "Javier Vela <javier.vela00@gmail.com>"]
+readme = "README.md"
+package-mode = false

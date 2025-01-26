@@ -1,0 +1,58 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+  "name": "general_news_crawler",
+  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/vue-cli:2": {}
+  },
+
+  // Features to add to the dev container. More info: https://containers.dev/features.
+  // "features": {},
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  //"forwardPorts": [5173],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "anseki.vscode-color",
+        "GitHub.copilot",
+        "sainoba.px-to-rem",
+        "bradlc.vscode-tailwindcss",
+        "Wscats.vue",
+        "Vue.volar",
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode"
+      ]
+    },
+    "settings": {
+      "remote.localPortHost": "allInterfaces",
+      "explorer.fileNesting.enabled": true,
+      "explorer.fileNesting.patterns": {
+        "tsconfig.json": "tsconfig.*.json, env.d.ts",
+        "vite.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
+        "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig"
+      },
+      "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+      },
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+  },
+
+  //"forwardPorts": [8080],
+  "appPort": [5173, "0.0.0.0:8080:8080"],
+
+  "remoteUser": "node",
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "npm install -g npm@11.0.0; npm install -g mdb-cli vue; npm install"
+
+  // Configure tool-specific properties.
+  // "customizations": {},
+
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
+}

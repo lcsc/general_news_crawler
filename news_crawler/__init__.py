@@ -1,0 +1,1 @@
+print ("news_crawler package is imported")
