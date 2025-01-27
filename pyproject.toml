@@ -1,7 +1,18 @@
-[tool.poetry]
+[project]
+requires-python = ">=3.9"
 name = "general_news_crawler"
 version = "0.1.0"
 description = ""
-authors = ["Daniel Vilas Perulan <dvilas@csic.es>", "Javier Vela <javier.vela00@gmail.com>"]
+authors = [
+    {name = "Daniel Vilas Perulan", email="dvilas@csic.es"},
+    {name = "Javier Vela", email = "javier.vela00@gmail.com"}
+]
 readme = "README.md"
+
+[tool.poetry]
 package-mode = false
+[tool.poetry.dependencies]
+pydantic-mongo = "^2.3.0"
+flask = "^3.1.0"
+bs4 = "^0.0.2"
+lxml = "^5.3.0"

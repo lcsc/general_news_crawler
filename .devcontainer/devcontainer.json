@@ -1,6 +1,6 @@
 {
   "name": "news_crawler",
-  "image": "mcr.microsoft.com/devcontainers/python:3",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
   "customizations": {
     "vscode": {
       "settings": {
@@ -13,5 +13,6 @@
       }
     }
   },
-  "onCreateCommand": ".devcontainer/on-create-command.sh"
+  "onCreateCommand": ".devcontainer/on-create-command.sh",
+  "runArgs": ["--network=general_news_crawler_default", "--add-host=host.docker.internal:host-gateway"]
 }

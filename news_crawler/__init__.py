@@ -1,1 +1,1 @@
-print ("news_crawler package is imported")
+print("General News Crawler 0.0.0")
