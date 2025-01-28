@@ -1,5 +1,5 @@
-from .lister import NewsPaperLister
-from ..common.tools import get_url,print_exception
+from .lister import NewsPaperLister, PRENSA_DIGITAL
+from ..common.tools import get_url,print_exception, normalize_url
 from ..model.newspaper import NewsPaperListerInfo
 
 from typing import List
@@ -41,10 +41,10 @@ class PrensaDigitalLister(NewsPaperLister):
                     name=name,
                     #short_name=get_short_name_from_server_name(get_server_name_from_url(link)),
                     type=tipo,
-                    url=link,
+                    url=normalize_url(link),
                     #real_url=None,
                     #alt_urls=None,
-                    src='https://www.prensadigital.com/'))
+                    src=PRENSA_DIGITAL))
 
     def get_newspapers_ccaa(self, ccaa)->List[NewsPaperListerInfo]:
         ret = []

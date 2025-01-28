@@ -1,5 +1,5 @@
-from .lister import NewsPaperLister
-from ..common.tools import get_url,print_exception
+from .lister import NewsPaperLister, PRENSA_ESCRITA
+from ..common.tools import get_url,normalize_url
 from ..model.newspaper import NewsPaperListerInfo
 
 from typing import List
@@ -72,9 +72,9 @@ class PrensaEscritaLister(NewsPaperLister):
                     name=name,
                     #short_name=get_short_name_from_server_name(get_server_name_from_url(link)),
                     type=None,
-                    url=link,
+                    url=normalize_url(link),
                     city=ciudad,
                     #real_url=None,
                     #alt_urls=None,
-                    src='https://www.prensaescrita.com/'))
+                    src=PRENSA_ESCRITA))
         return ret
