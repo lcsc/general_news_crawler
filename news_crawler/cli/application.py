@@ -1,13 +1,17 @@
 from ..newspapers.prensadigital import PrensaDigitalLister
 from ..newspapers.prensaescrita import PrensaEscritaLister
 from ..model.newspaper import NewsPaperRepository
-
 from ..detector.detector import NewsPaperDetector
+from ..fetcher.bcube import BCubePrensaIbericaExtractor
+from ..model.bcube import BcubeMDRepository
+
+
 from pymongo import MongoClient
 client = MongoClient("mongodb://host.docker.internal:27017",username='root',
                      password='example',)
 database = client["general_news"]
 newsRepo = NewsPaperRepository(database=database)
+bCubeMdRepo = BcubeMDRepository(database=database)
 
 def get_newspapers():
     app_pd = PrensaDigitalLister(repo=newsRepo)
@@ -31,14 +35,18 @@ def detect_hoy():
     hoy = app_detectors._repo.find_one_by({"short_name":"diariocostadelsol"})
     print(app_detectors.detect_one(hoy))
 
+def fetch_bcube_prensa_iberica():
+    fetcher = BCubePrensaIbericaExtractor(repo=newsRepo,md_repo=bCubeMdRepo)
+    fetcher.extract_all()
+    
 def main() -> int:
     exit_code: int = 0
 
     #database["NewsPapers"].delete_many({})
     #get_newspapers()
-    detect_newspapers()
+    #detect_newspapers()
     #detect_hoy()
-    
+    fetch_bcube_prensa_iberica()
 
 
 
