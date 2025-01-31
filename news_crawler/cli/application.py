@@ -37,15 +37,19 @@ def detect_hoy():
 
 def fetch_bcube_prensa_iberica():
     fetcher = BCubePrensaIbericaExtractor(repo=newsRepo,md_repo=bCubeMdRepo)
+    hoy = newsRepo.find_one_by({"short_name":"elcorreogallego"})
+    #fetcher.extract_one(hoy)
     fetcher.extract_all()
+
     
 def main() -> int:
     exit_code: int = 0
 
     #database["NewsPapers"].delete_many({})
+    database["bCubeMetaData"].delete_many({})
     #get_newspapers()
     #detect_newspapers()
-    #detect_hoy()
+    #fetect_hoy()
     fetch_bcube_prensa_iberica()
 
 

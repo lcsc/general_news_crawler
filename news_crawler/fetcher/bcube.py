@@ -5,7 +5,7 @@ from ..common.tools import print_exception,get_url
 from bs4 import BeautifulSoup
 import requests
 from ..model.bcube import BcubeMD, BcubeMDRepository
-
+from .pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,pi_get_head_meta_ogurl
 
 class BCubeExtractor(NewsPaperExtractor):
     def __init__(self,repo:NewsPaperRepository, md_repo:BcubeMDRepository):
@@ -30,7 +30,7 @@ class BCubeExtractor(NewsPaperExtractor):
 
         self._md_repo.save(categories)
         
-        print(f"  found {len(categories)} categories: {categories}")
+        print(f"  found {len(categories.found_cats)} categories: {categories.found_cats}")
         for cat in categories.found_cats:
             try:
                 self.extract_one_category(np,cat)  
@@ -45,6 +45,12 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         super().__init__(repo=repo,md_repo=md_repo)
         self._subengine = "PrensaIberica"
     
+    
+    def _extractMD(self,doc:BeautifulSoup,ret:BcubeMD):
+        ret.link_on_foot=pi_has_link_on_footer(doc)
+        ret.url_head_link=pi_get_head_link_canonical(doc)
+        ret.url_head_og=pi_get_head_meta_ogurl(doc)
+
     def _extract_categories(self,np:NewsPaper, response:requests.Response,url:str)->BcubeMD:
         #html = response.content.decode("utf-8")
         ret = BcubeMD(ccaa=np.ccaa,short_name=np.short_name,
@@ -62,6 +68,9 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
                 return None
                 
         doc = BeautifulSoup(response.content, 'lxml')
+        #if np.engine is None:
+        self._extractMD(doc,ret)
+
         sections = doc.find_all('section')
         for s in sections:
             links  = s.find_all('a')
@@ -69,6 +78,8 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
                 href= l['href']
                 #print(f"  {href} -> {l['class']}")
                 ret.found_cats.append(href.replace(np.real_url,"/"))
+        
+        if ret.link_on_foot: return ret
         if len(ret.found_cats)==0:
             return None
         return ret
