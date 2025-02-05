@@ -3,7 +3,7 @@ from pydantic_mongo import PydanticObjectId,AbstractRepository
 from typing import Optional, List
 
 
-class BcubeMD(BaseModel):
+class BcubePiMd(BaseModel):
     id: Optional[PydanticObjectId] = None
     ccaa:str
     short_name:str
@@ -12,6 +12,19 @@ class BcubeMD(BaseModel):
     url_head_og:Optional[str]
     found_cats:List[str]
     
-class BcubeMDRepository(AbstractRepository[BcubeMD]):
+class BcubePiMDRepository(AbstractRepository[BcubePiMd]):
     class Meta:
-        collection_name = 'bCubeMetaData'
+        collection_name = 'bCubePIMetaData'
+
+
+class PrensaIbericaStat(BaseModel):
+    id: Optional[PydanticObjectId] = None
+    ccaa:Optional[str] = None
+    short_name:str 
+    js_name:Optional[str] = None
+    repo_found:bool
+    num_cats:int
+
+class PrensaIbericaStatRepository(AbstractRepository[PrensaIbericaStat]):
+    class Meta:
+        collection_name = 'piStats'

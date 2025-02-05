@@ -2,16 +2,20 @@ from ..newspapers.prensadigital import PrensaDigitalLister
 from ..newspapers.prensaescrita import PrensaEscritaLister
 from ..model.newspaper import NewsPaperRepository
 from ..detector.detector import NewsPaperDetector
-from ..fetcher.bcube import BCubePrensaIbericaExtractor
-from ..model.bcube import BcubeMDRepository
-
+from ..fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtractor
+from ..model.bcube import BcubePiMDRepository
+from ..model.repos import CrawlerRepos
+from ..fetcher.prensaiberica.pi_stats import PiAnalisys
 
 from pymongo import MongoClient
 client = MongoClient("mongodb://host.docker.internal:27017",username='root',
                      password='example',)
 database = client["general_news"]
-newsRepo = NewsPaperRepository(database=database)
-bCubeMdRepo = BcubeMDRepository(database=database)
+
+repos = CrawlerRepos().connect(database)
+
+newsRepo:NewsPaperRepository = repos.newspaper
+bCubePiMdRepo:BcubePiMDRepository = repos.bCubePiMd
 
 def get_newspapers():
     app_pd = PrensaDigitalLister(repo=newsRepo)
@@ -36,22 +40,27 @@ def detect_hoy():
     print(app_detectors.detect_one(hoy))
 
 def fetch_bcube_prensa_iberica():
-    fetcher = BCubePrensaIbericaExtractor(repo=newsRepo,md_repo=bCubeMdRepo)
+    fetcher = BCubePrensaIbericaExtractor(repos=repos)
     hoy = newsRepo.find_one_by({"short_name":"elcorreogallego"})
     #fetcher.extract_one(hoy)
     fetcher.extract_all()
+
+def check_bcube():
+    pi = PiAnalisys()
+    pi.checkPi()
+
 
     
 def main() -> int:
     exit_code: int = 0
 
     #database["NewsPapers"].delete_many({})
-    database["bCubeMetaData"].delete_many({})
+    #database["bCubeMetaData"].delete_many({})
     #get_newspapers()
     #detect_newspapers()
     #fetect_hoy()
     fetch_bcube_prensa_iberica()
-
+    #check_bcube()
 
 
     return exit_code

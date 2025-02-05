@@ -16,6 +16,9 @@ def pi_has_link_on_footer(doc:BeautifulSoup):
                     return True
     return False
 
+
+# Esta el grupo noticias (www.deia.eus) que es el mismo motor, cambia el footer
+
 def pi_get_head_link_canonical(doc:BeautifulSoup):
     # esto aparece en los de Prensa iberica
     #<link rel="canonical" href="https://www.laopiniondezamora.es/mapaweb/">
@@ -35,3 +38,35 @@ def pi_get_head_meta_ogurl(doc:BeautifulSoup):
     if link is None: return None
     if link.has_attr("content"): return link["content"]
     return None
+
+# Lista extraida de un JS de una de las paginas.
+pi_web_list=[
+"lne.es",
+"diaridegirona.cat",
+"diariodeibiza.es",
+"diariodemallorca.es",
+"levante-emv.com",
+"laopinioncoruna.es",
+"superdeporte.es",
+"laopiniondemalaga.es",
+"laopiniondemurcia.es",
+"laopiniondezamora.es",
+"laprovincia.es",
+"regio7.cat",
+"eldia.es",
+"mallorcazeitung.es",
+"emporda.info",
+"diariocordoba.com",
+"stilo.es",
+"codigonuevo.com",
+"elperiodicomediterraneo.com",
+"elperiodicodearagon.com",
+"elperiodicoextremadura.com",
+"sport.es",
+"elperiodico.com",
+"elperiodico.cat",
+"epe.es",
+"elcorreogallego.es",
+"elcorreoweb.es",
+"neomotor.com",
+]
