@@ -98,20 +98,21 @@ class NewsPaperExtractor():
         # should be implemented by the subclasses
         pass
 
-    def _process_one(self, np:NewsPaper):
+    def _process_one(self, np:NewsPaper)->bool:
         articles = self.extract_one(np)
         if articles is None:
-            return
+            return False
         print(f"  found {len(articles)} articles")
         self._np_repos.articles.save_many(articles)
         np.engine.sub_engine=self._subengine
+        return True
 
     def extract_all(self):
         cand= self.get_candidates()
         for np in cand:
             if self.should_be_extracted(np):
                 try:
-                    self._process_one(np)
-                    self.fill_stats(np)
+                    if self._process_one(np):
+                        self.fill_stats(np)
                 except Exception as e:
                     print_exception(e)
