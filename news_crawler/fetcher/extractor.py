@@ -32,14 +32,22 @@ class NewsArticleReader():
     def _extract_list_elements(self,context:NewsArticleReaderContext,object:any)->List[any]:
         '''Cada clase debe implementar'''
         pass
+
+    def _save_list_article(self,context:NewsArticleReaderContext,article:NewsArticle,raw:any):
+        '''Cada clase debe implementar'''
+        pass
+
     def extract_list(self,context:NewsArticleReaderContext,object:any)->List[NewsArticle]:
         list_news = self._extract_list_elements(context,object)
+        ret = []
         for obj in list_news:
             article = self._extract_list_one(context,obj)
             if article is not None:
                 context.addArticle(article)
+                self._save_list_article(context,article,obj)
+                ret.append(article)
         
-        ret = context.getListArticles()
+        #ret = context.getListArticles()
         if len(ret)==0: return None
         return ret
 
@@ -86,12 +94,17 @@ class NewsPaperExtractor():
         # TODO Implement a basic filter
         return True
     
+    def fill_stats(self, np:NewsPaper):
+        # should be implemented by the subclasses
+        pass
+
     def _process_one(self, np:NewsPaper):
         articles = self.extract_one(np)
-        if articles is not None:
-            print(f"  found {len(articles)} articles")
-            self._np_repos.articles.save_many(articles)
-
+        if articles is None:
+            return
+        print(f"  found {len(articles)} articles")
+        self._np_repos.articles.save_many(articles)
+        np.engine.sub_engine=self._subengine
 
     def extract_all(self):
         cand= self.get_candidates()
@@ -99,5 +112,6 @@ class NewsPaperExtractor():
             if self.should_be_extracted(np):
                 try:
                     self._process_one(np)
+                    self.fill_stats(np)
                 except Exception as e:
                     print_exception(e)

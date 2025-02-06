@@ -8,6 +8,9 @@ from .pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,pi_get_he
 from ..bcube import BCubeExtractor,BcubeArticleReaderContext, BcubeArticleReader
 from ...model.repos import CrawlerRepos
 from ...model.bcube.bcube import BcubeCategory
+from datetime import datetime
+import sys
+import time
 
 class BcubePiArticleReader(BcubeArticleReader):
     def __init__(self,repos:CrawlerRepos):
@@ -93,7 +96,8 @@ class BcubePiArticleReader(BcubeArticleReader):
         if date is None:
             print("article without any date")
             return None
-        
+        date = datetime.fromisoformat(date)
+        data["category"]=context.category.cat_name
         ret = None
         try:
             article_id  =self._guess_id(data)
@@ -106,13 +110,19 @@ class BcubePiArticleReader(BcubeArticleReader):
                           np_ccaa=np.ccaa,
                           np_name=np.short_name,
                           article_id=article_id,
+                          ##
+                          article_headline=data["title"],
+                          article_url=data["data-url"],
+                          date= date,
+                          engine_id="bCube-PrensaIberica",
+                          engine_data=data
                 )
-            
-            ret.article_headline=data["title"],
-            ret.article_url=data["data-url"],
-            ret.date= date,
-            ret.engine_id="bCube-PrensaIberica",
-            ret.engine_data=data
+            else:
+                ret.article_headline=data["title"]
+                ret.article_url=data["data-url"]
+                ret.date= date
+                ret.engine_id="bCube-PrensaIberica"
+                ret.engine_data=data
 
         except Exception as e:
             print("****** Failed *****")
@@ -224,15 +234,23 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         cat = context.category
 
         response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
-
+        
+        if response.status_code == 503: # este error puede ser puntual
+            count =0
+            while count < 5 and response.status_code==503:
+                time.sleep(1) # reintentamos al segundo maximo 5
+                response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
+        
+    
         if response.status_code==200:
             json = response.json()
             articles =self._reader.extract_list(context,json)
             if articles is None:
                 return response
-            for a in articles:
-                a.engine_data["category"]=cat.cat_name
-                
+            if page > context.last_page:
+                context.last_page=page
+            context.page_size[page]=len(articles)
+            
         return response
 
     def extract_one_category(self,np:NewsPaper,cat:BcubeCategory)->List[NewsArticle]:
@@ -247,8 +265,40 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
             response =self._get_url_cat(context,2)
         if response.status_code != 200:
             return None
+
+        while response.status_code==200:
+            tope*=10
+            response = self._get_url_cat(context,tope)
+
+        while response.status_code == 404:
+            tmp = int(tope/2)
+            response = self._get_url_cat(context,tmp)
+
+            if(response.status_code==404): tope=tmp
+            else: n = tmp
         
+        diff = tope - n
+        while diff > 1:
+            tmp = n + int(diff/2)
+            if tmp==n: tmp +=1
+            response = self._get_url_cat(context,tmp)
 
-        return list(context.articles.values())
-
+            if(response.status_code==404): tope=tmp
+            else: n = tmp
+            diff = tope - n
+        context.last_page=n
+        print(f"  {context.category.cat_name}: {context.page_size}")
+        if n>2: # En caso contrario no tenemos suficiente informacion.
+            if not (n-1) in context.page_size:
+                response = self._get_url_cat(context,n-1)
+                if response.status_code!=200:
+                    print("ERROR?????")
+                print(f"  {context.category.cat_name}: {context.page_size}")
+            page_size=context.page_size[n-1]
+            print (f"   PageSize: {page_size}")
+            context.category.n_articulos=(n-1)*page_size+context.page_size[n]
+            print (f"   num_arti: {context.category.n_articulos}")
+        
+        sys.stdout.flush() #cada vez que terminemos una cat, forzamos flush
+        return context.getListArticles()
 

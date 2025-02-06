@@ -10,7 +10,8 @@ class BcubeCategory(BaseModel):
     cat_name:str
     cat_url:str
     first_article:Optional[datetime]=None
-    first_month:Optional[datetime]=None
+    first_month:Optional[str]=None
+    n_articulos:Optional[int]=None
     
 class BcubeCategoryRepository(AbstractRepository[BcubeCategory]):
     class Meta:

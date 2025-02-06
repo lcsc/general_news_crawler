@@ -19,3 +19,6 @@ ccaa=[
     'asturias',
     'murcia',
  ]
+
+#Minimo de articulos para considerar que el mes esta activo
+month_thresold=20

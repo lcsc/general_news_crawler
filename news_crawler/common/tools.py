@@ -1,5 +1,8 @@
-
+import traceback
 import requests
+import os
+
+from ..model.newspaper import NewsPaper
 
 def get_url(api_url):
     headers = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
@@ -13,6 +16,7 @@ def get_url(api_url):
 def print_exception(e:Exception):
     print("##### ERROR #####")
     print(e)
+    traceback.print_exc()
     print("##### ERROR #####")
 
 def get_server_name_from_url(url:str):
@@ -35,3 +39,12 @@ def normalize_url(url:str):
         url = url + "/"
     return url
        
+def save_file(path:str, contents:any):
+    dir = os.path.dirname(path)
+    if not os.path.exists(dir):
+        os.makedirs(dir, exist_ok=True)
+    with open(path, 'w', newline='') as file:
+        file.write(contents)
+
+def np_base_path(np:NewsPaper):
+    return f"data/{np.ccaa}/{np.short_name}"

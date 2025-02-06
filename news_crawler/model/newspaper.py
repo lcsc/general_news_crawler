@@ -38,6 +38,11 @@ class NewsPaper(BaseModel):
 
     engine: Optional[NewsPaperEngine] = None
     url_fails: Optional[Dict[str,str]] = None
+
+    first_article:Optional[datetime]=None
+    first_month:Optional[str]=None
+    n_articulos:Optional[int]=None
+    
     class Config:
         # Configuración para manejar la conversión con MongoDB
         arbitrary_types_allowed = True

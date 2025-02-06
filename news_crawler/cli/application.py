@@ -7,6 +7,7 @@ from ..model.bcube.prensaiberica import BcubePiMDRepository
 from ..model.repos import CrawlerRepos
 from ..fetcher.prensaiberica.pi_stats import PiAnalisys
 
+import time 
 from pymongo import MongoClient
 client = MongoClient("mongodb://host.docker.internal:27017",username='root',
                      password='example',)
@@ -41,15 +42,14 @@ def detect_hoy():
 
 def fetch_bcube_prensa_iberica():
     fetcher = BCubePrensaIbericaExtractor(repos=repos)
-    hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
-    fetcher._process_one(hoy)
-    #fetcher.extract_all()
+    #hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
+    #fetcher._process_one(hoy)
+    #fetcher.fill_stats(hoy)
+    fetcher.extract_all()
 
 def check_bcube():
     pi = PiAnalisys()
     pi.checkPi()
-
-
     
 def main() -> int:
     exit_code: int = 0
@@ -67,4 +67,7 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    start = time.time() 
     main()
+    end = time.time() 
+    print("Execution time: ",end - start) 
