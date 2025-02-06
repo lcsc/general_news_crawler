@@ -1,14 +1,55 @@
-from ..model.newspaper import NewsPaper
-from typing import List
+from ..model.newspaper import NewsPaper,NewsArticle
+from typing import List,Dict
 from ..common.tools import print_exception
 from ..model.repos import CrawlerRepos
+
+class NewsArticleReaderContext():
+    def __init__(self,news_paper:NewsPaper):
+        self.news_paper:NewsPaper=news_paper
+        self.articles:Dict[str,NewsArticle]={}
+
+    def addArticle(self,article:NewsArticle):
+        if article.article_id not in self.articles:
+            self.articles[article.article_id]=article
+        else:
+            if article.article_url==self.articles[article.article_id].article_url: return
+            print ("****** ID Repetido ******")
+            print(article)
+            print(self.articles[article.article_id])
+    
+    
+    def getListArticles(self)->List[NewsArticle]:
+        return list(self.articles.values())
+
+class NewsArticleReader():
+    def __init__(self,repos:CrawlerRepos):
+        self.repos=repos
+
+    def _extract_list_one(self,context:NewsArticleReaderContext,object:any)->NewsArticle:
+        '''Cada clase debe implementar'''
+        pass
+
+    def _extract_list_elements(self,context:NewsArticleReaderContext,object:any)->List[any]:
+        '''Cada clase debe implementar'''
+        pass
+    def extract_list(self,context:NewsArticleReaderContext,object:any)->List[NewsArticle]:
+        list_news = self._extract_list_elements(context,object)
+        for obj in list_news:
+            article = self._extract_list_one(context,obj)
+            if article is not None:
+                context.addArticle(article)
+        
+        ret = context.getListArticles()
+        if len(ret)==0: return None
+        return ret
 
 class NewsPaperExtractor():
 
     def __init__(self,np_repos:CrawlerRepos):
         self._np_repos = np_repos
-        self._engine = None
-        self._subengine = None
+        self._engine:str = None
+        self._subengine:str = None
+        self._reader:NewsArticleReader = None
     
     def get_no_engine(self):
         return self._np_repos.newspaper.find_by({"engine":None,"real_url":{"$ne":None}})
@@ -34,8 +75,7 @@ class NewsPaperExtractor():
         return ret
 
 
-    # TODO List of Articles
-    def extract_one(self,np:NewsPaper)-> List[str]:
+    def extract_one(self,np:NewsPaper)-> List[NewsArticle]:
         # should be implemented by the subclasses
         # has to extract n_articles,
         # First declared news
@@ -49,7 +89,8 @@ class NewsPaperExtractor():
     def _process_one(self, np:NewsPaper):
         articles = self.extract_one(np)
         if articles is not None:
-            self._np_repo.save(np)
+            print(f"  found {len(articles)} articles")
+            self._np_repos.articles.save_many(articles)
 
 
     def extract_all(self):

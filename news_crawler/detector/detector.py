@@ -82,6 +82,11 @@ class NewsPaperDetector():
             if response is not None and response.status_code == 200:
                 state._reponse = response
                 newsPaper.real_url = response.url
+                if newsPaper.real_url.endswith("//"):
+                    newsPaper.real_url=newsPaper.real_url[:-1]
+                if not newsPaper.real_url.endswith("/"):
+                    newsPaper.real_url=newsPaper.real_url+"/"
+
                 #print(f"  URL {url} -> {response.url}")
                 return state
                

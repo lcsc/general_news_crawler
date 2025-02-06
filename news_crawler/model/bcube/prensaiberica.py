@@ -3,6 +3,7 @@ from pydantic_mongo import PydanticObjectId,AbstractRepository
 from typing import Optional, List
 
 
+# TODO: Añadir fecha de captura
 class BcubePiMd(BaseModel):
     id: Optional[PydanticObjectId] = None
     ccaa:str

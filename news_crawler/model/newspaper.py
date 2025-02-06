@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from pydantic_mongo import PydanticObjectId,AbstractRepository
 from typing import Optional, List, Dict
 from .engine import NewsPaperEngine
+from datetime import datetime
 
 class NewsPaperListerInfo(BaseModel):
     name: str
@@ -40,10 +41,28 @@ class NewsPaper(BaseModel):
     class Config:
         # Configuración para manejar la conversión con MongoDB
         arbitrary_types_allowed = True
-
-
     
 
 class NewsPaperRepository(AbstractRepository[NewsPaper]):
     class Meta:
         collection_name = 'NewsPapers'
+
+class NewsArticle(BaseModel):
+    id: Optional[PydanticObjectId] = None
+    np_name: str
+    np_ccaa: str
+    article_id:str
+    article_url:str
+    article_headline:str
+    date:datetime
+    engine_id:str
+    engine_data:Optional[any]=None
+    raw_data:Optional[any]=None
+    
+    class Config:
+        # Configuración para manejar la conversión con MongoDB
+        arbitrary_types_allowed = True
+
+class NewsArticleRepository(AbstractRepository[NewsArticle]):
+    class Meta:
+        collection_name = 'NewsArticles'

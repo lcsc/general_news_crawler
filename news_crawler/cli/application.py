@@ -3,7 +3,7 @@ from ..newspapers.prensaescrita import PrensaEscritaLister
 from ..model.newspaper import NewsPaperRepository
 from ..detector.detector import NewsPaperDetector
 from ..fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtractor
-from ..model.bcube import BcubePiMDRepository
+from ..model.bcube.prensaiberica import BcubePiMDRepository
 from ..model.repos import CrawlerRepos
 from ..fetcher.prensaiberica.pi_stats import PiAnalisys
 
@@ -41,9 +41,9 @@ def detect_hoy():
 
 def fetch_bcube_prensa_iberica():
     fetcher = BCubePrensaIbericaExtractor(repos=repos)
-    hoy = newsRepo.find_one_by({"short_name":"elcorreogallego"})
-    #fetcher.extract_one(hoy)
-    fetcher.extract_all()
+    hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
+    fetcher._process_one(hoy)
+    #fetcher.extract_all()
 
 def check_bcube():
     pi = PiAnalisys()

@@ -39,6 +39,7 @@ def pi_get_head_meta_ogurl(doc:BeautifulSoup):
     if link.has_attr("content"): return link["content"]
     return None
 
+
 # Lista extraida de un JS de una de las paginas.
 pi_web_list=[
 "lne.es",

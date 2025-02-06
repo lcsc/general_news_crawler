@@ -1,6 +1,7 @@
 from pymongo import database
-from .newspaper import NewsPaperRepository
-from .bcube import BcubePiMDRepository, PrensaIbericaStatRepository
+from .newspaper import NewsPaperRepository,NewsArticleRepository
+from .bcube.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
+from .bcube.bcube import BcubeCategoryRepository
 
 class CrawlerRepos:
     _instance = None
@@ -16,14 +17,21 @@ class CrawlerRepos:
         # print("Running  init")
         if not hasattr(self, "newspaper"):
             self.newspaper = None
+            self.articles= None
+
+            self.bCubeCategories = None
             self.bCubePiMd = None
             self.piStats= None
+            
         # else:
         #     print("Skiping init")
     
     def connect(self,db:database=None):
         print ("Connecting to DataBase")
         self.newspaper = NewsPaperRepository(database=db)
+        self.articles= NewsArticleRepository(database=db)
+
+        self.bCubeCategories=BcubeCategoryRepository(database=db)
         self.bCubePiMd = BcubePiMDRepository(database=db)
         self.piStats= PrensaIbericaStatRepository(database=db)
 
