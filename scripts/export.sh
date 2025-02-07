@@ -1,0 +1,2 @@
+docker compose exec mongodb mongoexport --uri="mongodb://root:example@localhost/" --authenticationDatabase=admin -dgeneral_news -cNewsPapers > data/NewsPapers.json
+docker compose exec mongodb mongoexport --uri="mongodb://root:example@localhost/" --authenticationDatabase=admin -dgeneral_news -cbCubeCategory > data/bCubeCategory.json
