@@ -1,5 +1,6 @@
 from datetime import datetime,timezone
 import sys
+from datetime import timedelta
 #diferentes codificaciones de 0
 invalid_dates= [datetime.fromisoformat("1970-01-01 00:00:00Z"),datetime.fromisoformat("1970-01-01 00:00:01Z"),
                 datetime.fromisoformat("1969-12-31T23:00:00Z"),datetime.fromisoformat("1969-12-31T23:00:01Z"),
@@ -8,6 +9,8 @@ invalid_dates= [datetime.fromisoformat("1970-01-01 00:00:00Z"),datetime.fromisof
 # Fecha del primer articulo en españa
 first_article_spain = datetime.fromisoformat("1661-01-01T00:00:00Z")
 
+# Cuanto tiempo debe haber pasado para volver a comprobar (en bulk)
+delta_to_check = timedelta(days=7)
 
 
 def isValidDay(day:datetime):

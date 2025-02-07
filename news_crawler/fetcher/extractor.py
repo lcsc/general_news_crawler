@@ -2,7 +2,8 @@ from ..model.newspaper import NewsPaper,NewsArticle
 from typing import List,Dict
 from ..common.tools import print_exception
 from ..model.repos import CrawlerRepos
-
+from datetime import datetime,timezone
+from ..common.dates import delta_to_check
 class NewsArticleReaderContext():
     def __init__(self,news_paper:NewsPaper):
         self.news_paper:NewsPaper=news_paper
@@ -91,20 +92,30 @@ class NewsPaperExtractor():
         return None
 
     def should_be_extracted(self,np:NewsPaper)->bool:
-        # TODO Implement a basic filter
-        return True
+        if np.first_article is None : return True
+        if np.first_month is None : return True
+        if np.n_articulos is None : return True
+        if np.last_check is None : return True
+        date = datetime.now(tz=timezone.utc)
+
+        if np.last_check.tzinfo is None:
+            np.last_check=np.last_check.replace(tzinfo=timezone.utc)
+        
+        return date-np.last_check>delta_to_check
     
     def fill_stats(self, np:NewsPaper):
         # should be implemented by the subclasses
         pass
 
     def _process_one(self, np:NewsPaper)->bool:
+        date = datetime.now(tz=timezone.utc)
         articles = self.extract_one(np)
         if articles is None:
             return False
         print(f"  found {len(articles)} articles")
         self._np_repos.articles.save_many(articles)
         np.engine.sub_engine=self._subengine
+        np.last_check=date
         return True
 
     def extract_all(self):
@@ -114,5 +125,6 @@ class NewsPaperExtractor():
                 try:
                     if self._process_one(np):
                         self.fill_stats(np)
+                        self._np_repos.newspaper.save(np)
                 except Exception as e:
                     print_exception(e)

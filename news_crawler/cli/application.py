@@ -42,7 +42,8 @@ def detect_hoy():
 
 def fetch_bcube_prensa_iberica():
     fetcher = BCubePrensaIbericaExtractor(repos=repos)
-    #hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
+    hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
+    #print(f"Should be checked: {fetcher.should_be_extracted(hoy)}")
     #fetcher._process_one(hoy)
     #fetcher.fill_stats(hoy)
     fetcher.extract_all()

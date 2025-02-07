@@ -42,6 +42,7 @@ class NewsPaper(BaseModel):
     first_article:Optional[datetime]=None
     first_month:Optional[str]=None
     n_articulos:Optional[int]=None
+    last_check:Optional[datetime]=None
     
     class Config:
         # Configuración para manejar la conversión con MongoDB
