@@ -13,7 +13,7 @@ readme = "README.md"
 crawler = "news_crawler.cli.app:main"
 
 [tool.setuptools]
-packages = ["news_crawler"]
+packages = ["news_crawler","news_api"]
 
 
 [tool.poetry]
@@ -24,3 +24,5 @@ flask = "^3.1.0"
 bs4 = "^0.0.2"
 lxml = "^5.3.0"
 click = "^8.1.8"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"

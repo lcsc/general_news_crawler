@@ -1,5 +1,7 @@
 from ..model.engine import NewsPaperEngine
 from ..model.newspaper import NewsPaper 
+from ..common.consts import ENGINE_ID_bCube,ENGINE_ID_WordPress,ENGINE_ID_Jomla, ENGINE_ID_Drupal,ENGINE_ID_OpenNemas,ENGINE_ID_Blogger,ENGINE_ID_Vocento
+from ..common.consts import SUBENGINE_ID_wp_json
 import json
 
 from requests import Response
@@ -33,7 +35,7 @@ class WPDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="wordpress", sub_engine="wp-json")
+        ret = NewsPaperEngine(engine=ENGINE_ID_WordPress, sub_engine=SUBENGINE_ID_wp_json)
         respHdrs = state.get_headers()
         if "link" in respHdrs and "wp-json" in respHdrs["link"]: 
             ret.evidence = {"type":"header",
@@ -68,7 +70,7 @@ class BcubeDetector(EngineDetector):
         meta = head.find_all("meta",{"name":"generator"})
         for m in meta:
             if 'bCube' in m["content"]:
-                return NewsPaperEngine(engine="bCube", sub_engine=None, evidence={"type":"html head meta","name":m["name"],"content":m["content"]})
+                return NewsPaperEngine(engine=ENGINE_ID_bCube, sub_engine=None, evidence={"type":"html head meta","name":m["name"],"content":m["content"]})
     
         return None
 
@@ -79,7 +81,7 @@ class JoomlaDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="Joomla", sub_engine=None)
+        ret = NewsPaperEngine(engine=ENGINE_ID_Jomla, sub_engine=None)
         respHdrs = state.get_headers()
 
         if "X-content-encoded-by" in respHdrs and respHdrs["X-content-encoded-by"].startswith("Joomla"):
@@ -94,7 +96,7 @@ class DrupalDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="Drupal", sub_engine=None)
+        ret = NewsPaperEngine(engine=ENGINE_ID_Drupal, sub_engine=None)
         respHdrs = state.get_headers()
         if "X-Generator" in respHdrs and respHdrs["X-Generator"].startswith("Drupal"): 
             ret.evidence = {"type":"header",
@@ -111,7 +113,7 @@ class OpenNemasDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="OpenNemas", sub_engine=None)
+        ret = NewsPaperEngine(engine=ENGINE_ID_OpenNemas, sub_engine=None)
         doc = state.get_doc()
         head = doc.find("head")
         if head is None: return None
@@ -129,7 +131,7 @@ class BloggerDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="Blogger", sub_engine=None)
+        ret = NewsPaperEngine(engine=ENGINE_ID_Blogger, sub_engine=None)
         doc= state.get_doc()
         head = doc.find("head")
         if head is None: return None
@@ -149,7 +151,7 @@ class VocentoDetector(EngineDetector):
         pass
 
     def detect(self, state:DetectionState)->NewsPaperEngine:
-        ret = NewsPaperEngine(engine="Vocento", sub_engine=None)
+        ret = NewsPaperEngine(engine=ENGINE_ID_Vocento, sub_engine=None)
         doc = state.get_doc()
         head = doc.find("head")
         if head is None: 

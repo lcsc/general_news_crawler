@@ -5,7 +5,7 @@ from .extractor import NewsPaperExtractor,NewsArticleReaderContext,NewsArticleRe
 from typing import List
 from ..common.tools import print_exception, np_base_path, save_file
 from ..common.dates import isValidDay
-from ..common.consts import month_thresold
+from ..common.consts import month_thresold,ENGINE_ID_bCube
 from bs4 import BeautifulSoup
 
 import sys
@@ -39,7 +39,7 @@ class BcubeArticleReader(NewsArticleReader):
 class BCubeExtractor(NewsPaperExtractor):
     def __init__(self,repos:CrawlerRepos):
         super().__init__(repos)
-        self._engine = "bCube"
+        self._engine = ENGINE_ID_bCube
         self._reader:BcubeArticleReader=None
 
     def get_categories(self,np:NewsPaper)->list[BcubeCategory]:

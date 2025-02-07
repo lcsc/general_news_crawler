@@ -13,6 +13,7 @@
       }
     }
   },
+  "appPort": [5000, "0.0.0.0:5000:5000"],
   "onCreateCommand": ".devcontainer/on-create-command.sh",
   "runArgs": ["--network=general_news_crawler_default", "--add-host=host.docker.internal:host-gateway"]
 }

@@ -9,13 +9,23 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup lang="js">
+import { defineComponent, onMounted } from "vue";
 import { HotTable } from "@handsontable/vue3";
 import { registerAllModules } from "handsontable/registry";
 import "handsontable/styles/handsontable.min.css";
 import "handsontable/styles/ht-theme-main.min.css";
+import axios from "axios";
 
+onMounted(async () => {
+  const response = await axios.get(
+    "/api/np/andalucia?engine=bCube"
+  );
+  console.log(response.data);
+});
+</script>
+
+<script lang="js">
 // register Handsontable's modules
 registerAllModules();
 

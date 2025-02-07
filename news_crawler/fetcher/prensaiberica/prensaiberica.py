@@ -9,6 +9,7 @@ from ..bcube import BCubeExtractor,BcubeArticleReaderContext, BcubeArticleReader
 from ...model.repos import CrawlerRepos
 from ...model.bcube.bcube import BcubeCategory
 from datetime import datetime
+from ...common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
 import sys
 import time
 
@@ -114,14 +115,14 @@ class BcubePiArticleReader(BcubeArticleReader):
                           article_headline=data["title"],
                           article_url=data["data-url"],
                           date= date,
-                          engine_id="bCube-PrensaIberica",
+                          engine_id=f"{ENGINE_ID_bCube}-{SUBENGINE_ID_bc_PrensaIberica}",
                           engine_data=data
                 )
             else:
                 ret.article_headline=data["title"]
                 ret.article_url=data["data-url"]
                 ret.date= date
-                ret.engine_id="bCube-PrensaIberica"
+                ret.engine_id=f"{ENGINE_ID_bCube}-{SUBENGINE_ID_bc_PrensaIberica}"
                 ret.engine_data=data
 
         except Exception as e:
@@ -136,7 +137,7 @@ class BcubePiArticleReader(BcubeArticleReader):
 class BCubePrensaIbericaExtractor(BCubeExtractor):
     def __init__(self,repos:CrawlerRepos ):
         super().__init__(repos=repos)
-        self._subengine = "PrensaIberica"
+        self._subengine = SUBENGINE_ID_bc_PrensaIberica
         self._reader:BcubePiArticleReader=BcubePiArticleReader(repos)
     
     
