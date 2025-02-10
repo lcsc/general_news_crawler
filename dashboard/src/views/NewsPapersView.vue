@@ -1,6 +1,11 @@
 <template>
   <MDBContainer fluid>
-    <NewsPaperSelector @setccaa="(ca)=> console.log('Change to '+ca)"/>
+    <NewsPaperSelector
+      @setCcaa="(ca) => onCcaaChanged(ca)"
+      @setProvincia="(engine) => onProvinciaChanged(engine)"
+      @setEngine="(engine) => onEngineChanged(engine)"
+      @setSubEngine="(engine) => onSubEngineChanged(engine)"
+    />
   </MDBContainer>
   <MDBContainer fluid>
     <div class="ht-theme-main-dark-auto">
@@ -57,6 +62,31 @@ import {default as NewsPaperSelector} from '../components/NewsPaperSelector.vue'
 // register Handsontable's modules
 registerAllModules();
 
+let state={ca:null,engine:"bCube",sub_engine:null}
+
+function buildUrl(){
+  function add_param(url,param,value){
+    if (value!=null){
+    if (url.indexOf("?")==-1){
+      url+="?";
+    }else{
+      url+="&";
+    }
+    url += param+"="+value
+   }
+   return url
+  }
+
+  let url = "/news/api/np/"
+  if (state.ca != null){
+    url += state.ca+"/"
+  }
+  url = add_param(url,"engine",state.engine)
+  url = add_param(url,"sub_engine",state.sub_engine)
+
+  return url
+}
+
 export default defineComponent({
   data() {
     return {
@@ -74,10 +104,42 @@ export default defineComponent({
     HotTable, HotColumn, MDBContainer,NewsPaperSelector
   },
   mounted() {
-    axios.get("/news/api/np/?engine=bCube").then(response=>{
+    axios.get(buildUrl()).then(response=>{
       //hotTableComponent.update_data(response.data)
       this.$refs.hotTableComponent.hotInstance.loadData(response.data)
     })
   },
+  setup(props) {
+    return{
+      onCcaaChanged,
+      onProvinciaChanged,
+      onEngineChanged,
+      onSubEngineChanged
+    }
+  }
 });
+
+  function onCcaaChanged(ca){
+    state.ca=ca
+    axios.get(buildUrl()).then(response=>{
+      //hotTableComponent.update_data(response.data)
+      this.$refs.hotTableComponent.hotInstance.loadData(response.data)
+    })
+  }
+  function onProvinciaChanged(provincia){
+  }
+  function onEngineChanged(engine){
+    state.engine=engine;
+    axios.get(buildUrl()).then(response=>{
+      //hotTableComponent.update_data(response.data)
+      this.$refs.hotTableComponent.hotInstance.loadData(response.data)
+    })
+  }
+  function onSubEngineChanged(engine){
+    state.sub_engine=engine;
+    axios.get(buildUrl()).then(response=>{
+      //hotTableComponent.update_data(response.data)
+      this.$refs.hotTableComponent.hotInstance.loadData(response.data)
+    })
+  }
 </script>
