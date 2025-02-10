@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-  "name": "general_news_crawler",
+  "name": "general_news_crawler_dashboard",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
   "features": {
@@ -44,7 +44,7 @@
   },
 
   //"forwardPorts": [8080],
-  "appPort": [5173, "0.0.0.0:8080:8080"],
+  "appPort": ["0.0.0.0:5173:5173"],
 
   "remoteUser": "node",
   // Use 'postCreateCommand' to run commands after the container is created.

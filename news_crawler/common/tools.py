@@ -1,8 +1,12 @@
 import traceback
 import requests
 import os
+import sys
 
 from ..model.newspaper import NewsPaper
+
+from pymongo import MongoClient
+
 
 def get_url(api_url):
     headers = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
@@ -48,3 +52,13 @@ def save_file(path:str, contents:any):
 
 def np_base_path(np:NewsPaper):
     return f"data/{np.ccaa}/{np.short_name}"
+
+def connect_mongo()->MongoClient:
+    
+    mongo_url = os.environ.get("MONGODB_URL","mongodb://host.docker.internal:27017")
+    username=os.environ.get("MONGODB_USERNAME","root")
+    password = os.environ.get("MONGODB_PASSWORD","example")
+
+    client = MongoClient(mongo_url,username=username,
+                     password=password,)
+    return client

@@ -6,11 +6,11 @@ from ..fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtractor
 from ..model.bcube.prensaiberica import BcubePiMDRepository
 from ..model.repos import CrawlerRepos
 from ..fetcher.prensaiberica.pi_stats import PiAnalisys
-
+from ..common.tools import connect_mongo
 import time 
-from pymongo import MongoClient
-client = MongoClient("mongodb://host.docker.internal:27017",username='root',
-                     password='example',)
+
+client = connect_mongo()
+
 database = client["general_news"]
 
 repos = CrawlerRepos().connect(database)

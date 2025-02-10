@@ -16,9 +16,9 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      "/api": {
-        target: "http://host.docker.internal:5000",
-        changeOrigin: true,
+      "/news/api": {
+        target: "http://host.docker.internal:80",
+        changeOrigin: false,
         secure: false,
         ws: true,
         configure: (proxy, _options) => {

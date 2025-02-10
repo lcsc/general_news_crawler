@@ -20,5 +20,51 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
       ME_CONFIG_BASICAUTH: "false"
+  
+  news_api:
+    image: general_news_crawler_api
+    build:
+      context: .
+    environment:
+      MONGODB_USERNAME: root
+      MONGODB_PASSWORD: example
+      MONGODB_URL: mongodb://root:example@mongodb:27017/
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.news_api.rule=PathPrefix(`/news/api`)"
+      - "traefik.http.routers.news_api.entrypoints=web"
+
+  news_dashboard:
+    image: general_news_crawler_dashboard
+    build: 
+      context: dashboard
+    ports:
+      - 8082:80
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.news_dashboard.rule=PathPrefix(`/news/dashboard`)"
+      - "traefik.http.routers.news_dashboard.entrypoints=web"
+
+  traefik:
+    image: "traefik:v3.3"
+    container_name: "traefik"
+    command:
+      #- "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.web.address=:80"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+    
 volumes:
   dbdata8:
