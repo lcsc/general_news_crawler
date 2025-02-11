@@ -12,10 +12,10 @@
   "dependencies": {
     "@handsontable/vue3": "^15.0.0",
     "axios": "^1.7.9",
-    "handsontable": "^15.0.0",
     "mdb-vue-ui-kit": "^6.0.0",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "vue3-easy-data-table": "^1.5.47"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",

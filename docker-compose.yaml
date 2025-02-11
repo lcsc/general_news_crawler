@@ -20,6 +20,11 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
       ME_CONFIG_BASICAUTH: "false"
+      ME_CONFIG_SITE_BASEURL: "/news/mongo"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mongo.rule=PathPrefix(`/news/mongo`)"
+      - "traefik.http.routers.mongo.entrypoints=web"
   
   news_api:
     image: general_news_crawler_api

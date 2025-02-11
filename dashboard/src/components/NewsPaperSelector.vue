@@ -77,7 +77,7 @@ const emit = defineEmits<{
     </MDBDropdown>
     <MDBDropdown v-model="drop_sub_engines">
       <MDBDropdownToggle @click="drop_sub_engines = !drop_sub_engines">
-        Engines
+        SubEngines
       </MDBDropdownToggle>
       <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
         <MDBDropdownItem @click="$emit('setSubEngine', null)" href="#"
