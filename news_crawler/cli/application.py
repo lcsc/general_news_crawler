@@ -7,6 +7,7 @@ from ..model.bcube.prensaiberica import BcubePiMDRepository
 from ..model.repos import CrawlerRepos
 from ..fetcher.prensaiberica.pi_stats import PiAnalisys
 from ..common.tools import connect_mongo
+from ..fetcher.wordpress import WordPressInfoExtractor
 import time 
 
 client = connect_mongo()
@@ -48,6 +49,11 @@ def fetch_bcube_prensa_iberica():
     #fetcher.fill_stats(hoy)
     fetcher.extract_all()
 
+def fetch_wordpress_info():
+    fetcher = WordPressInfoExtractor(repos=repos)
+    #np = newsRepo.find_one_by({"short_name":"agendaempresa"})
+    np = newsRepo.find_one_by({"short_name":"cadistasfinos"})
+    fetcher.extract_one(np)
 def check_bcube():
     pi = PiAnalisys()
     pi.checkPi()
@@ -60,9 +66,9 @@ def main() -> int:
     #get_newspapers()
     #detect_newspapers()
     #fetect_hoy()
-    fetch_bcube_prensa_iberica()
+    #fetch_bcube_prensa_iberica()
     #check_bcube()
-
+    fetch_wordpress_info()
 
     return exit_code
 
