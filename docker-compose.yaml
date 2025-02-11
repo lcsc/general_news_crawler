@@ -63,6 +63,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.web.address=:80"
+      - "--accesslog=true"
     restart: unless-stopped
     ports:
       - "80:80"
