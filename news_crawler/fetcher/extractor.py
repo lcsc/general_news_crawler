@@ -2,8 +2,9 @@ from ..model.newspaper import NewsPaper,NewsArticle
 from typing import List,Dict
 from ..common.tools import print_exception
 from ..model.repos import CrawlerRepos
+from ..model.engine import NewsPaperEngine
 from datetime import datetime,timezone
-from ..common.dates import delta_to_check
+from ..common.dates import delta_to_check, fecha_minima
 class NewsArticleReaderContext():
     def __init__(self,news_paper:NewsPaper):
         self.news_paper:NewsPaper=news_paper
@@ -21,6 +22,9 @@ class NewsArticleReaderContext():
     
     def getListArticles(self)->List[NewsArticle]:
         return list(self.articles.values())
+    
+    def getArticleCount(self)->int:
+        return len(self.articles.keys())
 
 class NewsArticleReader():
     def __init__(self,repos:CrawlerRepos):
@@ -51,6 +55,47 @@ class NewsArticleReader():
         #ret = context.getListArticles()
         if len(ret)==0: return None
         return ret
+    
+    def createOrUpdateArticle(self,
+                              np:NewsPaper,
+                              article_id:str,
+                              engine_id:str,
+                              title:str,
+                              url:str,
+                              date:str|datetime,
+                              engine_data=any
+
+                              )->NewsArticle:
+        if isinstance(date,str):
+            if date.startswith("-"):
+                date=fecha_minima
+            else:
+                date= datetime.fromisoformat(date)
+
+        ret = self.repos.articles.find_one_by({"np_ccaa":np.ccaa,
+                                                    "np_name":np.short_name,
+                                                    "article_id":article_id,
+                                                    })
+        if ret is None:
+            ret = NewsArticle(id=None,
+                        np_ccaa=np.ccaa,
+                        np_name=np.short_name,
+                        article_id=article_id,
+                        ##
+                        article_headline=title,
+                        article_url=url,
+                        date= date,
+                        engine_id=engine_id,
+                        engine_data=engine_data
+            )
+        else:
+            ret.article_headline=title
+            ret.article_url=url
+            ret.date= date
+            ret.engine_id=engine_id
+            ret.engine_data=engine_data
+
+        return ret
 
 class NewsPaperExtractor():
 
@@ -64,23 +109,34 @@ class NewsPaperExtractor():
         return self._np_repos.newspaper.find_by({"engine":None,"real_url":{"$ne":None}})
     
     def get_engine_no_subengine(self):
-        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.subengine":None})
+        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.sub_engine":None})
     
     def get_engine_subengine(self):
         if self._subengine is None:
             return []
-        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.subengine":self._subengine})
+        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.sub_engine":self._subengine})
 
-    def get_candidates(self)->List[NewsPaper]:
+    def get_candidates(self,try_no_engine=True,try_no_subengine:bool=None)->List[NewsPaper]:
         '''
 
         '''
+        if try_no_subengine is None: 
+            try_no_subengine=try_no_engine
+        
         ret = []
-        ret.extend(self.get_no_engine())
+
+        if try_no_engine:
+            print("candidates <- no Engine")
+            ret.extend(self.get_no_engine())
+
         if self._engine is not None:
-            ret.extend(self.get_engine_no_subengine())
+            if try_no_subengine:
+                print("candidates <- no Sub Engine")
+                ret.extend(self.get_engine_no_subengine())
             if self._subengine is not None:
+                print("candidates <- Detected")
                 ret.extend(self.get_engine_subengine())
+        print(f"candidates to check: {len(ret)}")
         return ret
 
 
@@ -114,13 +170,21 @@ class NewsPaperExtractor():
             return False
         print(f"  found {len(articles)} articles")
         self._np_repos.articles.save_many(articles)
-        np.engine.sub_engine=self._subengine
+        if np.engine is None:
+            np.engine=NewsPaperEngine(engine=self._engine,
+                                      sub_engine=self._subengine,
+                                      evidence={"articles_found":len(articles)})
+        if np.engine.sub_engine is None:
+            np.engine.sub_engine=self._subengine
         np.last_check=date
+        self._np_repos.newspaper.save(np)
         return True
 
-    def extract_all(self):
-        cand= self.get_candidates()
-        for np in cand:
+    def extract_all(self,try_no_engine=True,try_no_subengine:bool=None):
+        cand= self.get_candidates(try_no_engine=try_no_engine,try_no_subengine=try_no_subengine)
+        top = len(cand)
+        for idx,np in enumerate(cand):
+            print(f"[{idx+1}/{top}] Checking \"{np.name}\"")
             if self.should_be_extracted(np):
                 try:
                     if self._process_one(np):

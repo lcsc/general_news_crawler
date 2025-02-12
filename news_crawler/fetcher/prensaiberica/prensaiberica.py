@@ -102,28 +102,15 @@ class BcubePiArticleReader(BcubeArticleReader):
         ret = None
         try:
             article_id  =self._guess_id(data)
-            ret = self.repos.articles.find_one_by({"np_ccaa":np.ccaa,
-                                                       "np_name":np.short_name,
-                                                       "article_id":article_id,
-                                                       })
-            if ret is None:
-                ret = NewsArticle(id=None,
-                          np_ccaa=np.ccaa,
-                          np_name=np.short_name,
-                          article_id=article_id,
-                          ##
-                          article_headline=data["title"],
-                          article_url=data["data-url"],
-                          date= date,
-                          engine_id=f"{ENGINE_ID_bCube}-{SUBENGINE_ID_bc_PrensaIberica}",
-                          engine_data=data
-                )
-            else:
-                ret.article_headline=data["title"]
-                ret.article_url=data["data-url"]
-                ret.date= date
-                ret.engine_id=f"{ENGINE_ID_bCube}-{SUBENGINE_ID_bc_PrensaIberica}"
-                ret.engine_data=data
+            ret = self.createOrUpdateArticle(np=np,
+                                         article_id=article_id,
+                                         engine_id=f"{ENGINE_ID_bCube}-{SUBENGINE_ID_bc_PrensaIberica}",
+                                         title=data["title"],
+                                         url=data["data-url"],
+                                         date=date,
+                                         engine_data=data
+                                         )
+
 
         except Exception as e:
             print("****** Failed *****")
@@ -241,6 +228,7 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
             while count < 5 and response.status_code==503:
                 time.sleep(1) # reintentamos al segundo maximo 5
                 response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
+                count+=1
         
     
         if response.status_code==200:
