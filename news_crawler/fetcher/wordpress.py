@@ -29,7 +29,7 @@ class WpArticleReader(NewsArticleReader):
         return object
 
     def _save_list_article(self,context:WpReaderContext,article:NewsArticle,raw:any):
-        path =f"{np_base_path(context.news_paper)}{article.article_id}.list_raw"
+        path =f"{np_base_path(context.news_paper)}/{article.article_id}.list_raw"
         save_file(path, str(raw))
         article.raw_data=path
         pass
@@ -108,10 +108,10 @@ class WordPressInfoExtractor(NewsPaperExtractor):
         return None
     
     def find_first_month(self,ctx:WpReaderContext)->str:
-        print("Finding FM")
+        #print("Finding FM")
         first_month = find_first_month(histogram=ctx._histogram)
         page=1
-        print(f" ({page}) {first_month}")
+        #print(f" ({page}) {first_month}")
         cnt=ctx.getArticleCount()
         while first_month is None:
             page+=1
@@ -129,7 +129,7 @@ class WordPressInfoExtractor(NewsPaperExtractor):
                 print("  WARN no new articles found")
 
             first_month=find_first_month(ctx._histogram)
-            print(f" ({page}) {first_month}")
+            #print(f" ({page}) {first_month}")
             cnt=tmp
             
             
@@ -164,7 +164,7 @@ class WordPressInfoExtractor(NewsPaperExtractor):
 
         np.n_articulos=ctx._n_articles
         np.first_month=self.find_first_month(ctx)
-        print (f"  FM={np.first_month}")
+        #print (f"  FM={np.first_month}")
 
         ret = ctx.getListArticles()
         self._np_repos.articles.save_many(ret)        
@@ -174,3 +174,16 @@ class WordPressInfoExtractor(NewsPaperExtractor):
     # def should_be_extracted(self,np:NewsPaper)->bool:
     #     print("Asking to be extracted")
     #     return True
+    def fill_stats(self, np:NewsPaper):
+        print(f"Computing stats of {np.short_name} - {np.ccaa}")
+        articles = self._np_repos.articles.find_by({"np_name": np.short_name,"np_ccaa": np.ccaa})
+        for arti in articles:
+            if np.first_article is None:
+                np.first_article = arti.date
+            if np.first_article> arti.date:
+                np.first_article = arti.date
+        
+        histo = build_monthly_histogram(articles=articles)
+        first_month= find_first_month(histo)
+        if first_month is not None and np.first_month> first_month:
+            np.first_month=first_month

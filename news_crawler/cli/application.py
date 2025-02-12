@@ -55,6 +55,8 @@ def fetch_wordpress_info():
     #np = newsRepo.find_one_by({"short_name":"cadistasfinos"})
     #np = newsRepo.find_one_by({"short_name":"eitb"})
     #fetcher._process_one(np)
+    #fetcher.fill_stats(np)
+    #print(np)
     fetcher.extract_all(try_no_engine=False)
 
 
