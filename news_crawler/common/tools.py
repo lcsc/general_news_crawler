@@ -53,11 +53,16 @@ def save_file(path:str, contents:any):
 def np_base_path(np:NewsPaper):
     return f"data/{np.ccaa}/{np.short_name}"
 
-def connect_mongo()->MongoClient:
-    
-    mongo_url = os.environ.get("MONGODB_URL","mongodb://host.docker.internal:27017")
-    username=os.environ.get("MONGODB_USERNAME","root")
-    password = os.environ.get("MONGODB_PASSWORD","example")
+def connect_mongo(mongo_url:str=None,
+                  username:str=None,
+                  password:str=None
+                  )->MongoClient:
+    if mongo_url is None :
+        mongo_url = os.environ.get("MONGODB_URL","mongodb://host.docker.internal:27017")
+    if username is None:
+        username=os.environ.get("MONGODB_USERNAME","root")
+    if password is None:
+        password = os.environ.get("MONGODB_PASSWORD","example")
 
     client = MongoClient(mongo_url,username=username,
                      password=password,)
