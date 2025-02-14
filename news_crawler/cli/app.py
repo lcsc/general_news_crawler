@@ -2,6 +2,7 @@ import click
 
 from .commands.common import GeneralOptions, CommonArgs
 from .commands.backfill import BackFillArgs, BackFillCmd
+from .commands.detect import DetectArgs,DetectCmd
 from ..common.consts import engines
 from ..common.consts import sub_engines
 from .commands.multiprocess import launchMP_CA
@@ -59,3 +60,21 @@ def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,year:int,month:int
 
     LOG.info(f"Total Duration: {datetime.now()-start}")
 
+def do_detect(obj:GeneralOptions,args:DetectArgs):
+    detector= DetectCmd(general=obj,args=args)
+    detector.detect()
+
+@main.command()
+@click.pass_obj
+def detect(obj:GeneralOptions):
+    start = datetime.now()
+
+    LOG.info("BackFilling")
+    args = DetectArgs()
+
+    if obj.ccaa is None:
+        launchMP_CA(do_detect,obj,args)
+    else:
+        do_detect(obj,args)
+
+    LOG.info(f"Total Duration: {datetime.now()-start}")

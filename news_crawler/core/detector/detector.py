@@ -43,9 +43,8 @@ class NewsPaperDetector():
         self._detectors = [WPDetector(), BcubeDetector(),JoomlaDetector(),DrupalDetector(),OpenNemasDetector(),BloggerDetector(),VocentoDetector()] 
         pass
 
-    def detect_all(self):
-        all:List[NewsPaper] = self._repo.find_by({})
-        for np in all:
+    def detect_many(self, allNp:List[NewsPaper]):
+        for np in allNp:
             if np.engine is not None:  # already detected
                 continue
 
@@ -54,6 +53,9 @@ class NewsPaperDetector():
                 np.engine = engine
             self._repo.save(np)
         pass
+    def detect_all(self):
+        allNp:List[NewsPaper] = self._repo.find_by({})
+        self.detect_many(allNp)
 
     def try_url(self, url:str)->Tuple[Response,str]:
          try:
