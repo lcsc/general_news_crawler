@@ -1,10 +1,10 @@
 from ..model.newspaper import NewsPaper,NewsArticle
 from typing import List,Dict
-from ..common.tools import print_exception
+from ...common.tools import print_exception
 from ..model.repos import CrawlerRepos
 from ..model.engine import NewsPaperEngine
 from datetime import datetime,timezone
-from ..common.dates import delta_to_check, fecha_minima
+from ...common.dates import delta_to_check, fecha_minima
 class NewsArticleReaderContext():
     def __init__(self,news_paper:NewsPaper):
         self.news_paper:NewsPaper=news_paper

@@ -1,5 +1,5 @@
-from ..core.backfiller.backfiller import BackFiller
-from ..common.consts import ENGINE_ID_WordPress, SUBENGINE_ID_wp_json
+from ...core.backfiller.backfiller import BackFiller
+from ...common.consts import ENGINE_ID_WordPress, SUBENGINE_ID_wp_json
 from ..model.newspaper import NewsPaper,NewsArticle
 
 import logging

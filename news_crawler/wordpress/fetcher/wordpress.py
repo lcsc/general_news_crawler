@@ -5,7 +5,7 @@ from ..common.dates import isValidDay, find_first_month,build_monthly_histogram
 from ..model.newspaper import NewsPaper, NewsArticle
 from ..model.repos import CrawlerRepos
 
-from .extractor import NewsPaperExtractor, NewsArticleReader, NewsArticleReaderContext
+from ..core.fetcher.extractor import NewsPaperExtractor, NewsArticleReader, NewsArticleReaderContext
 
 from datetime import datetime
 from typing import List,Dict

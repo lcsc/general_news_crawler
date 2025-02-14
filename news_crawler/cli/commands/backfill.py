@@ -2,7 +2,7 @@ from .common import CommonArgs, GeneralOptions, CommonCmd
 import logging
 from time import sleep
 from ...core.backfiller.backfiller import BackFiller,BackFillerManager
-from ...backfiller.wordpress import WpBackFiller
+from ...wordpress.backfiller.wordpress import WpBackFiller
 
 from typing import List,Dict
 LOG:logging.Logger=logging.getLogger(__name__)
