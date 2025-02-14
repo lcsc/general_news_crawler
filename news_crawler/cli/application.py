@@ -1,13 +1,13 @@
-from ..newspapers.prensadigital import PrensaDigitalLister
-from ..newspapers.prensaescrita import PrensaEscritaLister
-from ..model.newspaper import NewsPaperRepository
-from ..detector.detector import NewsPaperDetector
-from ..fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtractor
-from ..model.bcube.prensaiberica import BcubePiMDRepository
-from ..model.repos import CrawlerRepos
-from ..fetcher.prensaiberica.pi_stats import PiAnalisys
+from ..core.newspapers.prensadigital import PrensaDigitalLister
+from ..core.newspapers.prensaescrita import PrensaEscritaLister
+from ..core.model.newspaper import NewsPaperRepository
+from ..core.detector.detector import NewsPaperDetector
+from ..bcube.fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtractor
+from ..bcube.model.prensaiberica import BcubePiMDRepository
+from ..core.model.repos import CrawlerRepos
+from ..bcube.fetcher.prensaiberica.pi_stats import PiAnalisys
 from ..common.tools import connect_mongo
-from ..fetcher.wordpress import WordPressInfoExtractor
+from ..wordpress.fetcher.wordpress import WordPressInfoExtractor
 import time 
 
 client = connect_mongo()

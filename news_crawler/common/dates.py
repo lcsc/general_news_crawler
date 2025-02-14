@@ -3,7 +3,7 @@ import sys
 from datetime import timedelta
 
 from typing import List,Dict
-from ..model.newspaper import NewsArticle
+from ..core.model.newspaper import NewsArticle
 from .consts import month_thresold
 
 #diferentes codificaciones de 0

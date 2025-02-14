@@ -1,5 +1,5 @@
-from ...model.repos import CrawlerRepos
-from ...model.newspaper import NewsArticle,NewsPaper,NewsPaperEngine
+from ...core.model.repos import CrawlerRepos
+from ...core.model.newspaper import NewsArticle,NewsPaper,NewsPaperEngine
 
 
 from typing import List,Tuple,Dict

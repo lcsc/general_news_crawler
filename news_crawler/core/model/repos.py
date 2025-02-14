@@ -1,7 +1,7 @@
 from pymongo import database
 from .newspaper import NewsPaperRepository,NewsArticleRepository
-from .bcube.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
-from .bcube.bcube import BcubeCategoryRepository
+from ...bcube.model.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
+from ...bcube.model.bcube import BcubeCategoryRepository
 
 class CrawlerRepos:
     _instance = None

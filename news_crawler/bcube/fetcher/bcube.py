@@ -1,11 +1,11 @@
-from ..model.repos import CrawlerRepos
-from ..model.newspaper import NewsPaper, NewsArticle
-from ..model.bcube.bcube import BcubeCategory
-from .extractor import NewsPaperExtractor,NewsArticleReaderContext,NewsArticleReader
+from ...core.model.repos import CrawlerRepos
+from ...core.model.newspaper import NewsPaper, NewsArticle
+from ..model.bcube import BcubeCategory
+from ...core.fetcher.extractor import NewsPaperExtractor,NewsArticleReaderContext,NewsArticleReader
 from typing import List
-from ..common.tools import print_exception, np_base_path, save_file
-from ..common.dates import isValidDay
-from ..common.consts import month_thresold,ENGINE_ID_bCube
+from ...common.tools import print_exception, np_base_path, save_file
+from ...common.dates import isValidDay
+from ...common.consts import month_thresold,ENGINE_ID_bCube
 from bs4 import BeautifulSoup
 
 import sys

@@ -1,6 +1,6 @@
 
-from ..common import consts
-from ..common.tools import get_server_name_from_url, get_short_name_from_server_name
+from ...common import consts
+from ...common.tools import get_server_name_from_url, get_short_name_from_server_name
 from ..model.newspaper import NewsPaper, NewsPaperRepository ,NewsPaperListerInfo
 from typing import List
 from pymongo.database import Database

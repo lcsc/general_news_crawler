@@ -1,5 +1,5 @@
 from ...common.tools import connect_mongo
-from ...model.repos import CrawlerRepos
+from ...core.model.repos import CrawlerRepos
 
 from pymongo import MongoClient, database
 

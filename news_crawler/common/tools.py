@@ -3,7 +3,7 @@ import requests
 import os
 import sys
 
-from ..model.newspaper import NewsPaper
+from ..core.model.newspaper import NewsPaper
 
 from pymongo import MongoClient
 

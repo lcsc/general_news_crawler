@@ -1,8 +1,9 @@
-from ...model.newspaper import NewsPaper, NewsPaperRepository
-from ...common.tools import get_short_name_from_server_name
-from ...model.bcube.prensaiberica import PrensaIbericaStat
-from ...model.repos import CrawlerRepos
-from ...model.bcube.prensaiberica import BcubePiMd
+
+from ....core.model.newspaper import NewsPaper, NewsPaperRepository
+from ....common.tools import get_short_name_from_server_name
+from ...model.prensaiberica import PrensaIbericaStat
+from ....core.model.repos import CrawlerRepos
+from ...model.prensaiberica import BcubePiMd
 from .pi_tools import pi_web_list
 
 def get_Newspaper(repo: NewsPaperRepository, name:str)->NewsPaper:

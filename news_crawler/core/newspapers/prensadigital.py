@@ -1,5 +1,5 @@
 from .lister import NewsPaperLister, PRENSA_DIGITAL
-from ..common.tools import get_url,print_exception, normalize_url
+from ...common.tools import get_url,print_exception, normalize_url
 from ..model.newspaper import NewsPaperListerInfo
 
 from typing import List

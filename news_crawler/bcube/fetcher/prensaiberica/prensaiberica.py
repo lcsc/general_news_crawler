@@ -1,15 +1,15 @@
-from ...model.newspaper import NewsPaper, NewsArticle
+from ....core.model.newspaper import NewsPaper, NewsArticle
 from typing import List
-from ...common.tools import get_url
+from ....common.tools import get_url
 from bs4 import BeautifulSoup
 import requests
-from ...model.bcube.prensaiberica import BcubePiMd
+from ...model.prensaiberica import BcubePiMd
 from .pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,pi_get_head_meta_ogurl
 from ..bcube import BCubeExtractor,BcubeArticleReaderContext, BcubeArticleReader
-from ...model.repos import CrawlerRepos
-from ...model.bcube.bcube import BcubeCategory
+from ....core.model.repos import CrawlerRepos
+from ...model.bcube import BcubeCategory
 from datetime import datetime
-from ...common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
+from ....common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
 import sys
 import time
 

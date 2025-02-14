@@ -2,8 +2,8 @@ from ..model.newspaper import NewsPaper, NewsPaperRepository
 from ..model.engine import NewsPaperEngine
 from .detectors import DetectionState, WPDetector, BcubeDetector, JoomlaDetector, DrupalDetector, OpenNemasDetector, BloggerDetector,VocentoDetector
 from requests import Response
-from ..common.tools import get_url
-from ..common.faildetect import check_fail
+from ...common.tools import get_url
+from ...common.faildetect import check_fail
 
 from typing import List,Tuple
 

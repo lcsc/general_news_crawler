@@ -1,7 +1,7 @@
 from ..model.engine import NewsPaperEngine
 from ..model.newspaper import NewsPaper 
-from ..common.consts import ENGINE_ID_bCube,ENGINE_ID_WordPress,ENGINE_ID_Jomla, ENGINE_ID_Drupal,ENGINE_ID_OpenNemas,ENGINE_ID_Blogger,ENGINE_ID_Vocento
-from ..common.consts import SUBENGINE_ID_wp_json
+from ...common.consts import ENGINE_ID_bCube,ENGINE_ID_WordPress,ENGINE_ID_Jomla, ENGINE_ID_Drupal,ENGINE_ID_OpenNemas,ENGINE_ID_Blogger,ENGINE_ID_Vocento
+from ...common.consts import SUBENGINE_ID_wp_json
 import json
 
 from requests import Response
