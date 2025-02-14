@@ -7,8 +7,8 @@ services:
       - dbdata8:/data/db
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
   
   mongo-express:
     image: mongo-express
@@ -16,9 +16,9 @@ services:
     ports:
       - 8081:8081
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER:-root}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-example}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER:-root}:${MONGO_PASSWORD:-example}@mongodb:27017/
       ME_CONFIG_BASICAUTH: "false"
       ME_CONFIG_SITE_BASEURL: "/news/mongo"
     labels:
@@ -31,9 +31,9 @@ services:
     build:
       context: .
     environment:
-      MONGODB_USERNAME: root
-      MONGODB_PASSWORD: example
-      MONGODB_URL: mongodb://root:example@mongodb:27017/
+      MONGODB_USERNAME: ${MONGO_USER:-root}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-example}
+      MONGODB_URL: mongodb://${MONGO_USER:-root}:${MONGO_PASSWORD:-example}@mongodb:27017/
     ports:
       - 5000:5000
     restart: unless-stopped
@@ -69,7 +69,7 @@ services:
       - "80:80"
       - "8080:8080"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro"
 
     
 volumes:

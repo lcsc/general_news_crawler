@@ -70,11 +70,11 @@ def main() -> int:
     #database["NewsPapers"].delete_many({})
     #database["bCubeMetaData"].delete_many({})
     #get_newspapers()
-    #detect_newspapers()
+    detect_newspapers()
     #fetect_hoy()
     #fetch_bcube_prensa_iberica()
     #check_bcube()
-    fetch_wordpress_info()
+    #fetch_wordpress_info()
 
     return exit_code
 
