@@ -1,6 +1,6 @@
 
-from news_crawler.model.repos import CrawlerRepos
-from news_crawler.model.newspaper import NewsPaper
+from news_crawler.core.model.repos import CrawlerRepos
+from news_crawler.core.model.newspaper import NewsPaper
 
 from typing import List
 
