@@ -7,6 +7,9 @@ from ..common.consts import sub_engines
 from .commands.multiprocess import launchMP_CA
 from datetime import datetime
 
+import logging
+LOG = logging.getLogger(__name__)
+
 @click.group()
 @click.option('-c','--ccaa', 'ccaa', envvar='REPO_HOME', default=None)
 @click.option('-p','--provincia', 'provincia', envvar='REPO_HOME', default=None)
@@ -45,7 +48,7 @@ def run_backfillnews(obj:GeneralOptions,args:CommonArgs):
 def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,year:int,month:int,day:int):
     start = datetime.now()
 
-    print("BackFilling")
+    LOG.info("BackFilling")
     args = BackFillArgs(engine=engine,sub_engine=sub_engine,
         year=year,month=month,day=day)
 
@@ -54,5 +57,5 @@ def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,year:int,month:int
     else:
         run_backfillnews(obj,args)
 
-    print(f"Duration: {datetime.now()-start}")
+    LOG.info(f"Total Duration: {datetime.now()-start}")
 

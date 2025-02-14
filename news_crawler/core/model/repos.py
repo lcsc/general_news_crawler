@@ -3,6 +3,9 @@ from .newspaper import NewsPaperRepository,NewsArticleRepository
 from ...bcube.model.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
 from ...bcube.model.bcube import BcubeCategoryRepository
 
+import logging
+LOG = logging.getLogger(__name__)
+
 class CrawlerRepos:
     _instance = None
 
@@ -27,7 +30,7 @@ class CrawlerRepos:
         #     print("Skiping init")
     
     def connect(self,db:database=None):
-        print ("Connecting to DataBase")
+        LOG.info ("Connecting to DataBase")
         self.newspaper = NewsPaperRepository(database=db)
         self.articles= NewsArticleRepository(database=db)
 

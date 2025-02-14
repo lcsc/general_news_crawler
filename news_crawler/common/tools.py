@@ -6,22 +6,24 @@ import sys
 from ..core.model.newspaper import NewsPaper
 
 from pymongo import MongoClient
+import logging
 
+LOG = logging.getLogger(__name__)
 
 def get_url(api_url):
     headers = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
     response = requests.get(api_url , timeout=(3,60), headers=headers) # 3s connection, 60s download)
-    print(f"{api_url} {response.status_code}")
+    LOG.info(f"{api_url} {response.status_code}")
     while response.status_code==521 or response.status_code==521:
         response = requests.get(api_url, timeout=(3,60)) # 3s connection, 60s download)
-        print(f"{api_url} {response.status_code}")
+        LOG.info(f"{api_url} {response.status_code}")
     return response
 
 def print_exception(e:Exception):
-    print("##### ERROR #####")
-    print(e)
+    LOG.error("##### ERROR #####")
+    LOG.error(e)
     traceback.print_exc()
-    print("##### ERROR #####")
+    LOG.error("##### ERROR #####")
 
 def get_server_name_from_url(url:str):
     url = url.replace("http://","")

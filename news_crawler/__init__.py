@@ -1,4 +1,4 @@
-from .common.loggin import initLogger
+from .common.logtools import initLogger
 
 initLogger()
 

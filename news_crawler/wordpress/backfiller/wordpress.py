@@ -1,6 +1,7 @@
 from ...core.backfiller.backfiller import BackFiller
 from ...common.consts import ENGINE_ID_WordPress, SUBENGINE_ID_wp_json
 from ...core.model.newspaper import NewsPaper,NewsArticle
+from ..downloader.wpdownloader import WpReaderContext,WpDownlader, WpArticleReader
 
 import logging
 
@@ -11,10 +12,46 @@ class WpBackFiller(BackFiller):
         super().__init__(repos)
         self._engine=ENGINE_ID_WordPress
         self._sub_engine=SUBENGINE_ID_wp_json
+        self._downloader=WpDownlader(WpArticleReader(repos))
     
     def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->bool:
-        LOG.info(f"BackFilling News of ({np.name})\"{np.name}\"")
+        LOG.info(f"BackFilling News of ({np.short_name})\"{np.name}\"")
+        if np.n_articulos is None:
+            LOG.error("No tiene articulos, no se ha podido obtener informacion previa")
+            return False
+        
+        if np.first_article is None or np.first_month is None:
+            LOG.error("Falta informacion previa")
+            return False
+        
         start,end  = self.get_range(year,month,day)
+        ctx = WpReaderContext(news_paper=np)
         LOG.debug(f"  from {start} to {end}")
+        
+        try:
+            tope = 1
+            page = 1
+            cnt=0
+            while page<=tope:
+                response = self._downloader.wp_get_dates(ctx,page,start,end)
+                if ctx._n_pages > tope:
+                    tope=ctx._n_pages
+                tmp = ctx.getArticleCount()
+                if tmp == cnt:
+                    if cnt >0:
+                        LOG.error("No se ha encontrado nuevas entradas (¿Protecion?)")
+                    tope = page # paramos
+                page+=1
+                cnt=tmp
+        except Exception as e:
+            LOG.error(e)
+            return False
+        
+        LOG.debug(f"found list:({ctx.getArticleCount()}) n_articles:({ctx._n_articles}) n_pages:({ctx._n_pages})")
+        articles = ctx.getListArticles()
+        self._repos.articles.save_many(articles)
+        return True
+        
+    
 
 
