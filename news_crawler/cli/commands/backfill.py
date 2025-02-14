@@ -1,7 +1,10 @@
 from .common import CommonArgs, GeneralOptions, CommonCmd
 import logging
 from time import sleep
+from ...core.backfiller.backfiller import BackFiller,BackFillerManager
+from ...backfiller.wordpress import WpBackFiller
 
+from typing import List,Dict
 LOG:logging.Logger=logging.getLogger(__name__)
 
 
@@ -11,6 +14,7 @@ class BackFillArgs(CommonArgs):
         self.year=year
         self.month=month
         self.day=day
+        self._bfillers:Dict[str,BackFiller]
 
 class BackFillCmd(CommonCmd):
     def __init__(self, general:GeneralOptions,args:BackFillArgs ):
@@ -20,13 +24,17 @@ class BackFillCmd(CommonCmd):
         repos = self.connectMongo()
         basic_filter= self.buildFilterNewsPaper();
         LOG.info(f"Query to Mongo: {basic_filter}") 
-
         candidates = repos.newspaper.find_by(basic_filter)
         candidates = list(candidates)
         LOG.info(f"Found {len(candidates)} NewsPapers")
 
-        for np in candidates:
-             LOG.info(np.short_name)
+        arg:BackFillArgs=self.args
+
+        mgr = BackFillerManager(repos)
+        mgr.addBackFiller(WpBackFiller(repos))
+        mgr.backfillManyNews(candidates,arg.year,arg.month,arg.day)
+            
+            
 
         pass
                         
