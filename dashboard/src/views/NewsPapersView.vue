@@ -5,10 +5,11 @@ import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vu
 import { MDBContainer } from "mdb-vue-ui-kit";
 import axios from "axios";
 import type { Header, Item } from "vue3-easy-data-table";
+import type { NewsPaperSelectorModel } from "@/model/selectors";
 
 const data = ref([]);
 
-let state: { [id: string]: string | null } = {
+let state: NewsPaperSelectorModel = {
   ca: null,
   provincia: null,
   engine: "bCube",
@@ -28,6 +29,12 @@ const headers: Header[] = [
   { text: "Primer Articulo", value: "first_article", sortable: true },
   { text: "Ultima Comprobacion", value: "last_check", sortable: true },
 ];
+
+async function onStateChanged(_state: NewsPaperSelectorModel) {
+  state = _state;
+  let response = await axios.get(buildUrl(state));
+  data.value = response.data;
+}
 
 async function onCcaaChanged(ca: string) {
   state.ca = ca;
@@ -88,6 +95,7 @@ function buildUrl(state: any) {
       @setProvincia="(engine:string) => onProvinciaChanged(engine)"
       @setEngine="(engine:string) => onEngineChanged(engine)"
       @setSubEngine="(engine:string) => onSubEngineChanged(engine)"
+      @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
     />
   </MDBContainer>
   <MDBContainer fluid>
