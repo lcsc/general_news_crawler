@@ -1,0 +1,16 @@
+Andalucia:
+    digitalsevilla (error 403 demasiadas peticiones)
+CastillaLeon:
+    palenciaenlared (peticion en Body)
+Catalunya:
+    economiadigital (error 503, saltable de pagina)
+Madrid:
+    okdiario (protegido contra querys)
+    diariomadridista (es okdiario)
+    theobjective (salta un 502, demasiadas peticiones)
+    gacetinmadrid (salta too many redirect, ¿Demasiadas peticiones?)
+Rioja:
+    labrujulacalahorra (502, ¿Demasiadas peticiones?)
+Valencia:
+    valencianoticias (Html before realResponse)
+    

@@ -1,0 +1,19 @@
+@startuml backfill
+start
+:Obtener News Papers;
+:Expandir News Papers a jobs;
+:Repartir News Paper a Workers
+equilibrando Jobs;
+fork 
+    :Diseminar jobs
+    Alternar NP;
+    repeat :BackFill Job;
+        :Actualiza Np en Mongo;
+    repeat while (more Jobs)
+fork again
+    :...;
+end fork
+
+stop
+
+@enduml

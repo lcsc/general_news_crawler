@@ -1,8 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic_mongo import PydanticObjectId,AbstractRepository
 from typing import Optional, List, Dict
 from .engine import NewsPaperEngine
 from datetime import datetime
+from enum import Enum
+
+from ...common.consts import BfStatus_PENDING
 
 class NewsPaperListerInfo(BaseModel):
     name: str
@@ -23,6 +26,12 @@ class NewsPaperListerInfo(BaseModel):
                 ret[key] = other[key]
         return ret
 
+
+class NewsPaperBackFill(BaseModel ):
+    status:str=BfStatus_PENDING
+    msg:Optional[str]=None
+    
+    
 class NewsPaper(BaseModel):
     id: Optional[PydanticObjectId] = None
     name: str
@@ -44,9 +53,25 @@ class NewsPaper(BaseModel):
     n_articulos:Optional[int]=None
     last_check:Optional[datetime]=None
     
+    backfill:Optional[Dict[str,Dict[str,NewsPaperBackFill]]]=None
+
+
+    def addBfStatus(self,year:int,month:int,status:str, msg:str=None):
+        year = str(year)
+        month=str(month)
+        if self.backfill is None: self.backfill={}
+        if year not in self.backfill: self.backfill[year]={}
+        if month not in self.backfill[year]:
+            self.backfill[year][month]=NewsPaperBackFill(status=status,msg=msg)
+        else:
+            self.backfill[year][month].status = status
+            self.backfill[year][month].msg = msg
+
     class Config:
         # Configuración para manejar la conversión con MongoDB
         arbitrary_types_allowed = True
+        use_enum_values = True
+
     
 
 class NewsPaperRepository(AbstractRepository[NewsPaper]):
@@ -68,6 +93,7 @@ class NewsArticle(BaseModel):
     class Config:
         # Configuración para manejar la conversión con MongoDB
         arbitrary_types_allowed = True
+        use_enum_values = True
 
 class NewsArticleRepository(AbstractRepository[NewsArticle]):
     class Meta:

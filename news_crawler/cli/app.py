@@ -34,31 +34,38 @@ def main(ctx, ccaa:str,
     pass
 
 
-def run_backfillnews(obj:GeneralOptions,args:CommonArgs):
+def run_backfillnews_day(obj:GeneralOptions,args:CommonArgs):
     filler= BackFillCmd(general=obj,args=args)
-    filler.backFillNews()
+    filler.backFillNews_day()
 
 
 @main.command()
 @click.option('-e',"engine", type=click.Choice(engines, case_sensitive=False), default=None)
 @click.option('-se',"sub_engine",type=click.Choice(sub_engines, case_sensitive=False), default=None)
+@click.option('-w',"workers",type=int,default=10)
 @click.argument('year',type=int)
 @click.argument('month',type=int,required=False)
 @click.argument('day',type=int, required=False)
 @click.pass_obj
-def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,year:int,month:int,day:int):
+def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:int,month:int,day:int):
     start = datetime.now()
 
     LOG.info("BackFilling")
     args = BackFillArgs(engine=engine,sub_engine=sub_engine,
-        year=year,month=month,day=day)
+        year=year,month=month,day=day,workers=workers)
 
-    if obj.ccaa is None:
-        launchMP_CA(run_backfillnews,obj,args)
-    else:
-        run_backfillnews(obj,args)
-
+    if  obj.ccaa is not None and obj.short_name is not None:
+         # nos piden un Periodico concreto
+        if month is not None:
+            # Si solo se genera un Job (y ya lo sabemos)
+            run_backfillnews_day(obj,args)
+            LOG.info(f"Total Duration: {datetime.now()-start}")
+            return
+    
+    filler= BackFillCmd(general=obj,args=args)
+    filler.backFillNews()
     LOG.info(f"Total Duration: {datetime.now()-start}")
+    
 
 def do_detect(obj:GeneralOptions,args:DetectArgs):
     detector= DetectCmd(general=obj,args=args)
@@ -69,7 +76,7 @@ def do_detect(obj:GeneralOptions,args:DetectArgs):
 def detect(obj:GeneralOptions):
     start = datetime.now()
 
-    LOG.info("BackFilling")
+    LOG.info("Detecting")
     args = DetectArgs()
 
     if obj.ccaa is None:

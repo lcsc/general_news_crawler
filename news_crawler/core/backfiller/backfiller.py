@@ -1,5 +1,6 @@
 from ...core.model.repos import CrawlerRepos
-from ...core.model.newspaper import NewsArticle,NewsPaper,NewsPaperEngine
+from ...core.model.newspaper import NewsArticle,NewsPaper,NewsPaperEngine, NewsPaperBackFill
+from ...common.consts import BfStatus_OK
 
 
 from typing import List,Tuple,Dict
@@ -47,16 +48,19 @@ class BackFiller():
         return (start,end)
         
 
-    def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->bool:
+    def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->NewsPaperBackFill:
         '''Should be implemented by subclases'''
         # return true if was ok and save mus be done
-        return False
+        return None
 
     def backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None):
         if not self.isNewsPaperProcessable(np):
             # si nos invocan directamente mostramos warn
             LOG.warning(f"  {np.short_name} is not processable, forcing check...")
-        if self.do_backFillNews(np=np,year=year,month=month,day=day):
+        res = self.do_backFillNews(np=np,year=year,month=month,day=day)
+        if res is not None:
+            if day is None and month is not None:
+                np.addBfStatus(year,month,status=res.status,msg=res.msg)
             self._repos.newspaper.save(np)
 
     def backfillManyNews(self,newspapers:List[NewsPaper],year:int,month:int=None,day:int=None):
