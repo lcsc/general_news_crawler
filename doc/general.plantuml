@@ -1,0 +1,49 @@
+@startuml Proceso GenericDisplay
+start
+partition Busqueda{
+    fork
+        :PrensaDigital;
+    fork again
+        :PensaEscrita;
+    end fork
+}
+partition Deteccion{
+    split 
+        :Wordpress;
+    split again
+        :bCube;
+    split again
+        :Vocento;
+    split again
+        :Jomla
+        Drupal
+        OpenNemas
+        Blogger;
+
+    end split
+    :Generar Real URL;
+}
+partition Extraccion Informacion{
+    fork
+        :bCube Prensa Iberica;
+    fork again
+        :WordPress wp-Json;
+    fork again
+        :Vocento;
+    end fork
+    :Calcular estadisticas;
+    note right: Primera noticia y primer mes +20
+}
+partition Backfilling Noticias{
+    :Listado Mensual;
+}
+partition Descarga Noticias{
+    :Descarga Noticias;
+}
+partition Procesado Noticias{
+    :Clasificador;
+    :Extraccion de Impactos;
+}
+@enduml
+
+
