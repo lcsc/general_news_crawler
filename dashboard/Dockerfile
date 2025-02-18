@@ -10,7 +10,7 @@ RUN npm install
 RUN vite build --base=/news/dashboard
 
 
-FROM nginx:stable
-ARG ENVIRONENT=build
-ARG VIEWER
+FROM nginx:stable-alpine
+
 COPY --from=builder /src/${VIEWER}/dist /usr/share/nginx/html/news/dashboard
+COPY vue-router-nginx.conf /etc/nginx/conf.d/default.conf
