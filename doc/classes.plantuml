@@ -1,0 +1,70 @@
+@startuml classes
+set namespaceSeparator none
+class "BackFillArgs" as news_crawler.cli.commands.backfill.BackFillArgs {
+  day : int
+  month : int
+  workers : int
+  year : int
+}
+class "BackFillCmd" as news_crawler.cli.commands.backfill.BackFillCmd {
+  backFillNews()
+  backFillNews_day()
+  expandJob(np: NewsPaper, year: int, month: int) -> BackFillJob
+  expandJobs(np: NewsPaper, year: int, month: int, day: int) -> List[BackFillJob]
+  find_less_loaded_worker(workers: List[BackFillWorker]) -> BackFillWorker
+  splitJobs(jobs: List[Dict]) -> List[BackFillWorker]
+}
+class "BackFillJob" as news_crawler.cli.commands.backfill.BackFillJob {
+  day : Optional[int]
+  general
+  month : int
+  np : NewsPaper
+  year : int
+}
+class "BackFillWorker" as news_crawler.cli.commands.backfill.BackFillWorker {
+  jobs : List[BackFillJob]
+  nJobs : int
+  addJobs(jobs: List[BackFillJob])
+  getArgs()
+  getTarget()
+}
+class "CommonArgs" as news_crawler.cli.commands.common.CommonArgs {
+  engine : str
+  sub_engine : str
+}
+class "CommonCmd" as news_crawler.cli.commands.common.CommonCmd {
+  args
+  dataBase : Optional[database]
+  general
+  mongoClient : Optional[MongoClient]
+  repos : Optional[CrawlerRepos]
+  buildFilterNewsPaper() -> dict
+  connectMongo() -> CrawlerRepos
+}
+class "DetectArgs" as news_crawler.cli.commands.detect.DetectArgs {
+}
+class "DetectCmd" as news_crawler.cli.commands.detect.DetectCmd {
+  detect()
+}
+class "GeneralOptions" as news_crawler.cli.commands.common.GeneralOptions {
+  ccaa : str
+  mongo_passwd : str
+  mongo_url : str
+  mongo_user : str
+  provincia : str
+  short_name : str
+}
+class "NewsWorker" as news_crawler.cli.commands.multiprocess.NewsWorker {
+  name : str
+  {abstract}getArgs()
+  {abstract}getTarget()
+}
+news_crawler.cli.commands.backfill.BackFillArgs --|> news_crawler.cli.commands.common.CommonArgs
+news_crawler.cli.commands.backfill.BackFillCmd --|> news_crawler.cli.commands.common.CommonCmd
+news_crawler.cli.commands.backfill.BackFillWorker --|> news_crawler.cli.commands.multiprocess.NewsWorker
+news_crawler.cli.commands.detect.DetectArgs --|> news_crawler.cli.commands.common.CommonArgs
+news_crawler.cli.commands.detect.DetectCmd --|> news_crawler.cli.commands.common.CommonCmd
+news_crawler.cli.commands.common.CommonArgs --o news_crawler.cli.commands.common.CommonCmd : args
+news_crawler.cli.commands.common.GeneralOptions --o news_crawler.cli.commands.backfill.BackFillJob : general
+news_crawler.cli.commands.common.GeneralOptions --o news_crawler.cli.commands.common.CommonCmd : general
+@enduml

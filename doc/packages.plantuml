@@ -1,0 +1,29 @@
+@startuml packages
+set namespaceSeparator none
+package "news_crawler.cli" as news_crawler.cli {
+}
+package "news_crawler.cli.app" as news_crawler.cli.app {
+}
+package "news_crawler.cli.application" as news_crawler.cli.application {
+}
+package "news_crawler.cli.commands" as news_crawler.cli.commands {
+}
+package "news_crawler.cli.commands.backfill" as news_crawler.cli.commands.backfill {
+}
+package "news_crawler.cli.commands.common" as news_crawler.cli.commands.common {
+}
+package "news_crawler.cli.commands.detect" as news_crawler.cli.commands.detect {
+}
+package "news_crawler.cli.commands.multiprocess" as news_crawler.cli.commands.multiprocess {
+}
+news_crawler.cli --> news_crawler.cli.app
+news_crawler.cli.app --> news_crawler.cli.commands.backfill
+news_crawler.cli.app --> news_crawler.cli.commands.common
+news_crawler.cli.app --> news_crawler.cli.commands.detect
+news_crawler.cli.app --> news_crawler.cli.commands.multiprocess
+news_crawler.cli.commands --> news_crawler.cli.commands.common
+news_crawler.cli.commands.backfill --> news_crawler.cli.commands.common
+news_crawler.cli.commands.backfill --> news_crawler.cli.commands.multiprocess
+news_crawler.cli.commands.detect --> news_crawler.cli.commands.common
+news_crawler.cli.commands.multiprocess --> news_crawler.cli.commands.common
+@enduml
