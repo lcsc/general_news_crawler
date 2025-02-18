@@ -49,14 +49,14 @@ async def get_newspapers(engine:str=None,sub_engine:str=None)->List[NewsPaper]:
     items = repos.newspaper.find_by(query)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}")
+@api_np.get("/{ccaa}/")
 async def get_newspapers_ccaa(ccaa:str,engine:str=None,sub_engine:str=None)->List[NewsPaper]:
     query = build_query(ccaa=ccaa, engine=engine,sub_engine=sub_engine)
     print(f"  Searchin {query}")
     items = repos.newspaper.find_by(query)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}/{short_name}")
+@api_np.get("/{ccaa}/{short_name}/")
 async def get_newspaper_ccaa_name(ccaa:str,short_name)->NewsPaper:
     item = repos.newspaper.find_one_by({"ccaa":ccaa,"short_name":short_name})
     return serialize_document(item)
