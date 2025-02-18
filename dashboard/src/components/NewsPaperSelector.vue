@@ -7,14 +7,20 @@ import {
 } from "mdb-vue-ui-kit";
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import { default as DropDown } from "./DropDown.vue";
+import type { NewsPaperSelectorModel } from "@/model/selectors";
 
-const dropdown1 = ref(false);
-const drop_prov = ref(false);
-const drop_engines = ref(false);
-const drop_sub_engines = ref(false);
 const ccaa = ref([]);
+const ca = ref<string | null>("");
+const provincias = ref([]);
 const engines = ref([]);
 const sub_engines = ref([]);
+const state = ref<NewsPaperSelectorModel>({
+  ca: null,
+  provincia: null,
+  engine: "bCube",
+  sub_engine: null,
+});
 
 onMounted(async () => {
   let response = await axios.get("/news/api/options");
@@ -25,71 +31,55 @@ onMounted(async () => {
 });
 
 const emit = defineEmits<{
-  setCcaa: [ca: string];
-  setProvincia: [provincia: string];
-  setEngine: [value: string];
-  setSubEngine: [value: string];
+  stateChannged: [state: NewsPaperSelectorModel];
 }>();
+
+function onCcaaChanged(data: string | null) {
+  state.value.ca = data;
+  ca.value = data;
+  emit("stateChannged", state.value);
+}
+
+function onProvinciaChanged(data: string | null) {
+  state.value.provincia = data;
+  emit("stateChannged", state.value);
+}
+
+function onEngineChanged(data: string | null) {
+  state.value.engine = data;
+  emit("stateChannged", state.value);
+}
+
+function onSubEngineChanged(data: string | null) {
+  state.value.sub_engine = data;
+  emit("stateChannged", state.value);
+}
 </script>
 <template>
   <div style="display: inline-flex">
-    <MDBDropdown v-model="dropdown1">
-      <MDBDropdownToggle @click="dropdown1 = !dropdown1">
-        CCAA
-      </MDBDropdownToggle>
-      <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-        <MDBDropdownItem @click="$emit('setCcaa', null)" href="#"
-          >Todas</MDBDropdownItem
-        >
-        <MDBDropdownItem
-          v-for="ca in ccaa"
-          @click="$emit('setCcaa', ca)"
-          href="#"
-          >{{ ca }}</MDBDropdownItem
-        >
-      </MDBDropdownMenu>
-    </MDBDropdown>
-    <MDBDropdown v-model="drop_prov">
-      <MDBDropdownToggle @click="drop_prov = !drop_prov">
-        Provincias
-      </MDBDropdownToggle>
-      <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-        <MDBDropdownItem @click="$emit('setProvincia', null)" href="#"
-          >Todas</MDBDropdownItem
-        >
-      </MDBDropdownMenu>
-    </MDBDropdown>
-    <MDBDropdown v-model="drop_engines">
-      <MDBDropdownToggle @click="drop_engines = !drop_engines">
-        Engines
-      </MDBDropdownToggle>
-      <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-        <MDBDropdownItem @click="$emit('setEngine', null)" href="#"
-          >Todos</MDBDropdownItem
-        >
-        <MDBDropdownItem
-          v-for="engine in engines"
-          @click="$emit('setEngine', engine)"
-          href="#"
-          >{{ engine }}</MDBDropdownItem
-        >
-      </MDBDropdownMenu>
-    </MDBDropdown>
-    <MDBDropdown v-model="drop_sub_engines">
-      <MDBDropdownToggle @click="drop_sub_engines = !drop_sub_engines">
-        SubEngines
-      </MDBDropdownToggle>
-      <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
-        <MDBDropdownItem @click="$emit('setSubEngine', null)" href="#"
-          >Todos</MDBDropdownItem
-        >
-        <MDBDropdownItem
-          v-for="engine in sub_engines"
-          @click="$emit('setSubEngine', engine)"
-          href="#"
-          >{{ engine }}</MDBDropdownItem
-        >
-      </MDBDropdownMenu>
-    </MDBDropdown>
+    <DropDown
+      caption="CCAA"
+      :data="ccaa"
+      :selected="state.ca"
+      @onSelect="(data) => onCcaaChanged(data)"
+    ></DropDown>
+    <DropDown
+      caption="Provincias"
+      :data="provincias"
+      :selected="state.provincia"
+      @onSelect="(data) => onProvinciaChanged(data)"
+    ></DropDown>
+    <DropDown
+      caption="Motores"
+      :data="engines"
+      :selected="state.engine"
+      @onSelect="(data) => onEngineChanged(data)"
+    ></DropDown>
+    <DropDown
+      caption="Sub_Motores"
+      :data="sub_engines"
+      :selected="state.sub_engine"
+      @onSelect="(data) => onSubEngineChanged(data)"
+    ></DropDown>
   </div>
 </template>
