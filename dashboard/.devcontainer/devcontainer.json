@@ -4,9 +4,9 @@
   "name": "general_news_crawler_dashboard",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
-  "features": {
-    "ghcr.io/devcontainers-extra/features/vue-cli:2": {}
-  },
+   "features": {
+     "ghcr.io/devcontainers-extra/features/vue-cli:2": {}
+   },
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
@@ -45,8 +45,11 @@
 
   //"forwardPorts": [8080],
   "appPort": ["0.0.0.0:5173:5173"],
-
-  "remoteUser": "node",
+  //"remoteEnv": { "HOME": "/home/node" },
+  //"containerEnv": {
+	//	"HOME": "/home/node"
+	//},
+  "remoteUser": "root",
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "npm install -g npm@11.0.0; npm install -g mdb-cli vue; npm install",
   "runArgs": ["--network=general_news_crawler_default", "--add-host=host.docker.internal:host-gateway"]
@@ -56,4 +59,4 @@
 
   // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
   // "remoteUser": "root"
-}
+ }
