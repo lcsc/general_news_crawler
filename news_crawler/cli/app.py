@@ -6,6 +6,11 @@ from .commands import DetectArgs,DetectCmd
 from ..common.consts import engines
 from ..common.consts import sub_engines
 from .commands import launchMP_CA
+
+from .commands import ListerArgs,ListerCmd
+
+from ..core.newspapers import Listers
+
 from datetime import datetime
 
 import logging
@@ -32,6 +37,35 @@ def main(ctx, ccaa:str,
         mongo_user,
         mongo_passwd)
     pass
+
+@main.command()
+@click.argument("lister",type=click.Choice(Listers, case_sensitive=False), default=None, required=False)
+@click.pass_obj
+def list(obj:GeneralOptions,lister:str):
+    arg = ListerArgs(lister)
+    cmd = ListerCmd(obj,arg)
+    cmd.list()
+    pass
+
+
+def do_detect(obj:GeneralOptions,args:DetectArgs):
+    detector= DetectCmd(general=obj,args=args)
+    detector.detect()
+
+@main.command()
+@click.pass_obj
+def detect(obj:GeneralOptions):
+    start = datetime.now()
+
+    LOG.info("Detecting")
+    args = DetectArgs()
+
+    if obj.ccaa is None:
+        launchMP_CA(do_detect,obj,args)
+    else:
+        do_detect(obj,args)
+
+    LOG.info(f"Total Duration: {datetime.now()-start}")
 
 
 def run_backfillnews_day(obj:GeneralOptions,args:CommonArgs):
@@ -66,22 +100,3 @@ def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:i
     filler.backFillNews()
     LOG.info(f"Total Duration: {datetime.now()-start}")
     
-
-def do_detect(obj:GeneralOptions,args:DetectArgs):
-    detector= DetectCmd(general=obj,args=args)
-    detector.detect()
-
-@main.command()
-@click.pass_obj
-def detect(obj:GeneralOptions):
-    start = datetime.now()
-
-    LOG.info("Detecting")
-    args = DetectArgs()
-
-    if obj.ccaa is None:
-        launchMP_CA(do_detect,obj,args)
-    else:
-        do_detect(obj,args)
-
-    LOG.info(f"Total Duration: {datetime.now()-start}")

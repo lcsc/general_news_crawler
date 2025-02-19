@@ -8,18 +8,99 @@ from pymongo.database import Database
 PRENSA_DIGITAL='https://www.prensadigital.com/'
 PRENSA_ESCRITA='https://www.prensaescrita.com/'
 
+
+PRENSA_DIGITAL_ID='PrensaDigital'
+PRENSA_ESCRITA_ID='PrensaEscrita'
+
+# Traducciones de como estan en la web a un nombre corto mas sencillo
+provs_map={
+'Sevilla':'sevilla',
+'Málaga':'malaga',
+'Cádiz':'cadiz',
+'Granada':'granada',
+'Córdoba':'cordoba',
+'Almería':'almeria',
+'Jaén':'jaen',
+'Huelva':'huelva',
+'Zaragoza':'zaragoza',
+'Huesca':'huesca',
+'Teruel':'teruel',
+'Las Palmas':'laspalmas',
+'Santa Cruz de Tenerife':'santacruz',
+'Toledo':'toledo',
+'Ciudad Real':'ciudadreal',
+'Albacete':'albacete',
+'Guadalajara':'guadalajara',
+'Cuenca':'cuenca',
+'Valladolid':'valladolid',
+'León':'leon',
+'Burgos':'burgos',
+'Salamanca':'salamanca',
+'Zamora':'zamora',
+'Segovia':'segovia',
+'Palencia':'palencia',
+'Ávila':'avila',
+'Soria':'soria',
+'Barcelona':'barcelona',
+'Tarragona':'tarragona',
+'Girona':'girona',
+'Lleida':'lleida',
+'Valencia':'valencia',
+'Alicante':'alicante',
+'Castellón':'castellon',
+'Badajoz':'badajoz',
+'Cáceres':'caceres',
+'A Coruña/La Coruña':'lacoruña',
+'Coruña':'lacoruña',
+'Pontevedra':'pontevedra',
+'Lugo':'lugo',
+'Ourense/Orense':'orense',
+'Vizcaya - Bizkaia':'vizcaya',
+'Guipúzcoa - Gipuzkoa':'guipuzcoa',
+'Álava - Araba':'alava',
+'Ceuta':'ceuta',
+'Melilla':'melilla'
+}
+
+def getIdBasic(name:str)->str:
+    name=name.lower()
+    name=name.replace("á","a")
+    name=name.replace("é","e")
+    name=name.replace("í","i")
+    name=name.replace("ó","o")
+    name=name.replace("ú","u")
+
+    if "/" in name:
+        name =name.split("/")[1].removeprefix(" ")
+    if " - " in name:
+        name =name.split("-")[0].removesuffix(" ")
+    name = name.replace(" ","")
+    
+    return name
+
+def getProvId(prov:str)->str:
+    if prov in provs_map:
+        return provs_map[prov]
+    
+    prov = getIdBasic(prov)
+    return prov
+
+
 class NewsPaperLister():
     def __init__(self,repo:NewsPaperRepository):
         self._repo = repo
         pass
 
-    def get_newspapers_ccaa(self,ccaa)->List[NewsPaperListerInfo]:
+    def get_newspapers_ccaa(self,ca:str, prov:str=None)->List[NewsPaperListerInfo]:
         pass
     
-    def get_newspapers(self)->list[NewsPaperListerInfo]:
+    def get_newspapers(self, in_ca:str=None, in_prov:str=None)->list[NewsPaperListerInfo]:
         all:list[NewsPaper] =[]
-        for ca in consts.ccaa:
-            ca_list = self.get_newspapers_ccaa(ca)
+        ccaa=consts.ccaa
+        if in_ca is not None: 
+            ccaa=[in_ca]
+        for ca in ccaa:
+            ca_list = self.get_newspapers_ccaa(ca,in_prov)
             if ca_list is not None:
                 all.extend(ca_list)
         return all

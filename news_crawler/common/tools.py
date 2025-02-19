@@ -36,7 +36,8 @@ def get_short_name_from_server_name(server_name:str):
     #print(server_name)
     ret = server_name.removeprefix("www.")
     ret = ret.split(".")
-    return ret[0]
+    ret = ret[:-1] 
+    return ".".join(ret)
 
 def normalize_url(url:str):
     if url.startswith("http://"):

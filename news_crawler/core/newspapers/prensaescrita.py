@@ -1,9 +1,12 @@
-from .lister import NewsPaperLister, PRENSA_ESCRITA
+from .lister import NewsPaperLister, PRENSA_ESCRITA, getProvId
 from ...common.tools import get_url,normalize_url
 from ..model.newspaper import NewsPaperListerInfo
 
 from typing import List
 from bs4 import BeautifulSoup
+
+import logging
+LOG = logging.getLogger(__name__)
 
 ccaa_urls={
     'andalucia':'https://www.prensaescrita.com/andalucia.php',
@@ -26,13 +29,15 @@ ccaa_urls={
     'ceutamelilla':'https://www.prensaescrita.com/ceutaym.php'
 }
 
+
 class PrensaEscritaLister(NewsPaperLister):
     
-    def get_newspapers_ccaa(self, ccaa)->List[NewsPaperListerInfo]:
+    def get_newspapers_ccaa(self, ccaa:str, in_prov:str=None)->List[NewsPaperListerInfo]:
+        LOG.info(f"Buscando Periodicos de {ccaa}/{in_prov}")
         ret = []
         r = get_url(ccaa_urls[ccaa])
         if r.status_code != 200:
-            print(f"WARNING {r.status_code} {ccaa_urls[ccaa]}")
+            LOG.warning(f"{r.status_code} {ccaa_urls[ccaa]}")
             return None
         #html = r.content.decode("utf-8")
 
@@ -40,12 +45,12 @@ class PrensaEscritaLister(NewsPaperLister):
         tables = doc.find_all("table",{"width":"100%","height":"160","bgcolor":"#ffffff"})
         #for t in tables:
         if len(tables)>1:
-            print ("Warn: Found serveral candidates")
+            LOG.warning ("Warn: Found serveral candidates")
         t =tables[0]
-        print('found '+str(len(tables)))
+        LOG.info('found '+str(len(tables)))
 
         tables = t.find_all("table",{"width":"100%","cellpadding":"2","bgcolor":"#ffffff"})
-        print('   sub_tables '+str(len(tables)))
+        LOG.info('   sub_tables '+str(len(tables)))
         t =tables[0]
         #with open(ca+".0.html", "w") as f:
         #    f.write(str(t))
@@ -56,25 +61,26 @@ class PrensaEscritaLister(NewsPaperLister):
             if len(cells) == 1:
                 prov_tag=cells[0].find("h2")
                 if prov_tag is not None:
-                    prov= prov_tag.text
+                    prov= getProvId(prov_tag.text)
 
-                print(f"   {i_row}: {len(cells)} {prov}")
+                LOG.info(f"   {i_row}: {len(cells)} {prov}")
             if len(cells) == 4:
                 name= cells[1].text.strip()
                 ciudad= cells[2].text.strip()
                 link=cells[3].find('a')['href']
-                print(f"   {i_row}: {len(cells)} {name} {ciudad} {link}")
+                LOG.info(f"   {i_row}: {len(cells)} {name} {ciudad} {link}")
                 
-                ret.append(NewsPaperListerInfo(
-                    #id=None,
-                    ccaa=ccaa,
-                    provincia=prov,
-                    name=name,
-                    #short_name=get_short_name_from_server_name(get_server_name_from_url(link)),
-                    type=None,
-                    url=normalize_url(link),
-                    city=ciudad,
-                    #real_url=None,
-                    #alt_urls=None,
-                    src=PRENSA_ESCRITA))
+                if in_prov is None or prov == in_prov:
+                    ret.append(NewsPaperListerInfo(
+                        #id=None,
+                        ccaa=ccaa,
+                        provincia=prov,
+                        name=name,
+                        #short_name=get_short_name_from_server_name(get_server_name_from_url(link)),
+                        type=None,
+                        url=normalize_url(link),
+                        city=ciudad,
+                        #real_url=None,
+                        #alt_urls=None,
+                        src=PRENSA_ESCRITA))
         return ret

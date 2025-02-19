@@ -6,7 +6,7 @@ from ..bcube.fetcher.prensaiberica.prensaiberica import BCubePrensaIbericaExtrac
 from ..bcube.model.prensaiberica import BcubePiMDRepository
 from ..core.model.repos import CrawlerRepos
 from ..bcube.fetcher.prensaiberica.pi_stats import PiAnalisys
-from ..common.tools import connect_mongo
+from ..common.tools import connect_mongo, get_server_name_from_url,get_short_name_from_server_name
 from ..wordpress.fetcher.wordpress import WordPressInfoExtractor
 import time 
 
@@ -63,22 +63,89 @@ def fetch_wordpress_info():
 def check_bcube():
     pi = PiAnalisys()
     pi.checkPi()
+
+def getProvName(prov:str):
+    prov=prov.lower()
+    prov=prov.replace("á","a")
+    prov=prov.replace("é","e")
+    prov=prov.replace("í","i")
+    prov=prov.replace("ó","o")
+    prov=prov.replace("ú","u")
+
+    if "/" in prov:
+        prov =prov.split("/")[1].removeprefix(" ")
+    if " - " in prov:
+        prov =prov.split("-")[0].removesuffix(" ")
+    prov = prov.replace(" ","")
+    return prov
+
+def build_provs():
+    nps = repos.newspaper.find_by({})
+
+    ccaas = {}
+    for np in nps:
+        ca = np.ccaa
+        prov = np.provincia
+        if ca not in ccaas:
+            ccaas[ca]=[]
+        if prov is not None and prov not in ccaas[ca]:
+            ccaas[ca].append(prov)
     
+
+    #print(ccaas)
+    
+    # for ca in ccaas:
+    #     for p in ccaas[ca]:
+    #         print(f"'{p}':'{getProvName(p)}'")
+    
+    # return
+    
+    print ("{")
+    for ca in ccaas:
+        provs= ccaas[ca]
+        if len(provs)==0:
+            print(f"  '{ca}':['{ca}'],")    
+        elif len(provs)==1:
+            print(f"  '{ca}':['{provs[0]}'],")    
+        else:
+            print(f"  '{ca}':[")
+            for p in provs:
+                print(f"    '{p}',")
+            print("  ],")
+    print ("}")
+
+
+
 def main() -> int:
     exit_code: int = 0
 
     #database["NewsPapers"].delete_many({})
     #database["bCubeMetaData"].delete_many({})
     #get_newspapers()
-    detect_newspapers()
+    #detect_newspapers()
     #fetect_hoy()
     #fetch_bcube_prensa_iberica()
     #check_bcube()
     #fetch_wordpress_info()
+    #build_provs()
 
+    #pd = PrensaDigitalLister(repos.newspaper)
+    #urls = pd.listUrls()
+    #print(urls)
+    
+    #https://prensadigital.com/
+    # print("{")
+    # for ca in urls:
+    #     print(f"  '{ca}':{{")
+    #     for prov in urls[ca]:
+    #         print(f"    '{prov}':'https://prensadigital.com{urls[ca][prov]}',")
+    #     print("  },")
+    # print("}")
+
+    print(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
     return exit_code
 
-
+    print("{")
 if __name__ == "__main__":
     start = time.time() 
     main()
