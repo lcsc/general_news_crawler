@@ -1,0 +1,1 @@
+from .prensaiberica.prensaiberica import BCubePrensaIbericaExtractor

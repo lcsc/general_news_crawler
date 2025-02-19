@@ -96,6 +96,8 @@ class NewsArticleReader():
             ret.engine_data=engine_data
 
         return ret
+    
+        
 
 class NewsPaperExtractor():
 
@@ -180,8 +182,7 @@ class NewsPaperExtractor():
         self._np_repos.newspaper.save(np)
         return True
 
-    def extract_all(self,try_no_engine=True,try_no_subengine:bool=None):
-        cand= self.get_candidates(try_no_engine=try_no_engine,try_no_subengine=try_no_subengine)
+    def extract_many(self, cand:list[NewsPaper]):
         top = len(cand)
         for idx,np in enumerate(cand):
             print(f"[{idx+1}/{top}] Checking \"{np.name}\"")
@@ -192,3 +193,9 @@ class NewsPaperExtractor():
                         self._np_repos.newspaper.save(np)
                 except Exception as e:
                     print_exception(e)
+    
+    
+    def extract_all(self,try_no_engine=True,try_no_subengine:bool=None):
+
+        cand= self.get_candidates(try_no_engine=try_no_engine,try_no_subengine=try_no_subengine)
+        self.extract_many(cand)

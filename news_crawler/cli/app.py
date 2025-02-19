@@ -8,6 +8,7 @@ from ..common.consts import sub_engines
 from .commands import launchMP_CA
 
 from .commands import ListerArgs,ListerCmd
+from .commands import ExtractArgs, ExtractCmd
 
 from ..core.newspapers import Listers
 
@@ -66,6 +67,33 @@ def detect(obj:GeneralOptions):
         do_detect(obj,args)
 
     LOG.info(f"Total Duration: {datetime.now()-start}")
+
+
+def do_extract(obj:GeneralOptions, args:ExtractArgs):
+    extractor =ExtractCmd(obj,args)
+    extractor.extract()
+
+@main.command()
+@click.option('-e',"engine", type=click.Choice(engines, case_sensitive=False), default=None)
+@click.option('-se',"sub_engine",type=click.Choice(sub_engines, case_sensitive=False), default=None)
+@click.option('-t/-nt','--try/--no-try',"tryUnknown", default=True)
+@click.pass_obj
+def extract(obj:GeneralOptions,engine:str,sub_engine:str,tryUnknown:bool):
+    start = datetime.now()
+
+    LOG.info("Extracting dates")
+    args = ExtractArgs(engine=engine,sub_engine=sub_engine,
+        tryUnknown=tryUnknown)
+    if obj.ccaa is None:
+        launchMP_CA(do_extract,obj,args)
+        #do_extract(obj,args)
+    else:
+        do_extract(obj,args)
+
+    LOG.info(f"Total Duration: {datetime.now()-start}")
+    
+
+    pass
 
 
 def run_backfillnews_day(obj:GeneralOptions,args:CommonArgs):

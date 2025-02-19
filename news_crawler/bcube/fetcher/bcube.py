@@ -9,6 +9,9 @@ from ...common.consts import month_thresold,ENGINE_ID_bCube
 from bs4 import BeautifulSoup
 
 import sys
+import logging
+
+LOG= logging.getLogger(__name__)
 
 class BcubeArticleReaderContext(NewsArticleReaderContext):
     def __init__(self,news_paper:NewsPaper,category:BcubeCategory):
@@ -32,7 +35,11 @@ class BcubeArticleReader(NewsArticleReader):
         if not cat.endswith("/"): cat =cat +"/"
         if not cat.startswith("/"): cat ="/"+ cat
         path =f"{np_base_path(context.news_paper)}{cat}{article.article_id}.list_raw"
-        save_file(path, str(raw))
+
+        modDate = article.date
+        if "dateModified" in article.engine_data:
+            modDate = article.engine_data["dateModified"]
+        self.repos.save_file(path, str(raw),'list',modDate)
         article.raw_data=path
         pass
 
