@@ -7,9 +7,12 @@ from typing import List
 from fastapi import FastAPI, APIRouter
 from pymongo import MongoClient
 import news_crawler.common.consts
-
+from news_crawler import initLogger 
 from news_crawler.common.tools import connect_mongo
 
+import logging
+initLogger()
+LOG = logging.getLogger(__name__)
 # uvicorn --reload --host 0.0.0.0 --port 5000 news_api.main:app
 client = connect_mongo()
 
@@ -39,7 +42,10 @@ async def read_root():
 
 @app.get("/options")
 async def get_options():
-    return {"ccaas":news_crawler.common.consts.ccaa,
+    LOG.debug(news_crawler.common.consts.ccaa)
+
+    return {"ccaas":list(news_crawler.common.consts.ccaa),
+            "provincias":news_crawler.common.consts.provincias,
             "engines":news_crawler.common.consts.engines,
             "sub_engines":news_crawler.common.consts.sub_engines}
 
