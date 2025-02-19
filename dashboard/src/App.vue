@@ -2,7 +2,9 @@
   <header>
     <div>Aqui iran imagenes</div>
     <MDBNavbar expand="lg" light bg="white" container>
-      <MDBNavbarBrand href="/">News Crawler</MDBNavbarBrand>
+      <MDBNavbarBrand >
+        <router-link class="navbar-brand" to="/">News Crawler</router-link></MDBNavbarBrand
+      >
       <MDBNavbarToggler
         target="#navbarExample01"
         @click="collapse1 = !collapse1"
@@ -35,6 +37,11 @@ import { ref } from "vue";
 
 const collapse1 = ref(false);
 const dropdown1 = ref(false);
+
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
 </script>
 
 <script lang="ts">
