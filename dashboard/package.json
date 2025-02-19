@@ -13,9 +13,13 @@
     "@handsontable/vue3": "^15.0.0",
     "axios": "^1.7.9",
     "mdb-vue-ui-kit": "^6.0.0",
+    "ol": "^10.4.0",
+    "ol-contextmenu": "^5.5.0",
+    "ol-ext": "^4.0.27",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vue3-easy-data-table": "^1.5.47"
+    "vue3-easy-data-table": "^1.5.47",
+    "vue3-openlayers": "^11.3.3"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
