@@ -22,12 +22,29 @@ const state = ref<NewsPaperSelectorModel>({
   sub_engine: null,
 });
 
+let all_provs:{[ca:string]:[string]}
+let provs:[string]=[]
+
+function update_provs(){
+  if (state.value.ca==null){
+    provincias.value=provs
+  }else{
+    provincias.value=all_provs[state.value.ca]
+  }
+}
+
 onMounted(async () => {
   let response = await axios.get("/news/api/options");
-  console.log(response.data);
   ccaa.value = response.data.ccaas;
   engines.value = response.data.engines;
   sub_engines.value = response.data.sub_engines;
+  all_provs=response.data.provincias
+  provs  = []
+    Object.keys(all_provs).forEach((ca)=> {
+      let tmp = all_provs[ca];
+      provs = provs.concat(tmp);
+    });
+  update_provs()
 });
 
 const emit = defineEmits<{
@@ -37,6 +54,8 @@ const emit = defineEmits<{
 function onCcaaChanged(data: string | null) {
   state.value.ca = data;
   ca.value = data;
+  state.value.provincia=null;
+  update_provs()
   emit("stateChannged", state.value);
 }
 
