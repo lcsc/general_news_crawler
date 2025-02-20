@@ -10,9 +10,13 @@ import App from "./App.vue";
 import router from "./router";
 import OpenLayersMap from "vue3-openlayers";
 
+import { NewsClient } from "./newsclient/newsclient";
+
+NewsClient.instance.getOptions();
+
 const app = createApp(App);
 app.component("EasyDataTable", Vue3EasyDataTable);
 app.use(router);
-app.use(OpenLayersMap)
+app.use(OpenLayersMap);
 
 app.mount("#app");

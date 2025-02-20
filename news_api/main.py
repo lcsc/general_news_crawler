@@ -2,7 +2,7 @@
 from news_crawler.core.model.repos import CrawlerRepos
 from news_crawler.core.model.newspaper import NewsPaper
 
-from .models import BaseRequest
+from .models import BaseRequest, OptionsResult
 
 from typing import List
 
@@ -47,8 +47,8 @@ def build_query(ccaa:str=None,provincia:str=None,query:BaseRequest=None):
 async def read_root():
     return {"mensaje": "¡Hola desde FastAPI!"}
 
-@app.get("/options")
-async def get_options():
+@app.get("/options", operation_id="options")
+async def get_options()->OptionsResult:
     LOG.debug(news_crawler.common.consts.ccaa)
 
     return {"ccaas":list(news_crawler.common.consts.ccaa),
@@ -56,20 +56,20 @@ async def get_options():
             "engines":news_crawler.common.consts.engines,
             "sub_engines":news_crawler.common.consts.sub_engines}
 
-@api_np.get("/")
+@api_np.get("/", operation_id="np_list")
 async def get_newspapers(query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
     mongoQuery = build_query(query=query)
     items = repos.newspaper.find_by(mongoQuery)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}/")
+@api_np.get("/{ccaa}/", operation_id="np_list_ccaa")
 async def get_newspapers_ccaa(ccaa:str,query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
     mongoQuery = build_query(ccaa=ccaa, query=query)
     LOG.info(f"  Searchin {mongoQuery}")
     items = repos.newspaper.find_by(mongoQuery)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}/{provincia}/")
+@api_np.get("/{ccaa}/{provincia}/", operation_id="np_list_ccaa_prov")
 async def get_newspaper_ccaa_provincia(ccaa:str,provincia:str,query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
     LOG.info("Entrando")
     mongoQuery=build_query(ccaa=ccaa,provincia=provincia,query=query)
@@ -77,7 +77,7 @@ async def get_newspaper_ccaa_provincia(ccaa:str,provincia:str,query: Annotated[B
     items = repos.newspaper.find_by(mongoQuery)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}/{provincia}/{short_name}/")
+@api_np.get("/{ccaa}/{provincia}/{short_name}/", operation_id="np_get")
 async def get_newspaper_ccaa_name(ccaa:str,provincia:str,short_name:str)->Optional[NewsPaper]:
     if provincia == '*':provincia=None
     mongoQuery=build_query(ccaa=ccaa,provincia=provincia)

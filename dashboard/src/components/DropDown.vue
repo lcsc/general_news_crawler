@@ -10,7 +10,7 @@ import { ref, onMounted } from "vue";
 const drop = ref(false);
 const props = defineProps(["caption", "data", "selected"]);
 const emit = defineEmits<{
-  onSelect: [option: string | null];
+  onSelect: [option?: string];
 }>();
 </script>
 
@@ -21,9 +21,9 @@ const emit = defineEmits<{
     </MDBDropdownToggle>
     <MDBDropdownMenu aria-labelledby="dropdownMenuButton">
       <MDBDropdownItem
-        @click="$emit('onSelect', null)"
+        @click="$emit('onSelect', undefined)"
         href="#"
-        :active="selected == null"
+        :active="selected == undefined"
         >*</MDBDropdownItem
       >
       <MDBDropdownItem divider />

@@ -1,6 +1,6 @@
 export type NewsPaperSelectorModel = {
-  ca: string | null;
-  provincia: string | null;
-  engine: string | null;
-  sub_engine: string | null;
+  ca?: string;
+  provincia?: string;
+  engine?: string;
+  sub_engine?: string;
 };

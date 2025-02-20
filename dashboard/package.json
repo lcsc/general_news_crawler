@@ -7,10 +7,12 @@
     "build-only": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "gen-client": "openapi-ts"
   },
   "dependencies": {
     "@handsontable/vue3": "^15.0.0",
+    "@hey-api/client-axios": "^0.6.1",
     "axios": "^1.7.9",
     "mdb-vue-ui-kit": "^6.0.0",
     "ol": "^10.4.0",
@@ -22,6 +24,7 @@
     "vue3-openlayers": "^11.3.3"
   },
   "devDependencies": {
+    "@hey-api/openapi-ts": "^0.64.5",
     "@tsconfig/node22": "^22.0.0",
     "@types/node": "^22.10.7",
     "@vitejs/plugin-vue": "^5.2.1",

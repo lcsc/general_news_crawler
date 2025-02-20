@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import axios from "axios";
+
 import { default as DropDown } from "./DropDown.vue";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
+import { NewsClient } from "../newsclient/newsclient";
+import { options } from "@/newsclient/hey";
 
-const ccaa = ref([]);
-const provincias = ref<string[]>([]);
-const engines = ref([]);
-const sub_engines = ref([]);
+const ccaa = ref<string[] | undefined>([]);
+const provincias = ref<string[] | undefined>([]);
+const engines = ref<string[] | undefined>([]);
+const sub_engines = ref<string[] | undefined>([]);
 const state = ref<NewsPaperSelectorModel>({
-  ca: null,
-  provincia: null,
+  ca: undefined,
+  provincia: undefined,
   engine: "bCube",
-  sub_engine: null,
+  sub_engine: undefined,
 });
 
-let provs_data: { [ca: string]: [string] };
+let provs_data: { [ca: string]: string[] };
 let all_provs: string[] = [];
 
 function update_provs() {
@@ -27,41 +29,49 @@ function update_provs() {
 }
 
 onMounted(async () => {
-  let response = await axios.get("/news/api/options");
-  ccaa.value = response.data.ccaas;
-  engines.value = response.data.engines;
-  sub_engines.value = response.data.sub_engines;
-  provs_data = response.data.provincias;
-  all_provs = [];
-  Object.keys(provs_data).forEach((ca) => {
-    let tmp = provs_data[ca];
-    all_provs = all_provs.concat(tmp);
-  });
-  update_provs();
+  let srv_options = NewsClient.instance.serverOptions;
+  if (srv_options == undefined) {
+    srv_options == (await NewsClient.instance.getOptions());
+  }
+
+  if (srv_options != undefined) {
+    ccaa.value = srv_options.ccaas;
+    engines.value = srv_options.engines;
+    sub_engines.value = srv_options.sub_engines;
+    if (srv_options.provincias) {
+      provs_data = srv_options.provincias;
+      all_provs = [];
+      Object.keys(provs_data).forEach((ca) => {
+        let tmp = provs_data[ca];
+        all_provs = all_provs.concat(tmp);
+      });
+      update_provs();
+    }
+  }
 });
 
 const emit = defineEmits<{
   stateChannged: [state: NewsPaperSelectorModel];
 }>();
 
-function onCcaaChanged(data: string | null) {
+function onCcaaChanged(data?: string) {
   state.value.ca = data;
-  state.value.provincia = null;
+  state.value.provincia = undefined;
   update_provs();
   emit("stateChannged", state.value);
 }
 
-function onProvinciaChanged(data: string | null) {
+function onProvinciaChanged(data?: string) {
   state.value.provincia = data;
   emit("stateChannged", state.value);
 }
 
-function onEngineChanged(data: string | null) {
+function onEngineChanged(data?: string) {
   state.value.engine = data;
   emit("stateChannged", state.value);
 }
 
-function onSubEngineChanged(data: string | null) {
+function onSubEngineChanged(data?: string) {
   state.value.sub_engine = data;
   emit("stateChannged", state.value);
 }

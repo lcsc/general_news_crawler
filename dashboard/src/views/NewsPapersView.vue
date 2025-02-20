@@ -7,13 +7,16 @@ import axios from "axios";
 import type { Header, Item } from "vue3-easy-data-table";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 
-const data = ref([]);
+import { NewsClient } from "../newsclient/newsclient";
+import type { NewsPaper } from "@/newsclient/hey";
+
+const data = ref<NewsPaper[]>([]);
 
 let state: NewsPaperSelectorModel = {
-  ca: null,
-  provincia: null,
+  ca: undefined,
+  provincia: undefined,
   engine: "bCube",
-  sub_engine: null,
+  sub_engine: undefined,
 };
 
 const headers: Header[] = [
@@ -30,71 +33,27 @@ const headers: Header[] = [
   { text: "Ultima Comprobacion", value: "last_check", sortable: true },
 ];
 
+async function update(state: NewsPaperSelectorModel) {
+  let client = NewsClient.instance;
+  let response = await client.listNewsPapers(state);
+
+  data.value = response;
+}
+
 async function onStateChanged(_state: NewsPaperSelectorModel) {
   state = _state;
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
-}
-
-async function onCcaaChanged(ca: string) {
-  state.ca = ca;
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
-}
-
-async function onProvinciaChanged(prov: string) {
-  state.provincia = prov;
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
-}
-async function onEngineChanged(engine: string) {
-  state.engine = engine;
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
-}
-async function onSubEngineChanged(sub_engine: string) {
-  state.sub_engine = sub_engine;
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
+  await update(state);
 }
 
 onMounted(async () => {
-  let response = await axios.get(buildUrl(state));
-  data.value = response.data;
+  update(state);
 });
 </script>
 
-<script lang="ts">
-function buildUrl(state: any) {
-  function add_param(url: string, param: string, value: string) {
-    if (value != null) {
-      if (url.indexOf("?") == -1) {
-        url += "?";
-      } else {
-        url += "&";
-      }
-      url += param + "=" + value;
-    }
-    return url;
-  }
-
-  let url = "/news/api/np/";
-  if (state.ca != null) {
-    url += state.ca + "/";
-  }
-  url = add_param(url, "engine", state.engine);
-  url = add_param(url, "sub_engine", state.sub_engine);
-
-  return url;
-}
-</script>
+<script lang="ts"></script>
 <template>
   <MDBContainer fluid>
     <NewsPaperSelector
-      @setCcaa="(ca:string) => onCcaaChanged(ca)"
-      @setProvincia="(engine:string) => onProvinciaChanged(engine)"
-      @setEngine="(engine:string) => onEngineChanged(engine)"
-      @setSubEngine="(engine:string) => onSubEngineChanged(engine)"
       @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
     />
   </MDBContainer>
