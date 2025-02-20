@@ -2,9 +2,14 @@
 from news_crawler.core.model.repos import CrawlerRepos
 from news_crawler.core.model.newspaper import NewsPaper
 
+from .models import BaseRequest
+
 from typing import List
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Query
+
+from typing import Annotated, Literal, Optional
+
 from pymongo import MongoClient
 import news_crawler.common.consts
 from news_crawler import initLogger 
@@ -28,12 +33,14 @@ def serialize_document(doc):
     #doc["_id"] = str(doc["_id"])
     return doc
 
-def build_query(ccaa:str=None,short_name:str=None,engine:str=None,sub_engine:str=None):
+
+def build_query(ccaa:str=None,provincia:str=None,query:BaseRequest=None):
     ret = {}
     if ccaa is not None: ret.update({"ccaa":ccaa})
-    if short_name is not None: ret.update({"short_name":short_name})
-    if engine is not None: ret.update({"engine.engine":engine})
-    if sub_engine is not None: ret.update({"engine.sub_engine":sub_engine})
+    if provincia is not None: ret.update({"provincia":provincia})
+    if query is not None:
+        if query.engine is not None: ret.update({"engine.engine":query.engine})
+        if query.sub_engine is not None: ret.update({"engine.sub_engine":query.sub_engine})
     return ret
 
 @app.get("/")
@@ -50,21 +57,36 @@ async def get_options():
             "sub_engines":news_crawler.common.consts.sub_engines}
 
 @api_np.get("/")
-async def get_newspapers(engine:str=None,sub_engine:str=None)->List[NewsPaper]:
-    query = build_query(engine=engine,sub_engine=sub_engine)
-    items = repos.newspaper.find_by(query)
+async def get_newspapers(query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
+    mongoQuery = build_query(query=query)
+    items = repos.newspaper.find_by(mongoQuery)
     return [serialize_document(item) for item in items]
 
 @api_np.get("/{ccaa}/")
-async def get_newspapers_ccaa(ccaa:str,engine:str=None,sub_engine:str=None)->List[NewsPaper]:
-    query = build_query(ccaa=ccaa, engine=engine,sub_engine=sub_engine)
-    print(f"  Searchin {query}")
-    items = repos.newspaper.find_by(query)
+async def get_newspapers_ccaa(ccaa:str,query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
+    mongoQuery = build_query(ccaa=ccaa, query=query)
+    LOG.info(f"  Searchin {mongoQuery}")
+    items = repos.newspaper.find_by(mongoQuery)
     return [serialize_document(item) for item in items]
 
-@api_np.get("/{ccaa}/{short_name}/")
-async def get_newspaper_ccaa_name(ccaa:str,short_name)->NewsPaper:
-    item = repos.newspaper.find_one_by({"ccaa":ccaa,"short_name":short_name})
+@api_np.get("/{ccaa}/{provincia}/")
+async def get_newspaper_ccaa_provincia(ccaa:str,provincia:str,query: Annotated[BaseRequest, Query()])->List[NewsPaper]:
+    LOG.info("Entrando")
+    mongoQuery=build_query(ccaa=ccaa,provincia=provincia,query=query)
+    LOG.info(f"  Searchin {mongoQuery}")
+    items = repos.newspaper.find_by(mongoQuery)
+    return [serialize_document(item) for item in items]
+
+@api_np.get("/{ccaa}/{provincia}/{short_name}/")
+async def get_newspaper_ccaa_name(ccaa:str,provincia:str,short_name:str)->Optional[NewsPaper]:
+    if provincia == '*':provincia=None
+    mongoQuery=build_query(ccaa=ccaa,provincia=provincia)
+    LOG.info(f"  Searchin {mongoQuery}")
+    
+    mongoQuery.update({"short_name":short_name})
+    item = repos.newspaper.find_one_by(mongoQuery)
     return serialize_document(item)
+
+
 
 app.include_router(api_np)

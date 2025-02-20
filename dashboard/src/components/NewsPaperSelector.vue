@@ -1,18 +1,11 @@
 <script setup lang="ts">
-import {
-  MDBDropdown,
-  MDBDropdownToggle,
-  MDBDropdownMenu,
-  MDBDropdownItem,
-} from "mdb-vue-ui-kit";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { default as DropDown } from "./DropDown.vue";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 
 const ccaa = ref([]);
-const ca = ref<string | null>("");
-const provincias = ref([]);
+const provincias = ref<string[]>([]);
 const engines = ref([]);
 const sub_engines = ref([]);
 const state = ref<NewsPaperSelectorModel>({
@@ -22,14 +15,14 @@ const state = ref<NewsPaperSelectorModel>({
   sub_engine: null,
 });
 
-let all_provs:{[ca:string]:[string]}
-let provs:[string]=[]
+let provs_data: { [ca: string]: [string] };
+let all_provs: string[] = [];
 
-function update_provs(){
-  if (state.value.ca==null){
-    provincias.value=provs
-  }else{
-    provincias.value=all_provs[state.value.ca]
+function update_provs() {
+  if (state.value.ca == null) {
+    provincias.value = all_provs;
+  } else {
+    provincias.value = provs_data[state.value.ca];
   }
 }
 
@@ -38,13 +31,13 @@ onMounted(async () => {
   ccaa.value = response.data.ccaas;
   engines.value = response.data.engines;
   sub_engines.value = response.data.sub_engines;
-  all_provs=response.data.provincias
-  provs  = []
-    Object.keys(all_provs).forEach((ca)=> {
-      let tmp = all_provs[ca];
-      provs = provs.concat(tmp);
-    });
-  update_provs()
+  provs_data = response.data.provincias;
+  all_provs = [];
+  Object.keys(provs_data).forEach((ca) => {
+    let tmp = provs_data[ca];
+    all_provs = all_provs.concat(tmp);
+  });
+  update_provs();
 });
 
 const emit = defineEmits<{
@@ -53,9 +46,8 @@ const emit = defineEmits<{
 
 function onCcaaChanged(data: string | null) {
   state.value.ca = data;
-  ca.value = data;
-  state.value.provincia=null;
-  update_provs()
+  state.value.provincia = null;
+  update_provs();
   emit("stateChannged", state.value);
 }
 
