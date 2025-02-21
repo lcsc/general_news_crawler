@@ -1,0 +1,2 @@
+curl https://raw.githubusercontent.com/codeforgermany/click_that_hood/refs/heads/main/public/data/spain-communities.geojson -o dashboard/src/assets/communities.geojson
+curl https://raw.githubusercontent.com/codeforgermany/click_that_hood/refs/heads/main/public/data/spain-provinces.geojson -o dashboard/src/assets/provinces.geojson
