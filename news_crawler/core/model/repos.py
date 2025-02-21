@@ -60,6 +60,8 @@ class CrawlerRepos:
                 if filename in files:
                     if isinstance(dateNewer,str):
                         dateNewer=datetime.fromisoformat(dateNewer)
+                    if dateNewer.tzinfo is None:
+                        dateNewer=dateNewer.replace(tzinfo=timezone.utc)
                     info = tar.getmember(filename)
                     mtime = datetime.fromtimestamp(info.mtime, tz=timezone.utc)
                     if dateNewer>mtime:

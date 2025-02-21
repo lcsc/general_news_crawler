@@ -3,6 +3,7 @@ from ...core.fetcher import NewsPaperExtractor
 import logging
 
 from ...bcube.fetcher import BCubePrensaIbericaExtractor
+from ...wordpress.fetcher import WordPressInfoExtractor
 
 LOG = logging.getLogger(__name__)
 
@@ -21,12 +22,19 @@ class ExtractCmd(CommonCmd):
         repos = self.connectMongo()
         basic_filter= self.buildFilterNewsPaper();
         LOG.info(f"Query to Mongo: {basic_filter}") 
-        candidates = repos.newspaper.find_by(basic_filter)
-        candidates = list(candidates)
-        LOG.info(f"Found {len(candidates)} NewsPapers")
+        args:ExtractArgs=self.args
         
-        extractor:NewsPaperExtractor = BCubePrensaIbericaExtractor(repos)
+        if args.sub_engine is None or args.sub_engine == "PrensaIberica":
+            extractor:NewsPaperExtractor = BCubePrensaIbericaExtractor(repos)
+            candidates = extractor.get_candidates(try_no_engine=args._tryUnknown,filter=basic_filter)
+            candidates = list(candidates)
+            LOG.info(f"Found {len(candidates)} NewsPapers")
 
-        extractor.extract_many(candidates)
-        
+            extractor.extract_many(candidates)
+        if args.sub_engine is None or args.sub_engine == "wp-json":
+            extractor:NewsPaperExtractor = WordPressInfoExtractor(repos)
+            candidates = extractor.get_candidates(try_no_engine=args._tryUnknown,filter=basic_filter)
+            candidates = list(candidates)
+            LOG.info(f"Found {len(candidates)} NewsPapers")
+            extractor.extract_many(candidates)
         pass

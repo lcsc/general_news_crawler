@@ -5,6 +5,11 @@ from ..model.repos import CrawlerRepos
 from ..model.engine import NewsPaperEngine
 from datetime import datetime,timezone
 from ...common.dates import delta_to_check, fecha_minima
+
+import logging
+LOG = logging.getLogger(__name__)
+
+
 class NewsArticleReaderContext():
     def __init__(self,news_paper:NewsPaper):
         self.news_paper:NewsPaper=news_paper
@@ -15,9 +20,9 @@ class NewsArticleReaderContext():
             self.articles[article.article_id]=article
         else:
             if article.article_url==self.articles[article.article_id].article_url: return
-            print ("****** ID Repetido ******")
-            print(article)
-            print(self.articles[article.article_id])
+            LOG.error("****** ID Repetido ******")
+            LOG.error(article)
+            LOG.error(self.articles[article.article_id])
     
     
     def getListArticles(self)->List[NewsArticle]:
@@ -107,38 +112,71 @@ class NewsPaperExtractor():
         self._subengine:str = None
         self._reader:NewsArticleReader = None
     
-    def get_no_engine(self):
-        return self._np_repos.newspaper.find_by({"engine":None,"real_url":{"$ne":None}})
+    def get_no_engine(self, filter:Dict[str,str]=None):
+        query = {}
+        if filter is not None:
+            query.update(filter)
+        if "engine.engine" in query: query.pop('engine.engine')
+        if "engine.sub_engine" in query: query.pop('engine.sub_engine')
+
+        query.update({"engine":None,"real_url":{"$ne":None}})
+        
+        LOG.debug(f" Quering no Engine: {query}")
+        return self._np_repos.newspaper.find_by(query)
     
-    def get_engine_no_subengine(self):
-        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.sub_engine":None})
+    def get_engine_no_subengine(self, filter:Dict[str,str]=None):
+
+        query = {}
+        if filter is not None:
+            query.update(filter)
+        if "engine.engine" in query: query.pop('engine.engine')
+        if "engine.sub_engine" in query: query.pop('engine.sub_engine')
+
+        query.update({"engine.engine":self._engine,"engine.sub_engine":None})
+        
+        LOG.debug(f" Quering no SubEngine: {query}")
+
+        return self._np_repos.newspaper.find_by(query)
     
-    def get_engine_subengine(self):
+    def get_engine_subengine(self, filter:Dict[str,str]=None):
         if self._subengine is None:
+            return []  
+
+        query = {}
+        if filter is not None:
+            query.update(filter)
+        if "engine.engine" in query: query.pop('engine.engine')
+        if "engine.sub_engine" in query: query.pop('engine.sub_engine')
+        
+        query.update({"engine.engine":self._engine,"engine.sub_engine":self._subengine})
+        
+        LOG.debug(f" Quering no Engine: {query}")
+        return self._np_repos.newspaper.find_by(query)
+    
+
+    def get_candidates(self,try_no_engine=True,try_no_subengine:bool=None, filter:Dict[str,str]=None)->List[NewsPaper]:
+        '''
+
+        '''
+
+        if filter is not None and "engine.sub_engine" in filter and filter["engine.sub_engine"] != self._subengine:
+            LOG.warning("Omiting get_candidates")
             return []
-        return self._np_repos.newspaper.find_by({"engine.engine":self._engine,"engine.sub_engine":self._subengine})
 
-    def get_candidates(self,try_no_engine=True,try_no_subengine:bool=None)->List[NewsPaper]:
-        '''
-
-        '''
-        if try_no_subengine is None: 
+        if try_no_subengine is  None: 
             try_no_subengine=try_no_engine
         
         ret = []
 
         if try_no_engine:
-            print("candidates <- no Engine")
-            ret.extend(self.get_no_engine())
+            ret.extend(self.get_no_engine(filter=filter))
 
         if self._engine is not None:
             if try_no_subengine:
-                print("candidates <- no Sub Engine")
-                ret.extend(self.get_engine_no_subengine())
+                ret.extend(self.get_engine_no_subengine(filter=filter))
             if self._subengine is not None:
-                print("candidates <- Detected")
-                ret.extend(self.get_engine_subengine())
-        print(f"candidates to check: {len(ret)}")
+                ret.extend(self.get_engine_subengine(filter=filter))
+        LOG.info(f"candidates to check: {len(ret)}")
         return ret
 
 
@@ -170,7 +208,7 @@ class NewsPaperExtractor():
         articles = self.extract_one(np)
         if articles is None:
             return False
-        print(f"  found {len(articles)} articles")
+        LOG.info(f"  found {len(articles)} articles")
         self._np_repos.articles.save_many(articles)
         if np.engine is None:
             np.engine=NewsPaperEngine(engine=self._engine,
@@ -185,7 +223,7 @@ class NewsPaperExtractor():
     def extract_many(self, cand:list[NewsPaper]):
         top = len(cand)
         for idx,np in enumerate(cand):
-            print(f"[{idx+1}/{top}] Checking \"{np.name}\"")
+            LOG.info(f"[{idx+1}/{top}] Checking \"{np.name}\"")
             if self.should_be_extracted(np):
                 try:
                     if self._process_one(np):
