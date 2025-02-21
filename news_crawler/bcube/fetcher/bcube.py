@@ -61,13 +61,13 @@ class BCubeExtractor(NewsPaperExtractor):
                                                            "cat_name":cat_name})
     
     def extract_one(self,np:NewsPaper)-> List[NewsArticle]:
-        print(f"\nextracting {np.short_name}")
+        LOG.info(f"extracting {np.short_name}")
         categories = self.get_categories(np)
         # Si no hay categorias, no es de este extractor
         if categories is None:
             return None
         
-        print(f"  found {len(categories)} categories")
+        LOG.info(f"  found {len(categories)} categories")
         ctx_gobal=BcubeArticleReaderContext(np,None)
         for cat in categories:
             try:
@@ -75,7 +75,7 @@ class BCubeExtractor(NewsPaperExtractor):
                 cat_articles = self.extract_one_category(np,cat)  
                 self._np_repos.bCubeCategories.save(cat)
                 if cat_articles is not None:
-                    print(f"  [{cat.cat_name}] found {len(cat_articles)} articles")
+                    LOG.info(f"  [{cat.cat_name}] found {len(cat_articles)} articles")
                     self._np_repos.articles.save_many(cat_articles)
                     for a in cat_articles:
                         ctx_gobal.addArticle(a)
@@ -92,10 +92,10 @@ class BCubeExtractor(NewsPaperExtractor):
         for arti in articles:
             if not isValidDay(arti.date): continue
             if "category" not in arti.engine_data:
-                print("****** ERROR ****")
-                print("  Articulo sin categoria")
-                print(arti.model_dump())
-                print("****** ERROR ****")
+                LOG.error("****** ERROR ****")
+                LOG.error("  Articulo sin categoria")
+                LOG.error(arti.model_dump())
+                LOG.error("****** ERROR ****")
                 continue
             cat_data = cats[arti.engine_data["category"]]
             cat:BcubeCategory = cat_data["cat"]
@@ -143,7 +143,7 @@ class BCubeExtractor(NewsPaperExtractor):
         np.n_articulos=n_articles
 
     def fill_stats(self, np:NewsPaper):
-        print(f"Computing stats of {np.short_name} - {np.ccaa}")
+        LOG.info(f"Computing stats of {np.short_name} - {np.ccaa}")
         cats:List[BcubeCategory] = self._np_repos.bCubeCategories.find_by({"ccaa":np.ccaa,
                                                            "short_name":np.short_name})
         cats={c.cat_name: {"cat":c, "months":{}} for c in cats}

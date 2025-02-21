@@ -10,6 +10,10 @@ from ..common.tools import connect_mongo, get_server_name_from_url,get_short_nam
 from ..wordpress.fetcher.wordpress import WordPressInfoExtractor
 import time 
 
+import logging
+
+LOG = logging.getLogger(__name__)
+
 client = connect_mongo()
 
 database = client["general_news"]
@@ -19,15 +23,17 @@ repos = CrawlerRepos().connect(database)
 newsRepo:NewsPaperRepository = repos.newspaper
 bCubePiMdRepo:BcubePiMDRepository = repos.bCubePiMd
 
+
+
 def get_newspapers():
     app_pd = PrensaDigitalLister(repo=newsRepo)
     list = app_pd.get_newspapers()
-    print (f"found {len(list)} ")
+    LOG.info (f"found {len(list)} ")
     app_pd.store_newspapers(list)
     
     app_pe = PrensaEscritaLister(repo=newsRepo)
     list = app_pe.get_newspapers()
-    print (f"found {len(list)} ")
+    LOG.info (f"found {len(list)} ")
     app_pe.store_newspapers(list)
 
 def detect_newspapers():
@@ -39,12 +45,12 @@ def detect_hoy():
     #hoy = app_detectors._repo.find_one_by({"short_name":"hoy"})
     #hoy = app_detectors._repo.find_one_by({"short_name":"elmon"})
     hoy = app_detectors._repo.find_one_by({"short_name":"diariocostadelsol"})
-    print(app_detectors.detect_one(hoy))
+    LOG.info(app_detectors.detect_one(hoy))
 
 def fetch_bcube_prensa_iberica():
     fetcher = BCubePrensaIbericaExtractor(repos=repos)
     hoy = newsRepo.find_one_by({"short_name":"elcorreoweb"})
-    #print(f"Should be checked: {fetcher.should_be_extracted(hoy)}")
+    #LOG.info(f"Should be checked: {fetcher.should_be_extracted(hoy)}")
     #fetcher._process_one(hoy)
     #fetcher.fill_stats(hoy)
     fetcher.extract_all()
@@ -56,7 +62,7 @@ def fetch_wordpress_info():
     #np = newsRepo.find_one_by({"short_name":"eitb"})
     fetcher._process_one(np)
     fetcher.fill_stats(np)
-    #print(np)
+    #LOG.info(np)
     #fetcher.extract_all(try_no_engine=False)
 
 
@@ -92,27 +98,27 @@ def build_provs():
             ccaas[ca].append(prov)
     
 
-    #print(ccaas)
+    #LOG.info(ccaas)
     
     # for ca in ccaas:
     #     for p in ccaas[ca]:
-    #         print(f"'{p}':'{getProvName(p)}'")
+    #         LOG.info(f"'{p}':'{getProvName(p)}'")
     
     # return
     
-    print ("{")
+    LOG.info ("{")
     for ca in ccaas:
         provs= ccaas[ca]
         if len(provs)==0:
-            print(f"  '{ca}':['{ca}'],")    
+            LOG.info(f"  '{ca}':['{ca}'],")    
         elif len(provs)==1:
-            print(f"  '{ca}':['{provs[0]}'],")    
+            LOG.info(f"  '{ca}':['{provs[0]}'],")    
         else:
-            print(f"  '{ca}':[")
+            LOG.info(f"  '{ca}':[")
             for p in provs:
-                print(f"    '{p}',")
-            print("  ],")
-    print ("}")
+                LOG.info(f"    '{p}',")
+            LOG.info("  ],")
+    LOG.info ("}")
 
 
 
@@ -131,23 +137,23 @@ def main() -> int:
 
     #pd = PrensaDigitalLister(repos.newspaper)
     #urls = pd.listUrls()
-    #print(urls)
+    #LOG.info(urls)
     
     #https://prensadigital.com/
-    # print("{")
+    # LOG.info("{")
     # for ca in urls:
-    #     print(f"  '{ca}':{{")
+    #     LOG.info(f"  '{ca}':{{")
     #     for prov in urls[ca]:
-    #         print(f"    '{prov}':'https://prensadigital.com{urls[ca][prov]}',")
-    #     print("  },")
-    # print("}")
+    #         LOG.info(f"    '{prov}':'https://prensadigital.com{urls[ca][prov]}',")
+    #     LOG.info("  },")
+    # LOG.info("}")
 
-    print(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
+    LOG.info(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
     return exit_code
 
-    print("{")
+    LOG.info("{")
 if __name__ == "__main__":
     start = time.time() 
     main()
     end = time.time() 
-    print("Execution time: ",end - start) 
+    LOG.info("Execution time: ",end - start) 

@@ -161,7 +161,7 @@ class NewsPaperLister():
 
     def _merge_newspaper(self, in_db:NewsPaper):
         #if len(in_db.lister_info)>1:
-        #    print(f"WARNING: {in_db.short_name} has more than one lister info:\n{in_db}\n")
+        #    Log.info(f"WARNING: {in_db.short_name} has more than one lister info:\n{in_db}\n")
         in_db.name = self._select_field(self._get_field("name",in_db),PRENSA_DIGITAL)
         in_db.provincia = self._select_field(self._get_field("provincia",in_db),PRENSA_ESCRITA)
         in_db.city = self._select_field(self._get_field("city",in_db),PRENSA_ESCRITA)

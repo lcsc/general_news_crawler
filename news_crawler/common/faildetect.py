@@ -3,6 +3,9 @@ from urllib3.exceptions import ProtocolError, SSLError
 from http.client import RemoteDisconnected
 import ssl
 
+import logging
+LOG = logging.getLogger(__name__)
+
 def check_fail(error:Exception):
     if isinstance(error,requests.ConnectionError):
         if isinstance(error.__context__, ProtocolError):
@@ -11,11 +14,11 @@ def check_fail(error:Exception):
         cause=error.__context__.__cause__
         
         if cause is None:
-            print ("   No cause: "+str(error))
+            LOG.debug ("   No cause: "+str(error))
             return "Generic Error, cuase is None"    
-        #print(cause)
+        #LOG.debug(cause)
         if cause.__cause__ is not None and isinstance(cause.__cause__,OSError):
-            print ("   OS: "+str(cause))
+            LOG.debug ("   OS: "+str(cause))
             return "OS "+str(cause.__cause__)
         if isinstance(cause,SSLError):
             if isinstance(cause.__context__, ssl.SSLCertVerificationError):
@@ -23,10 +26,10 @@ def check_fail(error:Exception):
             if isinstance(cause.__context__, ssl.SSLEOFError):
                 return "SSL EOF (No HTTPS??)"
             
-        print (str(cause))
-        print ("   General cause: "+str(error))
+        LOG.debug (str(cause))
+        LOG.debug ("   General cause: "+str(error))
         return "Generic Error, cuase not checked"
-    print ("   Gen Error: "+str(error))
-    print (str(error))
+    LOG.debug ("   Gen Error: "+str(error))
+    LOG.debug (str(error))
 
     return "Generic Error, not checked"

@@ -89,19 +89,12 @@ class NewsPaperDetector():
                 if not newsPaper.real_url.endswith("/"):
                     newsPaper.real_url=newsPaper.real_url+"/"
 
-                #print(f"  URL {url} -> {response.url}")
                 return state
                
             if response is not None:
                 # if response.status_code == 403:
-                #     print("### 403 ###")
-                #     print(f" URL {url}")
-                #     print(response.request.headers)
-                #     print()
-                #     print(f"  URL {url} -> {response.headers}")
-                #     print()
-                #     print(response.text)
-                #     print("### 403 ###")
+                #     ("### 403 ###")
+                
                 errors[url] = f"Code: {response.status_code}"
             if fail is not None:
                 errors[url] = fail

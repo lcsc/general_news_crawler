@@ -33,7 +33,6 @@ def get_server_name_from_url(url:str):
 
 
 def get_short_name_from_server_name(server_name:str):
-    #print(server_name)
     ret = server_name.removeprefix("www.")
     ret = ret.split(".")
     ret = ret[:-1] 

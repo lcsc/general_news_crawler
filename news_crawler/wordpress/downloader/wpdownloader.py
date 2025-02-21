@@ -54,7 +54,7 @@ class WpArticleReader(NewsArticleReader):
         if not isValidDay(date):
             date=data["modified_gmt"]
         if not isValidDay(date):
-            print(f"WARN: El articulo {article_id} no tiene fechas validas")
+            LOG.warning(f"WARN: El articulo {article_id} no tiene fechas validas")
 
         ret = self.createOrUpdateArticle(np=np,
                                          article_id=article_id,
@@ -81,7 +81,7 @@ class WpDownlader():
         try:
             return int(n)
         except Exception as e:
-            print(f"WARN \"{n}\" is not a number ")
+            LOG.warning(f"WARN \"{n}\" is not a number ")
         return None
     
     def _do_wp_get_url(self,

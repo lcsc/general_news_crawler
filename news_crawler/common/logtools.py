@@ -11,7 +11,7 @@ console.setFormatter(logging.Formatter("[%(levelname)s]: %(message)s"))
 log.addHandler(console)
 
 def initLogger():
-    print("Initalizing Loggin")
+    log.info("Initalizing Loggin")
 
 def updateLogger():
     console.setFormatter(logging.Formatter("[%(processName)s][%(levelname)s]: %(message)s"))
