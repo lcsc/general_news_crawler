@@ -22,6 +22,7 @@
   <main>
     <RouterView />
   </main>
+  <footer>Texto footer</footer>
 </template>
 
 <script setup lang="ts">

@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import type { Feature } from "ol";
-import type { FeatureLike } from "ol/Feature";
-import type { Geometry } from "ol/geom";
+import { Feature, type Map as OlMap, type MapBrowserEvent } from "ol";
 import { fromLonLat } from "ol/proj";
-import { Fill, Stroke, Style } from "ol/style";
-import { inject, provide } from "vue";
+import { inject, onMounted, provide, ref } from "vue";
 import {
   Map,
   Layers,
@@ -14,43 +11,58 @@ import {
   Interactions,
 } from "vue3-openlayers";
 
+import type { SelectEvent } from "ol/interaction/Select";
+import type { Coordinate } from "ol/coordinate";
+
+
+const selectConditions = inject("ol-selectconditions");
+const format = inject("ol-format");
+
+const selectCondition = selectConditions.pointerMove;
+const selectedFeature = ref<Feature|null>(null);
+const geoJson = new format.GeoJSON();
 const options: Vue3OpenlayersGlobalOptions = {
   debug: false,
 };
-const selectConditions = inject("ol-selectconditions");
 
-const selectCondition = selectConditions.pointerMove;
+const tooltipCoord = ref<Coordinate | null>(null);
+const map = ref<{ map: OlMap } | null>(null);
 
 const featureSelected = (event: SelectEvent) => {
+  let selectedArray= event.selected
+  if (selectedArray.length ==0){
+    selectedFeature.value=null;
+  }else{
+    selectedFeature.value=selectedArray[0];
+  }
+
   //console.log(event);
 };
 
 const selectInteactionFilter = (feature: Feature) => {
-  console.log(feature);
+  //console.log(feature);
   return feature.get("name") != undefined;
 };
 
-function styleFn(feature: FeatureLike, style: Style) {
-  if (style == null) {
-    throw new Error("No esperado");
+function getMouseCoords(evt: MapBrowserEvent<PointerEvent>){
+  if (evt.dragging) {
+    return;
   }
-  let text = style.getText();
-  if (text == null) {
-    console.error("no text");
-  } else {
-    text.setText(feature.get("noml_ccaa"));
-  }
-
-  return style;
+  tooltipCoord.value = evt.coordinate
 }
 
-const format = inject("ol-format");
-
-const geoJson = new format.GeoJSON();
-import markerIcon from "@/assets/marker.png";
-import type { SelectEvent } from "ol/interaction/Select";
+function onMapClick(){
+  if(selectedFeature.value!=null){
+    alert("Click on "+ selectedFeature.value.get("name"))
+  }
+}
 
 provide("ol-options", options);
+
+onMounted(() => {
+  map.value?.map.on("pointermove", getMouseCoords);
+  map.value?.map.on("click",onMapClick);
+});
 </script>
 
 <template>
@@ -70,32 +82,36 @@ provide("ol-options", options);
         <Sources.OlSourceOsm />
       </Layers.OlTileLayer>
 
+      <Map.OlOverlay
+        v-if="selectedFeature && tooltipCoord"
+        :position="tooltipCoord"
+        :offset="[0, -5]"
+        positioning="bottom-center"
+        :stopEvent="false"
+        :insertFirst="false"
+      >
+        <div class="tooltip">
+          {{ selectedFeature.get("name") }}
+        </div>
+      </Map.OlOverlay>
+
       <Interactions.OlInteractionSelect
         @select="featureSelected"
         :condition="selectCondition"
         :filter="selectInteactionFilter"
       >
-        <Styles.OlStyle :overrideStyleFunction="styleFn">
-          <Styles.OlStyleStroke color="green" :width="4"></Styles.OlStyleStroke>
-          <Styles.OlStyleFill color="rgba(255,0,0,0.5)"></Styles.OlStyleFill>
-          <Styles.OlStyleText
-            color="rgba(255,255,255,0.5)"
-          ></Styles.OlStyleText>
+        <Styles.OlStyle>
+          <Styles.OlStyleStroke color="white" :width="4"></Styles.OlStyleStroke>
+          <Styles.OlStyleFill color="rgba(255,255,64,0.5)"></Styles.OlStyleFill>
         </Styles.OlStyle>
       </Interactions.OlInteractionSelect>
+
+
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector
-          url="src/assets/communities.geojson"
-          :format="geoJson"
-        >
+        <Sources.OlSourceVector url="src/assets/communities.geojson" :format="geoJson">
           <Styles.OlStyle>
-            <Styles.OlStyleStroke
-              color="gray"
-              :width="2"
-            ></Styles.OlStyleStroke>
-            <Styles.OlStyleFill
-              color="rgba(255,255,255,0.1)"
-            ></Styles.OlStyleFill>
+            <Styles.OlStyleStroke color="gray" :width="2"></Styles.OlStyleStroke>
+            <Styles.OlStyleFill color="rgba(255,255,255,0.1)"></Styles.OlStyleFill>
           </Styles.OlStyle>
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
@@ -105,6 +121,19 @@ provide("ol-options", options);
 
 <style scoped>
 .mapa {
-  height: 600px;
+   /* height: 600px; */
+   height: 100%;
 }
+.tooltip {
+    position: relative;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    color: white;
+    padding: 4px 8px;
+    opacity: 0.7;
+    white-space: nowrap;
+    font-size: 12px;
+    cursor: default;
+    user-select: none;
+  }
 </style>
