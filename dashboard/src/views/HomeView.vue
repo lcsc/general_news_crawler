@@ -31,13 +31,9 @@ const map = ref<{ map: OlMap } | null>(null);
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
   if (selectedArray.length == 0) {
-    setTimeout(() => {
-      selectedFeature.value = null;
-    });
+    selectedFeature.value = null;
   } else {
-    setTimeout(() => {
-      selectedFeature.value = selectedArray[0];
-    });
+    selectedFeature.value = selectedArray[0];
   }
   //event.
   //console.log(event);
@@ -48,32 +44,28 @@ const selectInteactionFilter = (feature: Feature) => {
   return feature.get("name") != undefined;
 };
 
-function getMouseCoords(evt: MapBrowserEvent<PointerEvent>) {
-  if (evt.dragging) {
-    return;
-  }
-
-  tooltipCoord.value = evt.coordinate;
-}
-
-function onMapClick() {
+function onMapClick(evt: MapBrowserEvent<UIEvent>) {
   if (selectedFeature.value != null) {
     alert("Click on " + selectedFeature.value.get("name"));
   }
 }
 
-const log = (type: string, event: MapBrowserEvent<UIEvent>) => {
-  setTimeout(() => {
-    tooltipCoord.value = event.coordinate;
-  });
+const getCoord = (event: MapBrowserEvent<UIEvent>) => {
+  if (event.dragging) {
+    return;
+  }
+  tooltipCoord.value = event.coordinate;
 };
 
 provide("ol-options", options);
 
 onMounted(() => {
-  //map.value?.map.on("pointermove", getMouseCoords);
+  map.value?.map.on("pointermove", getCoord);
   //map.value?.map.on("click", onMapClick);
 });
+
+const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
+const mapZoom = ref(6);
 </script>
 
 <template>
@@ -83,29 +75,26 @@ onMounted(() => {
       class="mapa"
       :style="{ height: mainSize + 'px' }"
       id="map"
+      @click="onMapClick"
     >
-      <Map.OlView
-        :center="fromLonLat([-3.7038, 40.4168], 'EPSG:4326')"
-        :zoom="6"
-        projection="EPSG:4326"
-      />
+      <Map.OlView :center="mapCenter" :zoom="mapZoom" projection="EPSG:4326" />
       <Layers.OlTileLayer>
         <Sources.OlSourceOsm />
       </Layers.OlTileLayer>
 
       <Map.OlOverlay
-        v-if="tooltipCoord"
+        v-if="tooltipCoord && selectedFeature"
         :position="tooltipCoord"
         :offset="[0, -5]"
         positioning="bottom-center"
-        :stopEvent="true"
-        :insertFirst="true"
+        :stopEvent="false"
+        :insertFirst="false"
       >
-        <div class="tooltip">selectedFeature.get("name")</div>
+        <div class="tooltip">{{ selectedFeature.get("name") }}</div>
       </Map.OlOverlay>
 
-      <Interactions.OlInteractionPointer @move="log('⬆️ up', $event)">
-      </Interactions.OlInteractionPointer>
+      <!-- <Interactions.OlInteractionPointer @move="getCoord($event)"> 
+      </Interactions.OlInteractionPointer>-->
 
       <Interactions.OlInteractionSelect
         @select="featureSelected"
