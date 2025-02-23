@@ -1,9 +1,11 @@
 <template>
-  <header>
+  <header ref="refHeader">
     <div>Aqui iran imagenes</div>
     <MDBNavbar expand="lg" light bg="white" container>
-      <MDBNavbarBrand >
-        <router-link class="navbar-brand" to="/">News Crawler</router-link></MDBNavbarBrand
+      <MDBNavbarBrand>
+        <router-link class="navbar-brand" to="/"
+          >News Crawler</router-link
+        ></MDBNavbarBrand
       >
       <MDBNavbarToggler
         target="#navbarExample01"
@@ -19,10 +21,10 @@
       </MDBCollapse>
     </MDBNavbar>
   </header>
-  <main>
+  <main ref="refMain" :style="{ height: mainSize + 'px' }">
     <RouterView />
   </main>
-  <footer>Texto footer</footer>
+  <footer ref="refFoot">Texto footer</footer>
 </template>
 
 <script setup lang="ts">
@@ -34,7 +36,7 @@ import {
   MDBNavbarItem,
   MDBNavbarNav,
 } from "mdb-vue-ui-kit";
-import { ref } from "vue";
+import { inject, onBeforeUnmount, onMounted, ref } from "vue";
 
 const collapse1 = ref(false);
 const dropdown1 = ref(false);
@@ -43,6 +45,28 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
+
+const refHeader = ref<HTMLElement | null>(null);
+const refMain = ref<HTMLElement | null>(null);
+const refFoot = ref<HTMLElement | null>(null);
+const mainSize = inject("mainSize");
+
+function handleWindowSizeChange() {
+  console.log("on resize");
+  const headerSize = refHeader.value?.clientHeight;
+  const footSize = refFoot.value?.clientHeight;
+  const windowSize = refHeader.value?.parentElement?.clientHeight;
+  mainSize.value = windowSize - headerSize - footSize;
+  console.log(mainSize);
+}
+
+onMounted(() => {
+  window.addEventListener("resize", handleWindowSizeChange);
+  handleWindowSizeChange();
+});
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleWindowSizeChange);
+});
 </script>
 
 <script lang="ts">
@@ -55,5 +79,6 @@ export default {
 <style>
 #app {
   font-family: Roboto, Helvetica, Arial, sans-serif;
+  height: 100vh;
 }
 </style>

@@ -14,12 +14,12 @@ import {
 import type { SelectEvent } from "ol/interaction/Select";
 import type { Coordinate } from "ol/coordinate";
 
-
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
+const mainSize = inject("mainSize");
 
 const selectCondition = selectConditions.pointerMove;
-const selectedFeature = ref<Feature|null>(null);
+const selectedFeature = ref<Feature | null>(null);
 const geoJson = new format.GeoJSON();
 const options: Vue3OpenlayersGlobalOptions = {
   debug: false,
@@ -29,13 +29,17 @@ const tooltipCoord = ref<Coordinate | null>(null);
 const map = ref<{ map: OlMap } | null>(null);
 
 const featureSelected = (event: SelectEvent) => {
-  let selectedArray= event.selected
-  if (selectedArray.length ==0){
-    selectedFeature.value=null;
-  }else{
-    selectedFeature.value=selectedArray[0];
+  let selectedArray = event.selected;
+  if (selectedArray.length == 0) {
+    setTimeout(() => {
+      selectedFeature.value = null;
+    });
+  } else {
+    setTimeout(() => {
+      selectedFeature.value = selectedArray[0];
+    });
   }
-
+  //event.
   //console.log(event);
 };
 
@@ -44,24 +48,31 @@ const selectInteactionFilter = (feature: Feature) => {
   return feature.get("name") != undefined;
 };
 
-function getMouseCoords(evt: MapBrowserEvent<PointerEvent>){
+function getMouseCoords(evt: MapBrowserEvent<PointerEvent>) {
   if (evt.dragging) {
     return;
   }
-  tooltipCoord.value = evt.coordinate
+
+  tooltipCoord.value = evt.coordinate;
 }
 
-function onMapClick(){
-  if(selectedFeature.value!=null){
-    alert("Click on "+ selectedFeature.value.get("name"))
+function onMapClick() {
+  if (selectedFeature.value != null) {
+    alert("Click on " + selectedFeature.value.get("name"));
   }
 }
+
+const log = (type: string, event: MapBrowserEvent<UIEvent>) => {
+  setTimeout(() => {
+    tooltipCoord.value = event.coordinate;
+  });
+};
 
 provide("ol-options", options);
 
 onMounted(() => {
-  map.value?.map.on("pointermove", getMouseCoords);
-  map.value?.map.on("click",onMapClick);
+  //map.value?.map.on("pointermove", getMouseCoords);
+  //map.value?.map.on("click", onMapClick);
 });
 </script>
 
@@ -70,7 +81,7 @@ onMounted(() => {
     <Map.OlMap
       ref="map"
       class="mapa"
-      style="min-width: 400px; min-height: 400px"
+      :style="{ height: mainSize + 'px' }"
       id="map"
     >
       <Map.OlView
@@ -83,17 +94,18 @@ onMounted(() => {
       </Layers.OlTileLayer>
 
       <Map.OlOverlay
-        v-if="selectedFeature && tooltipCoord"
+        v-if="tooltipCoord"
         :position="tooltipCoord"
         :offset="[0, -5]"
         positioning="bottom-center"
-        :stopEvent="false"
-        :insertFirst="false"
+        :stopEvent="true"
+        :insertFirst="true"
       >
-        <div class="tooltip">
-          {{ selectedFeature.get("name") }}
-        </div>
+        <div class="tooltip">selectedFeature.get("name")</div>
       </Map.OlOverlay>
+
+      <Interactions.OlInteractionPointer @move="log('⬆️ up', $event)">
+      </Interactions.OlInteractionPointer>
 
       <Interactions.OlInteractionSelect
         @select="featureSelected"
@@ -106,12 +118,19 @@ onMounted(() => {
         </Styles.OlStyle>
       </Interactions.OlInteractionSelect>
 
-
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector url="src/assets/communities.geojson" :format="geoJson">
+        <Sources.OlSourceVector
+          url="src/assets/communities.geojson"
+          :format="geoJson"
+        >
           <Styles.OlStyle>
-            <Styles.OlStyleStroke color="gray" :width="2"></Styles.OlStyleStroke>
-            <Styles.OlStyleFill color="rgba(255,255,255,0.1)"></Styles.OlStyleFill>
+            <Styles.OlStyleStroke
+              color="gray"
+              :width="2"
+            ></Styles.OlStyleStroke>
+            <Styles.OlStyleFill
+              color="rgba(255,255,255,0.1)"
+            ></Styles.OlStyleFill>
           </Styles.OlStyle>
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
@@ -121,19 +140,20 @@ onMounted(() => {
 
 <style scoped>
 .mapa {
-   /* height: 600px; */
-   height: 100%;
+  /* height: 600px; */
+  min-width: 400px;
+  min-height: 400px;
 }
 .tooltip {
-    position: relative;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 4px;
-    color: white;
-    padding: 4px 8px;
-    opacity: 0.7;
-    white-space: nowrap;
-    font-size: 12px;
-    cursor: default;
-    user-select: none;
-  }
+  position: relative;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  color: white;
+  padding: 4px 8px;
+  opacity: 0.7;
+  white-space: nowrap;
+  font-size: 12px;
+  cursor: default;
+  user-select: none;
+}
 </style>
