@@ -81,4 +81,7 @@ export default {
   font-family: Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
 }
+main {
+  overflow: hidden;
+}
 </style>

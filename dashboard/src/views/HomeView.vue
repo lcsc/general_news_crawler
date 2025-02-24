@@ -14,6 +14,9 @@ import {
 import type { SelectEvent } from "ol/interaction/Select";
 import type { Coordinate } from "ol/coordinate";
 
+
+import ccaaUrl from '../assets/communities.geojson?url'
+
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
 const mainSize = inject("mainSize");
@@ -27,6 +30,9 @@ const options: Vue3OpenlayersGlobalOptions = {
 
 const tooltipCoord = ref<Coordinate | null>(null);
 const map = ref<{ map: OlMap } | null>(null);
+const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
+const mapZoom = ref(6);
+
 
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
@@ -63,15 +69,6 @@ onMounted(() => {
   map.value?.map.on("pointermove", getCoord);
   //map.value?.map.on("click", onMapClick);
 });
-
-const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
-const mapZoom = ref(6);
-
-//const ccaa_url =import('../assets/communities.geojson')
-//:url="import('../assets/communities.geojson')"
-//url="src/assets/communities.geojson"
-import ccaaUrl from '../assets/communities.geojson?url'
-console.log("url: "+ccaaUrl)
 
 
 </script>

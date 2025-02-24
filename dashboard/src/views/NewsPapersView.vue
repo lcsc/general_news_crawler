@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { inject, onMounted, ref } from "vue";
 
 import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vue";
 import { MDBContainer } from "mdb-vue-ui-kit";
@@ -33,6 +33,8 @@ const headers: Header[] = [
   { text: "Ultima Comprobacion", value: "last_check", sortable: true },
 ];
 
+const mainSize = inject("mainSize");
+
 async function update(state: NewsPaperSelectorModel) {
   let client = NewsClient.instance;
   let response = await client.listNewsPapers(state);
@@ -52,16 +54,19 @@ onMounted(async () => {
 
 <script lang="ts"></script>
 <template>
-  <MDBContainer fluid>
-    <NewsPaperSelector
-      @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
-    />
-  </MDBContainer>
-  <MDBContainer fluid>
+  <div :style="{ height: mainSize + 'px' }" class="overflow-auto">
+    <MDBContainer fluid>
+      <NewsPaperSelector
+        @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
+      />
+    </MDBContainer>
+
     <EasyDataTable :headers="headers" :items="data" alternating>
       <template #item-real_url="item">
         <a :href="item.real_url" target="_blank">{{ item.real_url }}</a>
       </template>
     </EasyDataTable>
-  </MDBContainer>
+  </div>
 </template>
+
+<style></style>
