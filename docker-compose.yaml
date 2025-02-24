@@ -37,6 +37,8 @@ services:
     ports:
       - 5000:5000
     restart: unless-stopped
+    volumes:
+      - ./data:/app/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.news_api.rule=PathPrefix(`/news/api`)"

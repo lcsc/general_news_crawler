@@ -23,6 +23,7 @@ RUN poetry install
 
 COPY news_crawler /app/news_crawler
 COPY news_api /app/news_api
+RUN pip install -e /app
 
 CMD ["uvicorn","--host","0.0.0.0","--port", "5000","--forwarded-allow-ips","*", "news_api.main:app"]
 

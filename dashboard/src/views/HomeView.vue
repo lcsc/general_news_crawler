@@ -66,8 +66,15 @@ onMounted(() => {
 
 const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
 const mapZoom = ref(6);
-</script>
 
+//const ccaa_url =import('../assets/communities.geojson')
+//:url="import('../assets/communities.geojson')"
+//url="src/assets/communities.geojson"
+import ccaaUrl from '../assets/communities.geojson?url'
+console.log("url: "+ccaaUrl)
+
+
+</script>
 <template>
   <div>
     <Map.OlMap
@@ -96,20 +103,9 @@ const mapZoom = ref(6);
       <!-- <Interactions.OlInteractionPointer @move="getCoord($event)"> 
       </Interactions.OlInteractionPointer>-->
 
-      <Interactions.OlInteractionSelect
-        @select="featureSelected"
-        :condition="selectCondition"
-        :filter="selectInteactionFilter"
-      >
-        <Styles.OlStyle>
-          <Styles.OlStyleStroke color="white" :width="4"></Styles.OlStyleStroke>
-          <Styles.OlStyleFill color="rgba(255,255,64,0.5)"></Styles.OlStyleFill>
-        </Styles.OlStyle>
-      </Interactions.OlInteractionSelect>
-
       <Layers.OlVectorLayer>
         <Sources.OlSourceVector
-          url="src/assets/communities.geojson"
+          :url="ccaaUrl"
           :format="geoJson"
         >
           <Styles.OlStyle>
@@ -123,6 +119,17 @@ const mapZoom = ref(6);
           </Styles.OlStyle>
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>
+
+      <Interactions.OlInteractionSelect
+        @select="featureSelected"
+        :condition="selectCondition"
+        :filter="selectInteactionFilter"
+      >
+        <Styles.OlStyle>
+          <Styles.OlStyleStroke color="white" :width="4"></Styles.OlStyleStroke>
+          <Styles.OlStyleFill color="rgba(255,255,64,0.5)"></Styles.OlStyleFill>
+        </Styles.OlStyle>
+      </Interactions.OlInteractionSelect>
     </Map.OlMap>
   </div>
 </template>
