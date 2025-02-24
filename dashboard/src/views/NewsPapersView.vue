@@ -2,8 +2,7 @@
 import { inject, onMounted, ref } from "vue";
 
 import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vue";
-import { MDBContainer } from "mdb-vue-ui-kit";
-import axios from "axios";
+
 import type { Header, Item } from "vue3-easy-data-table";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 
@@ -55,11 +54,10 @@ onMounted(async () => {
 <script lang="ts"></script>
 <template>
   <div :style="{ height: mainSize + 'px' }" class="overflow-auto">
-    <MDBContainer fluid>
       <NewsPaperSelector
         @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
       />
-    </MDBContainer>
+
 
     <EasyDataTable :headers="headers" :items="data" alternating>
       <template #item-real_url="item">

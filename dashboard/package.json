@@ -11,13 +11,14 @@
     "gen-client": "openapi-ts"
   },
   "dependencies": {
-    "@handsontable/vue3": "^15.0.0",
     "@hey-api/client-axios": "^0.6.1",
+    "@primeuix/themes": "^1.0.0-rc.1",
     "axios": "^1.7.9",
-    "mdb-vue-ui-kit": "^6.0.0",
     "ol": "^10.4.0",
     "ol-contextmenu": "^5.5.0",
     "ol-ext": "^4.0.27",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.2.5",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "vue3-easy-data-table": "^1.5.47",

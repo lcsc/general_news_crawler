@@ -1,10 +1,4 @@
 <script setup lang="ts">
-import {
-  MDBDropdown,
-  MDBDropdownToggle,
-  MDBDropdownMenu,
-  MDBDropdownItem,
-} from "mdb-vue-ui-kit";
 import { ref, onMounted } from "vue";
 
 const drop = ref(false);
@@ -15,7 +9,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <MDBDropdown v-model="drop">
+  <!-- <MDBDropdown v-model="drop">
     <MDBDropdownToggle @click="drop = !drop">
       {{ caption }}
     </MDBDropdownToggle>
@@ -35,5 +29,5 @@ const emit = defineEmits<{
         >{{ option }}</MDBDropdownItem
       >
     </MDBDropdownMenu>
-  </MDBDropdown>
+  </MDBDropdown> -->
 </template>
