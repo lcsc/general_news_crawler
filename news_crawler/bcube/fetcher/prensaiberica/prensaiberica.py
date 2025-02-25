@@ -8,10 +8,8 @@ from ...tools.pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,p
 from ..bcube import BCubeExtractor,BcubeArticleReaderContext
 from ....core.model.repos import CrawlerRepos
 from ...model.bcube import BcubeCategory
-from datetime import datetime
-from ....common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
+from ....common.consts import SUBENGINE_ID_bc_PrensaIberica
 import sys
-import time
 
 from ...downloader.prensaiberica import BcubePiArticleReader,BcubePiDownloader
 

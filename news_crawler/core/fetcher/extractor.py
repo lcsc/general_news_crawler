@@ -1,5 +1,5 @@
 from ..model.newspaper import NewsPaper,NewsArticle
-from typing import List,Dict
+from typing import List,Dict, Optional
 from ...common.tools import print_exception
 from ..model.repos import CrawlerRepos
 from ..model.engine import NewsPaperEngine
@@ -14,6 +14,7 @@ class NewsArticleReaderContext():
     def __init__(self,news_paper:NewsPaper):
         self.news_paper:NewsPaper=news_paper
         self.articles:Dict[str,NewsArticle]={}
+        self.lastFound:Optional[List[NewsArticle]]=None
 
     def addArticle(self,article:NewsArticle):
         if article.article_id not in self.articles:

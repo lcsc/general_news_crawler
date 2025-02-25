@@ -1,10 +1,6 @@
-from ...core.model.newspaper import NewsPaper, NewsArticle
-from typing import List
+from ...core.model.newspaper import NewsArticle
 from ...common.tools import get_url
-from bs4 import BeautifulSoup
 import requests
-from ..model.prensaiberica import BcubePiMd
-from ..tools.pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,pi_get_head_meta_ogurl
 from .bcube import BcubeArticleReaderContext
 from ...core.model.repos import CrawlerRepos
 from datetime import datetime
@@ -144,10 +140,12 @@ class BcubePiDownloader():
         if response.status_code==200:
             json = response.json()
             articles =self._reader.extract_list(context,json)
+            context.lastFound=articles
             if articles is None:
                 return response
             if page > context.last_page:
                 context.last_page=page
             context.page_size[page]=len(articles)
+            
             
         return response

@@ -22,6 +22,11 @@ class BackFiller():
         if np.engine.sub_engine != self._sub_engine: return False
         return True
 
+    def isForceDate(self,month:int=None,day:int=None):
+        return month is not None and day is not None
+    
+    def isStoreBfDate(self,month:int=None,day:int=None):
+        return month is not None and day is None
 
     def get_range(self,year:int,month:int=None,day:int=None)->Tuple[datetime,datetime]:
         '''
@@ -54,12 +59,22 @@ class BackFiller():
         return None
 
     def backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None):
+        LOG.info(f"BackFilling News of ({np.short_name})\"{np.name}\"")
+
         if not self.isNewsPaperProcessable(np):
             # si nos invocan directamente mostramos warn
             LOG.warning(f"  {np.short_name} is not processable, forcing check...")
+
+        if np.n_articulos is None:
+            LOG.error("No tiene articulos, no se ha podido obtener informacion previa")
+            return
+        if np.first_article is None or np.first_month is None:
+            LOG.error("Falta informacion previa")
+            return
+        
         res = self.do_backFillNews(np=np,year=year,month=month,day=day)
         if res is not None:
-            if day is None and month is not None:
+            if self.isStoreBfDate(month,day):
                 np.addBfStatus(year,month,status=res.status,msg=res.msg)
             self._repos.newspaper.save(np)
 
@@ -99,6 +114,7 @@ class BackFillerManager(BackFiller):
             if filler.isNewsPaperProcessable(np):
                 return filler
         LOG.debug(f"BackFiller Manager didn't found BackEnd for {np.short_name}:({filler_id})")
+        #LOG.debug(self._fillers.keys())
         return None
 
     def isNewsPaperProcessable(self,np:NewsPaper)->bool:

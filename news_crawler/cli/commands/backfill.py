@@ -3,6 +3,7 @@ import logging
 from time import sleep
 from ...core.backfiller.backfiller import BackFiller,BackFillerManager
 from ...wordpress.backfiller.wordpress import WpBackFiller
+from ...bcube.backfiller.prensaiberica import BcubePiBackFiller
 from ...core.model.newspaper import NewsPaper
 from ...common.consts import BfStatus_OK
 
@@ -55,6 +56,7 @@ def doBackFillMp(jobs:List[BackFillJob]):
     repos = cmd.connectMongo()
     mgr = BackFillerManager(repos)
     mgr.addBackFiller(WpBackFiller(repos))
+    mgr.addBackFiller(BcubePiBackFiller(repos))
     
     grouped = getGroupedJobs(jobs)
     LOG.debug(f"Grouped Jobs {len(grouped)}")
@@ -95,6 +97,7 @@ class BackFillCmd(CommonCmd):
 
         mgr = BackFillerManager(repos)
         mgr.addBackFiller(WpBackFiller(repos))
+        mgr.addBackFiller(BcubePiBackFiller(repos))
         mgr.backfillManyNews(candidates,arg.year,arg.month,arg.day)
         pass
 

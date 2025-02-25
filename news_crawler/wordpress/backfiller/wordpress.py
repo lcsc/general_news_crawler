@@ -15,16 +15,7 @@ class WpBackFiller(BackFiller):
         self._sub_engine=SUBENGINE_ID_wp_json
         self._downloader=WpDownlader(WpArticleReader(repos))
     
-    def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->NewsPaperBackFill:
-        LOG.info(f"BackFilling News of ({np.short_name})\"{np.name}\"")
-        if np.n_articulos is None:
-            LOG.error("No tiene articulos, no se ha podido obtener informacion previa")
-            return None
-        
-        if np.first_article is None or np.first_month is None:
-            LOG.error("Falta informacion previa")
-            return None
-        
+    def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->NewsPaperBackFill:      
         start,end  = self.get_range(year,month,day)
         ctx = WpReaderContext(news_paper=np)
         LOG.debug(f"  from {start} to {end}")
