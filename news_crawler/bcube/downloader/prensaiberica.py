@@ -105,7 +105,8 @@ class BcubePiArticleReader(BcubeArticleReader):
                                          title=data["title"],
                                          url=data["data-url"],
                                          date=date,
-                                         engine_data=data
+                                         engine_data=data,
+                                         categories=[context.category.cat_name]
                                          )
 
 

@@ -89,6 +89,7 @@ class NewsArticle(BaseModel):
     engine_id:str
     engine_data:Optional[any]=None
     raw_data:Optional[any]=None
+    categories:Optional[List[str]]=None
     
     class Config:
         # Configuración para manejar la conversión con MongoDB

@@ -69,8 +69,8 @@ class NewsArticleReader():
                               title:str,
                               url:str,
                               date:str|datetime,
-                              engine_data=any
-
+                              engine_data=any,
+                              categories:List[str]=None
                               )->NewsArticle:
         if isinstance(date,str):
             if date.startswith("-"):
@@ -92,7 +92,8 @@ class NewsArticleReader():
                         article_url=url,
                         date= date,
                         engine_id=engine_id,
-                        engine_data=engine_data
+                        engine_data=engine_data,
+                        categories=categories
             )
         else:
             ret.article_headline=title
@@ -100,6 +101,12 @@ class NewsArticleReader():
             ret.date= date
             ret.engine_id=engine_id
             ret.engine_data=engine_data
+            if categories is not None:
+                if ret.categories is None:
+                    ret.categories=[]
+                for cat in categories:
+                    if cat not in ret.categories: 
+                        ret.categories.append(cat)
 
         return ret
     
