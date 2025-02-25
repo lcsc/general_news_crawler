@@ -83,6 +83,11 @@ const items = ref<MenuItem[]>([
     icon: "pi pi-wrench",
     items: [{ label: "Estadisticas" }],
   },
+  {
+    label: "About",
+    icon: "pi pi-info",
+    route: "/about",
+  },
 ]);
 </script>
 
