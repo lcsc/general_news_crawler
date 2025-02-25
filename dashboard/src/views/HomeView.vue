@@ -14,8 +14,7 @@ import {
 import type { SelectEvent } from "ol/interaction/Select";
 import type { Coordinate } from "ol/coordinate";
 
-
-import ccaaUrl from '../assets/communities.geojson?url'
+import ccaaUrl from "../assets/communities.geojson?url";
 
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
@@ -32,7 +31,6 @@ const tooltipCoord = ref<Coordinate | null>(null);
 const map = ref<{ map: OlMap } | null>(null);
 const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
 const mapZoom = ref(6);
-
 
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
@@ -69,8 +67,6 @@ onMounted(() => {
   map.value?.map.on("pointermove", getCoord);
   //map.value?.map.on("click", onMapClick);
 });
-
-
 </script>
 <template>
   <div>
@@ -101,10 +97,7 @@ onMounted(() => {
       </Interactions.OlInteractionPointer>-->
 
       <Layers.OlVectorLayer>
-        <Sources.OlSourceVector
-          :url="ccaaUrl"
-          :format="geoJson"
-        >
+        <Sources.OlSourceVector :url="ccaaUrl" :format="geoJson">
           <Styles.OlStyle>
             <Styles.OlStyleStroke
               color="gray"

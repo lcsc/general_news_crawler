@@ -54,10 +54,9 @@ onMounted(async () => {
 <script lang="ts"></script>
 <template>
   <div :style="{ height: mainSize + 'px' }" class="overflow-auto">
-      <NewsPaperSelector
-        @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
-      />
-
+    <NewsPaperSelector
+      @stateChannged="(state:NewsPaperSelectorModel)=> onStateChanged(state)"
+    />
 
     <EasyDataTable :headers="headers" :items="data" alternating>
       <template #item-real_url="item">

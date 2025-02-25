@@ -36,11 +36,11 @@ import { MDBContainer } from "mdb-vue-ui-kit";
 export default {
   name: "HelloWorld",
   components: {
-    MDBContainer
+    MDBContainer,
   },
   props: {
-    msg: String
-  }
+    msg: String,
+  },
 };
 </script>
 
