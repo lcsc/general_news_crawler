@@ -8,9 +8,10 @@ from ...wordpress.fetcher import WordPressInfoExtractor
 LOG = logging.getLogger(__name__)
 
 class ExtractArgs(CommonArgs):
-    def __init__(self, engine:str,sub_engine:str,tryUnknown:bool):
+    def __init__(self, engine:str,sub_engine:str,tryUnknown:bool,force:bool):
         super().__init__(engine=engine,sub_engine=sub_engine)
         self._tryUnknown=tryUnknown
+        self._force=force
 
     
 class ExtractCmd(CommonCmd):
@@ -30,11 +31,11 @@ class ExtractCmd(CommonCmd):
             candidates = list(candidates)
             LOG.info(f"Found {len(candidates)} NewsPapers")
 
-            extractor.extract_many(candidates)
+            extractor.extract_many(candidates, force= args._force)
         if args.sub_engine is None or args.sub_engine == "wp-json":
             extractor:NewsPaperExtractor = WordPressInfoExtractor(repos)
             candidates = extractor.get_candidates(try_no_engine=args._tryUnknown,filter=basic_filter)
             candidates = list(candidates)
             LOG.info(f"Found {len(candidates)} NewsPapers")
-            extractor.extract_many(candidates)
+            extractor.extract_many(candidates, force= args._force)
         pass

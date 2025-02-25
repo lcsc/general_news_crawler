@@ -4,7 +4,7 @@ from ....common.tools import get_short_name_from_server_name
 from ...model.prensaiberica import PrensaIbericaStat
 from ....core.model.repos import CrawlerRepos
 from ...model.prensaiberica import BcubePiMd
-from .pi_tools import pi_web_list
+from ...tools.pi_tools import pi_web_list
 
 def get_Newspaper(repo: NewsPaperRepository, name:str)->NewsPaper:
     shortname= get_short_name_from_server_name(name)

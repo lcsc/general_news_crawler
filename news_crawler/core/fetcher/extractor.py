@@ -220,11 +220,11 @@ class NewsPaperExtractor():
         self._np_repos.newspaper.save(np)
         return True
 
-    def extract_many(self, cand:list[NewsPaper]):
+    def extract_many(self, cand:list[NewsPaper],force:bool=False):
         top = len(cand)
         for idx,np in enumerate(cand):
             LOG.info(f"[{idx+1}/{top}] Checking \"{np.name}\"")
-            if self.should_be_extracted(np):
+            if force or self.should_be_extracted(np):
                 try:
                     if self._process_one(np):
                         self.fill_stats(np)
@@ -233,7 +233,7 @@ class NewsPaperExtractor():
                     print_exception(e)
     
     
-    def extract_all(self,try_no_engine=True,try_no_subengine:bool=None):
+    def extract_all(self,try_no_engine=True,try_no_subengine:bool=None, force:bool=False):
 
         cand= self.get_candidates(try_no_engine=try_no_engine,try_no_subengine=try_no_subengine)
         self.extract_many(cand)

@@ -77,13 +77,14 @@ def do_extract(obj:GeneralOptions, args:ExtractArgs):
 @click.option('-e',"engine", type=click.Choice(engines, case_sensitive=False), default=None)
 @click.option('-se',"sub_engine",type=click.Choice(sub_engines, case_sensitive=False), default=None)
 @click.option('-t/-nt','--try/--no-try',"tryUnknown", default=True)
+@click.option('-f/-nf','--force/--no-force',"force", default=False)
 @click.pass_obj
-def extract(obj:GeneralOptions,engine:str,sub_engine:str,tryUnknown:bool):
+def extract(obj:GeneralOptions,engine:str,sub_engine:str,tryUnknown:bool,force:bool):
     start = datetime.now()
 
     LOG.info("Extracting dates")
     args = ExtractArgs(engine=engine,sub_engine=sub_engine,
-        tryUnknown=tryUnknown)
+        tryUnknown=tryUnknown, force=force)
     if obj.ccaa is None:
         launchMP_CA(do_extract,obj,args)
         #do_extract(obj,args)
