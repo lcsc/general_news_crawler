@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-import { default as DropDown } from "./DropDown.vue";
+import { Select } from "primevue";
+
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 import { NewsClient } from "../newsclient/newsclient";
-import { options } from "@/newsclient/hey";
 
 const ccaa = ref<string[] | undefined>([]);
 const provincias = ref<string[] | undefined>([]);
@@ -78,29 +78,39 @@ function onSubEngineChanged(data?: string) {
 </script>
 <template>
   <div style="display: inline-flex">
-    <DropDown
-      caption="CCAA"
-      :data="ccaa"
-      :selected="state.ca"
-      @onSelect="(data) => onCcaaChanged(data)"
-    ></DropDown>
-    <DropDown
-      caption="Provincias"
-      :data="provincias"
-      :selected="state.provincia"
-      @onSelect="(data) => onProvinciaChanged(data)"
-    ></DropDown>
-    <DropDown
-      caption="Motores"
-      :data="engines"
-      :selected="state.engine"
-      @onSelect="(data) => onEngineChanged(data)"
-    ></DropDown>
-    <DropDown
-      caption="Sub_Motores"
-      :data="sub_engines"
-      :selected="state.sub_engine"
-      @onSelect="(data) => onSubEngineChanged(data)"
-    ></DropDown>
+    <Select
+      v-model="state.ca"
+      :options="ccaa"
+      showClear
+      placeholder="CCAA"
+      class="w-full md:w-56"
+      @update:modelValue="onCcaaChanged"
+    />
+
+    <Select
+      v-model="state.provincia"
+      :options="provincias"
+      showClear
+      placeholder="Provincias"
+      class="w-full md:w-56"
+      @update:modelValue="onProvinciaChanged"
+    />
+    <Select
+      v-model="state.engine"
+      :options="engines"
+      showClear
+      placeholder="Motores"
+      class="w-full md:w-56"
+      @update:modelValue="onEngineChanged"
+    />
+
+    <Select
+      v-model="state.sub_engine"
+      :options="sub_engines"
+      showClear
+      placeholder="Sub_Motores"
+      class="w-full md:w-56"
+      @update:modelValue="onSubEngineChanged"
+    />
   </div>
 </template>
