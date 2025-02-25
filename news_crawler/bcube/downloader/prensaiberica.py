@@ -14,8 +14,6 @@ from .bcube import BcubeArticleReader
 import sys
 import time
 
-
-
 class BcubePiArticleReader(BcubeArticleReader):
     def __init__(self,repos:CrawlerRepos):
         super().__init__(repos)
@@ -123,3 +121,33 @@ class BcubePiArticleReader(BcubeArticleReader):
             print("****** Failed *****")
 
         return ret
+    
+class BcubePiDownloader():
+    def __init__(self,reader:BcubePiArticleReader):
+        self._reader:BcubePiArticleReader=reader
+        pass
+
+    def get_url_cat(self,context:BcubeArticleReaderContext,page:int)->requests.Response:
+        np = context.news_paper
+        cat = context.category
+
+        response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
+        
+        if response.status_code == 503: # este error puede ser puntual
+            count =0
+            while count < 5 and response.status_code==503:
+                time.sleep(1) # reintentamos al segundo maximo 5
+                response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
+                count+=1
+        
+    
+        if response.status_code==200:
+            json = response.json()
+            articles =self._reader.extract_list(context,json)
+            if articles is None:
+                return response
+            if page > context.last_page:
+                context.last_page=page
+            context.page_size[page]=len(articles)
+            
+        return response

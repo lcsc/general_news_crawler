@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import requests
 from ...model.prensaiberica import BcubePiMd
 from ...tools.pi_tools import pi_has_link_on_footer,pi_get_head_link_canonical,pi_get_head_meta_ogurl
-from ..bcube import BCubeExtractor,BcubeArticleReaderContext, BcubeArticleReader
+from ..bcube import BCubeExtractor,BcubeArticleReaderContext
 from ....core.model.repos import CrawlerRepos
 from ...model.bcube import BcubeCategory
 from datetime import datetime
@@ -13,14 +13,15 @@ from ....common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
 import sys
 import time
 
-from ...downloader.prensaiberica import BcubePiArticleReader
+from ...downloader.prensaiberica import BcubePiArticleReader,BcubePiDownloader
 
 
 class BCubePrensaIbericaExtractor(BCubeExtractor):
     def __init__(self,repos:CrawlerRepos ):
         super().__init__(repos=repos)
         self._subengine = SUBENGINE_ID_bc_PrensaIberica
-        self._reader:BcubePiArticleReader=BcubePiArticleReader(repos)
+        #self._reader:BcubePiArticleReader=BcubePiArticleReader(repos)
+        self._downloader=BcubePiDownloader(BcubePiArticleReader(repos))
     
     
     def _extractMD(self,doc:BeautifulSoup,ret:BcubePiMd):
@@ -112,30 +113,7 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         return cats
     
 
-    def _get_url_cat(self,context:BcubeArticleReaderContext,page:int)->requests.Response:
-        np = context.news_paper
-        cat = context.category
 
-        response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
-        
-        if response.status_code == 503: # este error puede ser puntual
-            count =0
-            while count < 5 and response.status_code==503:
-                time.sleep(1) # reintentamos al segundo maximo 5
-                response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
-                count+=1
-        
-    
-        if response.status_code==200:
-            json = response.json()
-            articles =self._reader.extract_list(context,json)
-            if articles is None:
-                return response
-            if page > context.last_page:
-                context.last_page=page
-            context.page_size[page]=len(articles)
-            
-        return response
 
     def extract_one_category(self,np:NewsPaper,cat:BcubeCategory)->List[NewsArticle]:
         print(f"  Extracting {cat.cat_name}")
@@ -143,20 +121,20 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         tope=1
         n=1
         # try with page=1
-        response = self._get_url_cat(context,1)
+        response = self._downloader.get_url_cat(context,1)
         if response.status_code!=200:
             #some pages gives error on page 1, try page2
-            response =self._get_url_cat(context,2)
+            response =self._downloader.get_url_cat(context,2)
         if response.status_code != 200:
             return None
 
         while response.status_code==200:
             tope*=10
-            response = self._get_url_cat(context,tope)
+            response = self._downloader.get_url_cat(context,tope)
 
         while response.status_code == 404:
             tmp = int(tope/2)
-            response = self._get_url_cat(context,tmp)
+            response = self._downloader.get_url_cat(context,tmp)
 
             if(response.status_code==404): tope=tmp
             else: n = tmp
@@ -165,7 +143,7 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         while diff > 1:
             tmp = n + int(diff/2)
             if tmp==n: tmp +=1
-            response = self._get_url_cat(context,tmp)
+            response = self._downloader.get_url_cat(context,tmp)
 
             if(response.status_code==404): tope=tmp
             else: n = tmp
@@ -174,7 +152,7 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
         print(f"  {context.category.cat_name}: {context.page_size}")
         if n>2: # En caso contrario no tenemos suficiente informacion.
             if not (n-1) in context.page_size:
-                response = self._get_url_cat(context,n-1)
+                response = self._downloader.get_url_cat(context,n-1)
                 if response.status_code!=200:
                     print("ERROR?????")
                 print(f"  {context.category.cat_name}: {context.page_size}")
