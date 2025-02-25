@@ -3,7 +3,10 @@ import "vue3-easy-data-table/dist/style.css";
 import "vue3-openlayers/styles.css";
 import "primeicons/primeicons.css";
 
+// eslint-ts-ignore @typescript-eslint/no-default-export
+// @ts-expect-error
 import Vue3EasyDataTable from "vue3-easy-data-table";
+
 import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 

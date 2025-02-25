@@ -39,15 +39,7 @@
 <script setup lang="ts">
 import type { MenuItem } from "primevue/menuitem";
 import { inject, onBeforeUnmount, onMounted, ref, type Ref } from "vue";
-
-const collapse1 = ref(false);
-const dropdown1 = ref(false);
-
-import { useRouter, useRoute } from "vue-router";
 import { default as Menubar } from "primevue/menubar";
-
-const router = useRouter();
-const route = useRoute();
 
 const refHeader = ref<HTMLElement | null>(null);
 const refFoot = ref<HTMLElement | null>(null);
