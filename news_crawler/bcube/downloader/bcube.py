@@ -17,6 +17,7 @@ class BcubeArticleReaderContext(NewsArticleReaderContext):
         self.category=category
         self.last_page=1
         self.page_size={}
+        self.pagesHelper:Dict[int,Dict]={}
 
 class BcubeArticleReader(NewsArticleReader):
     def __init__(self,repos:CrawlerRepos):

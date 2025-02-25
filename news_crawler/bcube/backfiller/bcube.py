@@ -3,6 +3,7 @@ from ...common.consts import ENGINE_ID_bCube
 from ...common.consts import BfStatus_OK, BfStatus_ERROR
 from ...core.model.newspaper import NewsPaper,NewsArticle, NewsPaperBackFill
 from ..model.bcube import BcubeCategory
+from ..downloader.bcube import BcubeArticleReaderContext 
 from datetime import datetime
 import logging
 
@@ -16,7 +17,7 @@ class BcubeBackFiller(BackFiller):
 
 
         
-    def do_backFillNews_cat(self,np:NewsPaper,cat:BcubeCategory,start:datetime,end:datetime )->NewsPaperBackFill:
+    def do_backFillNews_cat(self,context:BcubeArticleReaderContext,start:datetime,end:datetime )->NewsPaperBackFill:
         pass
     
     def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->NewsPaperBackFill:
@@ -32,14 +33,24 @@ class BcubeBackFiller(BackFiller):
 
         for cat in cats:
             res = None
+            LOG.debug(f"Testing {cat.cat_name}")
             if cat.isCatDone(year,month) and not isForce:
+                LOG.debug(f"Already Done")
                 continue
-                
-            res = self.do_backFillNews_cat(np,cat,start,end)
+            context = BcubeArticleReaderContext(np,cat)
+            try:
+                res = self.do_backFillNews_cat(context,start,end)
+            except Exception as e:
+                LOG.error(e)
+                res= NewsPaperBackFill(status=BfStatus_ERROR,msg=str(e))
+
+            if context.getArticleCount()>0:
+                self._repos.articles.save_many(context.getListArticles())    
             if res is None or res.status != BfStatus_OK:
                 ret = NewsPaperBackFill(status=BfStatus_ERROR,msg="Categorias incompletas")
             if res is not None and isStoreBf:
                 cat.addBfStatus(year,month,res.status,res.msg)
                 self._repos.bCubeCategories.save(cat)
+
 
         return ret
