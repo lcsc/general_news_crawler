@@ -125,4 +125,20 @@ export class NewsClient {
     }
     throw new Error("Server error");
   }
+
+  public async getNewsPaper(ccaa:string,short_name:string):Promise<NewsPaper>{
+    let res = await npGet({
+      client:this.apiClient, 
+      path:{
+        ccaa:ccaa,
+        short_name:short_name,
+        provincia:"*"
+      }
+    });
+    if (res.data){
+      return res.data
+    }
+    
+    throw new Error("Server error");
+  }
 }

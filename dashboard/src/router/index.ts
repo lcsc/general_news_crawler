@@ -25,6 +25,14 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import("../views/NewsPapersView.vue"),
     },
+    {
+      path: "/news/:ccaa/:short_name/",
+      name: "news",
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import("../views/NewsArticleView.vue"),
+    },
   ],
 });
 
