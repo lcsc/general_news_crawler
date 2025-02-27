@@ -4,7 +4,26 @@ export type HttpValidationError = {
     detail?: Array<ValidationError>;
 };
 
+export type NewsArticle = {
+    id?: string | null;
+    np_name: string;
+    np_ccaa: string;
+    article_id: string;
+    article_url: string;
+    article_headline: string;
+    date: string;
+    engine_id: string;
+    engine_data?: unknown | null;
+    raw_data?: unknown | null;
+    categories?: Array<string> | null;
+};
+
 export type NewsPaper = {
+    backfill?: {
+        [key: string]: {
+            [key: string]: NewsPaperBackFill;
+        };
+    } | null;
     id?: string | null;
     name: string;
     ccaa: string;
@@ -23,11 +42,6 @@ export type NewsPaper = {
     first_month?: string | null;
     n_articulos?: number | null;
     last_check?: string | null;
-    backfill?: {
-        [key: string]: {
-            [key: string]: NewsPaperBackFill;
-        };
-    } | null;
 };
 
 export type NewsPaperBackFill = {
@@ -215,6 +229,34 @@ export type NpGetResponses = {
 };
 
 export type NpGetResponse = NpGetResponses[keyof NpGetResponses];
+
+export type NewsListData = {
+    body?: never;
+    path: {
+        ccaa: string;
+        short_name: string;
+    };
+    query?: never;
+    url: '/news/{ccaa}/{short_name}/';
+};
+
+export type NewsListErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type NewsListError = NewsListErrors[keyof NewsListErrors];
+
+export type NewsListResponses = {
+    /**
+     * Successful Response
+     */
+    200: Array<NewsArticle>;
+};
+
+export type NewsListResponse = NewsListResponses[keyof NewsListResponses];
 
 export type ClientOptions = {
     baseURL: `${string}://${string}/news/api` | (string & {});
