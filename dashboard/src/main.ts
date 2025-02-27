@@ -1,4 +1,4 @@
-import "./assets/main.css";
+import "./assets/style.css";
 import "vue3-easy-data-table/dist/style.css";
 import "vue3-openlayers/styles.css";
 import "primeicons/primeicons.css";
