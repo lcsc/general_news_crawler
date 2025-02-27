@@ -34,7 +34,7 @@ class BcubeBackFiller(BackFiller):
         for cat in cats:
             res = None
             LOG.debug(f"Testing {cat.cat_name}")
-            if cat.isCatDone(year,month) and not isForce:
+            if cat.isBfDone(year,month) and not isForce:
                 LOG.debug(f"Already Done")
                 continue
             context = BcubeArticleReaderContext(np,cat)

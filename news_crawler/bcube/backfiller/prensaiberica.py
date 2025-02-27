@@ -40,6 +40,67 @@ class BcubePiBackFiller(BcubeBackFiller):
         LOG.error(f"No se puede dar ({first.date}, {last.date}) ? {testDate}")
         return None
 
+    def goUp(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
+        LOG.debug(f"   Found {len(context.lastFound)}")
+        
+        first,last = self.extractFirstLastDates(context.lastFound)
+        location = self.objetivePageLocation(first,last,start)
+        
+        context.pagesHelper[cp]={"first":first,"last":last,"location":location}
+        tp:int=None
+        lpp:int=0
+        if location==0: return (cp,cp,location)
+        if location<=0: return (cp,cp,location)
+
+        #LOG.debug (f" page :{cp} ({first.date}, {last.date}) -> {start}")
+        while location > 0:
+            tp = cp+10
+            response =self._downloader.get_url_cat(context,tp)
+            
+            while response.status_code!=200:
+                tp = tp-1
+                # Aqui hemos llegado al incio de las publicaciones
+                # Nuestra fecha de incio puede ser anterior a la primera noticia
+                # Buscamos la ultima pagina con noticias
+                #LOG.debug(f"Respuesta no 200, probamos con {tp}")
+                if tp == cp:
+                    # Hemos llegado a la ulima pagina (que ya hemos leido correctamente)
+                    return (None,None,location)
+                response =self._downloader.get_url_cat(context,tp)
+
+            first,last = self.extractFirstLastDates(context.lastFound)
+            location = self.objetivePageLocation(first,last,start)
+            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
+            #LOG.debug (f" page :{tp} ({first.date}, {last.date}) -> {start}")
+            cp=tp
+            if location >0 and tp > lpp:lpp=tp
+        return (cp,lpp,location)
+    
+
+    def goDown(self,context:BcubeArticleReaderContext,start:datetime, cp:int, location:int, lpp:int)->int:
+        tp=cp
+        while location <0 and tp>lpp:
+            tp = cp -1
+            if tp in context.pagesHelper:
+                LOG.debug("Found in helper")
+                LOG.debug(f"({cp}) {context.pagesHelper[cp]['location']}")
+                LOG.debug(f"({tp}) {context.pagesHelper[tp]['location']}")
+                return None #TODO este caso 
+
+            response =self._downloader.get_url_cat(context,tp)
+            if response.status_code!=200:
+                LOG.error("GAP")
+                cp=tp
+
+            first,last = self.extractFirstLastDates(context.lastFound)
+            location = self.objetivePageLocation(first,last,start)
+            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
+            if location==0: 
+                LOG.debug(f"Found going down: {tp}, ({first.date}, {last.date})? {start}")
+                return tp
+            cp=tp
+        #si llegamos aqui es que cp es 1 y cp+1 es -1, la fecha buscada se produce entre paginas
+        return cp
 
     def searchStartPage(self, context:BcubeArticleReaderContext,start:datetime)->Tuple[int,NewsPaperBackFill]:
         cat  =context.category
@@ -52,85 +113,33 @@ class BcubePiBackFiller(BcubeBackFiller):
             #some pages gives error on page 1, try page2
             response =self._downloader.get_url_cat(context,2)
             cp=2
-        if response.status_code != 200:
-            return (None,NewsPaperBackFill(status=BfStatus_ERROR,msg="Sin Noticias (!200)"))
+        if response.status_code not in [200,404]: #un 404 es que no hay noticias
+            return (None,NewsPaperBackFill(status=BfStatus_ERROR,msg=f"Sin Noticias ({response.status_code})"))
         
         if context.lastFound is None:
             return (None,NewsPaperBackFill(status=BfStatus_OK,msg="Sin Noticias"))
         
-        LOG.debug(f"   Found {len(context.lastFound)}")
-        
-        first,last = self.extractFirstLastDates(context.lastFound)
-        location = self.objetivePageLocation(first,last,start)
-        
-        context.pagesHelper[cp]={"first":first,"last":last,"location":location}
-        tp:int=None
-        lpp:int=0
-        if location==0: return (cp,None)
-        if location<=0: return (None,NewsPaperBackFill(status=BfStatus_OK,msg="Sin Noticias"))
+        (cp,lpp,location) = self.goUp(context,start,cp)
 
-        LOG.debug (f" page :{cp} ({first.date}, {last.date}) -> {start}")
-        while location > 0:
-            tp = cp+10
-            response =self._downloader.get_url_cat(context,tp)
-            
-            while response.status_code!=200:
-                tp = int((cp+tp)/2)
-                if tp == cp: return (None,None)
-            first,last = self.extractFirstLastDates(context.lastFound)
-            location = self.objetivePageLocation(first,last,start)
-            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
-            LOG.debug (f" page :{tp} ({first.date}, {last.date}) -> {start}")
-            cp=tp
-            if location >0 and tp > lpp:lpp=tp
-        
+        if cp is None and location>0:
+            # La fecha buscada es anterior a la primera noticia
+            return (None,NewsPaperBackFill(status=BfStatus_OK,msg="Antes de la primera noticia"))
+
         if location ==0:
-            LOG.debug(f"Found going up: {tp}, ({first.date}, {last.date})? {start}")
-            return (tp,None)
+            LOG.debug(f"Found going up: {cp}, ({context.pagesHelper[cp]['first'].date}, {context.pagesHelper[cp]['last'].date})? {start}")
+            return (cp,None)
         
+        if cp is None:
+            LOG.error("Going Up return None")
+
         LOG.debug("Nos hemos pasado")
-        while location <0 and tp>lpp:
+        cp = self.goDown(context,start,cp,location,lpp)
 
-            tp = cp -1
-            if tp in context.pagesHelper:
-                LOG.debug("Found in helper")
-                LOG.debug(f"({cp}) {context.pagesHelper[cp]['location']}")
-                LOG.debug(f"({tp}) {context.pagesHelper[tp]['location']}")
-                return (None,None)
-
-            response =self._downloader.get_url_cat(context,tp)
-            if response.status_code!=200:
-                LOG.error("GAP")
-                cp=tp
-
-            first,last = self.extractFirstLastDates(context.lastFound)
-            location = self.objetivePageLocation(first,last,start)
-            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
-            if location==0: 
-                LOG.debug(f"Found going down: {tp}, ({first.date}, {last.date})? {start}")
-                return (tp,None)          
-            cp=tp
-        LOG.debug(f"cp: {cp} -> {context.pagesHelper[cp]['location']} ({context.pagesHelper[cp]['first'].date}, {context.pagesHelper[cp]['last'].date})? {start}")
-        LOG.debug(f"tp: {cp+1} -> {context.pagesHelper[cp+1]['location']} ({context.pagesHelper[cp+1]['first'].date}, {context.pagesHelper[cp+1]['last'].date})? {start}")
+        #LOG.debug(f"cp: {cp} -> {context.pagesHelper[cp]['location']} ({context.pagesHelper[cp]['first'].date}, {context.pagesHelper[cp]['last'].date})? {start}")
+        #LOG.debug(f"tp: {cp+1} -> {context.pagesHelper[cp+1]['location']} ({context.pagesHelper[cp+1]['first'].date}, {context.pagesHelper[cp+1]['last'].date})? {start}")
         return (cp,None)
 
-
-    def do_backFillNews_cat(self,context:BcubeArticleReaderContext,start:datetime,end:datetime )->NewsPaperBackFill:
-        LOG.info(f"Backfilling cat {context.category.cat_name}")
-        
-        (sp,res) = self.searchStartPage(context,end)
-        
-        if context.getArticleCount()>0:
-            self._repos.articles.save_many(context.getListArticles())
-
-        if res is not None:
-            return res
-
-        if sp is None:
-            LOG.debug("Start page not found")
-            return None # TODO Ver este problema (No hay noticias)
-        LOG.debug(f"Encontrada pagina {sp}")
-        
+    def readPages(self,context:BcubeArticleReaderContext,start:datetime,sp:int) -> NewsPaperBackFill:
         first=context.pagesHelper[sp]["first"]
         last=context.pagesHelper[sp]["last"]
         searchDir=self.objetivePageLocation(first,last,start)
@@ -145,15 +154,37 @@ class BcubePiBackFiller(BcubeBackFiller):
                 context.pagesHelper[sp]["searchDir"]=searchDir
             else:
                 response =self._downloader.get_url_cat(context, sp)
-                if response.status_code !=200:
+                if response.status_code ==404:
+                    # Ya no hay mas noticias
                     LOG.debug("Hemos llegado al final")
+                    return NewsPaperBackFill(status=BfStatus_OK) 
+                if response.status_code !=200:
+                    LOG.debug("Error, lo dejamos en Pending para otra")
                     return NewsPaperBackFill(status=BfStatus_PENDING)
                    
                 first,last = self.extractFirstLastDates(context.lastFound)
                 searchDir = self.objetivePageLocation(first,last,start)
                 context.pagesHelper[sp]={"first":first,"last":last,"searchDir":searchDir}
-            LOG.debug(f"{sp}, ({first.date}, {last.date})? {start}")
-
-
+            #LOG.debug(f"{sp}, ({first.date}, {last.date})? {start}")
         return NewsPaperBackFill(status=BfStatus_OK)
+
+    def do_backFillNews_cat(self,context:BcubeArticleReaderContext,start:datetime,end:datetime )->NewsPaperBackFill:
+        LOG.info(f"Backfilling cat {context.category.cat_name}")
+        
+        (sp,res) = self.searchStartPage(context,end)
+        
+        if context.getArticleCount()>0:
+            self._repos.articles.save_many(context.getListArticles())
+
+        if res is not None:
+            return res
+
+        if sp is None:
+            LOG.debug("Start page not found")
+            return NewsPaperBackFill(status=BfStatus_ERROR,msg="Star Page is None") # TODO Ver este problema (No hay noticias)
+        
+        LOG.debug(f"Encontrada pagina {sp}")
+        
+        return self.readPages(context,start,sp)
+
     

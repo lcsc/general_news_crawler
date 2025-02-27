@@ -5,7 +5,7 @@ from .engine import NewsPaperEngine
 from datetime import datetime
 from enum import Enum
 
-from ...common.consts import BfStatus_PENDING
+from ...common.consts import BfStatus_PENDING, BfStatus_OK
 
 class NewsPaperListerInfo(BaseModel):
     name: str
@@ -31,8 +31,30 @@ class NewsPaperBackFill(BaseModel ):
     status:str=BfStatus_PENDING
     msg:Optional[str]=None
     
+
+class BackFillBase():
+    backfill:Optional[Dict[str,Dict[str,NewsPaperBackFill]]]=None
     
-class NewsPaper(BaseModel):
+    def addBfStatus(self,year:int,month:int,status:str, msg:str=None):
+        year = str(year)
+        month=str(month)
+        if self.backfill is None: self.backfill={}
+        if year not in self.backfill: self.backfill[year]={}
+        if month not in self.backfill[year]:
+            self.backfill[year][month]=NewsPaperBackFill(status=status,msg=msg)
+        else:
+            self.backfill[year][month].status = status
+            self.backfill[year][month].msg = msg
+    
+    def isBfDone(self,year:int,month:int):
+        year = str(year)
+        month=str(month)
+        if self.backfill is None: return False
+        if year not in self.backfill: return False
+        if month not in self.backfill[year]: return False
+        return self.backfill[year][month].status == BfStatus_OK
+
+class NewsPaper(BaseModel, BackFillBase):
     id: Optional[PydanticObjectId] = None
     name: str
     ccaa: str
@@ -52,20 +74,6 @@ class NewsPaper(BaseModel):
     first_month:Optional[str]=None
     n_articulos:Optional[int]=None
     last_check:Optional[datetime]=None
-    
-    backfill:Optional[Dict[str,Dict[str,NewsPaperBackFill]]]=None
-
-
-    def addBfStatus(self,year:int,month:int,status:str, msg:str=None):
-        year = str(year)
-        month=str(month)
-        if self.backfill is None: self.backfill={}
-        if year not in self.backfill: self.backfill[year]={}
-        if month not in self.backfill[year]:
-            self.backfill[year][month]=NewsPaperBackFill(status=status,msg=msg)
-        else:
-            self.backfill[year][month].status = status
-            self.backfill[year][month].msg = msg
 
     class Config:
         # Configuración para manejar la conversión con MongoDB
