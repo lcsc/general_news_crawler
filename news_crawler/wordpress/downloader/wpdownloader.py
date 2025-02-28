@@ -33,7 +33,7 @@ class WpArticleReader(NewsArticleReader):
 
     def _save_list_article(self,context:WpReaderContext,article:NewsArticle,raw:any):
         path =f"{np_base_path(context.news_paper)}/{article.article_id}.list_raw"
-        save_file(path, str(raw))
+        #save_file(path, str(raw))
         self.repos.save_file(path,str(raw),"list",article.engine_data["modified_gmt"])
         article.raw_data=path
         pass
