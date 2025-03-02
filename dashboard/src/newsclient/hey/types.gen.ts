@@ -67,6 +67,12 @@ export type NewsPaperListerInfo = {
     src: string;
 };
 
+export type NewsSearchResult = {
+    results?: number;
+    pages?: number;
+    items?: Array<NewsArticle>;
+};
+
 export type OptionsResult = {
     ccaas?: Array<string>;
     provincias?: {
@@ -75,6 +81,8 @@ export type OptionsResult = {
     engines?: Array<string>;
     sub_engines?: Array<string>;
 };
+
+export type SortTypeEnum = 'asc' | 'desc';
 
 export type ValidationError = {
     loc: Array<string | number>;
@@ -236,7 +244,13 @@ export type NewsListData = {
         ccaa: string;
         short_name: string;
     };
-    query?: never;
+    query?: {
+        page?: number | null;
+        rowsPerPage?: number | null;
+        sortBy?: string | Array<string> | null;
+        sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
+        notBefore?: string | null;
+    };
     url: '/news/{ccaa}/{short_name}/';
 };
 
@@ -253,7 +267,7 @@ export type NewsListResponses = {
     /**
      * Successful Response
      */
-    200: Array<NewsArticle>;
+    200: NewsSearchResult;
 };
 
 export type NewsListResponse = NewsListResponses[keyof NewsListResponses];

@@ -3,9 +3,15 @@
       <div v-if="np">
       Mostrando Articulos de {{ np.name }} {{ router.params.ccaa }} - {{ router.params.short_name }}
       </div>
-      <EasyDataTable :headers="headers" :items="data" alternating>
-        <template #item-real_url="item">
-          <a :href="item.real_url" target="_blank">{{ item.real_url }}</a>
+      <EasyDataTable 
+      :headers="headers" 
+      :items="data"   
+      v-model:server-options="serverOptions"
+      :server-items-length="serverItemsLength"
+      :loading="loading"
+       alternating>
+        <template #item-headline="item">
+          <a :href="item.article_url" target="_blank">{{ item.article_headline }}</a>
         </template>
       </EasyDataTable>
     </div>
@@ -14,8 +20,8 @@
   <style></style>
 
 <script setup lang="ts">
-import { inject, onMounted, ref } from "vue";
-import type { Header } from "vue3-easy-data-table";
+import { inject, onMounted, ref, watch } from "vue";
+import type { Header, ServerOptions } from "vue3-easy-data-table";
 
 import {type NewsPaper, type NewsArticle} from "../newsclient/hey";
 import { useRoute } from "vue-router";
@@ -25,16 +31,57 @@ const mainSize = inject("mainSize");
 const data = ref<NewsArticle[]>([]);
 
 const headers: Header[] = [
-  { text: "Url", value: "url", sortable: true },
+  { text: "Articulo", value: "headline" },
+  { text: "fecha", value: "date", sortable: true },
   ]
 
 const router = useRoute()
 
 const np  = ref<NewsPaper|undefined>()
 
+const ccaa:string = router.params.ccaa
+const short_name:string= router.params.short_name
+const client = NewsClient.instance;
 
 onMounted(async()=>{
-  np.value = await  NewsClient.instance.getNewsPaper(router.params.ccaa, router.params.short_name)
+
+  np.value = await  client.getNewsPaper(ccaa, short_name);
+  loadFromServer();
+
 });
+
+const loading = ref(false);
+const serverItemsLength = ref(0);
+const serverOptions = ref<ServerOptions>({
+  page: 1,
+  rowsPerPage: 25,
+  sortBy: undefined,
+  sortType: undefined,
+});
+
+const loadFromServer = async () => {
+  loading.value = true;
+  /*
+  const {
+    serverCurrentPageItems,
+    serverTotalItemsLength,
+  } = await mockServerItems(serverOptions.value);
+  items.value = serverCurrentPageItems;*/
+
+  console.log(serverOptions.value)
+  let res = await client.listArticles(ccaa,short_name, serverOptions.value)
+  console.log(res)
+  if(res.results){
+    serverItemsLength.value =res.results;
+    data.value=res.items?res.items:[]
+  }
+
+  loading.value = false;
+};
+
+// initial load
+
+
+watch(serverOptions, (value) => { loadFromServer(); }, { deep: true });
 
 </script>

@@ -7,10 +7,12 @@ import {
   npList,
   npListCcaa,
   npListCcaaProv,
+  newsList,
 } from "./hey/sdk.gen";
 
 import type { NewsPaperSelectorModel } from "../model/selectors";
 import type { Axios, AxiosResponse } from "axios";
+import type { ServerOptions } from "vue3-easy-data-table";
 
 export class NewsClient {
   static #instance: NewsClient;
@@ -133,6 +135,28 @@ export class NewsClient {
         ccaa:ccaa,
         short_name:short_name,
         provincia:"*"
+      }
+    });
+    if (res.data){
+      return res.data
+    }
+    
+    throw new Error("Server error");
+  }
+
+
+  public async listArticles(ccaa:string,short_name:string, search:ServerOptions){
+    let res = await newsList({
+      client:this.apiClient, 
+      path:{
+        ccaa:ccaa,
+        short_name:short_name,
+      },
+      query:{
+        page:search.page,
+        rowsPerPage:search.rowsPerPage,
+        sortBy:search.sortBy,
+        sortType:search.sortType
       }
     });
     if (res.data){
