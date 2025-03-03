@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 
-import { Select } from "primevue";
+import { Button, Select, Toolbar } from "primevue";
 
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 import { NewsClient } from "../newsclient/newsclient";
@@ -77,40 +77,47 @@ function onSubEngineChanged(data?: string) {
 }
 </script>
 <template>
-  <div style="display: inline-flex">
-    <Select
-      v-model="state.ca"
-      :options="ccaa"
-      showClear
-      placeholder="CCAA"
-      class="w-full md:w-56"
-      @update:modelValue="onCcaaChanged"
-    />
+  <Toolbar>
+    <template #center>
+      <div style="display: inline-flex">
+        <Select
+          v-model="state.ca"
+          :options="ccaa"
+          showClear
+          placeholder="CCAA"
+          class="w-full md:w-56"
+          @update:modelValue="onCcaaChanged"
+        />
 
-    <Select
-      v-model="state.provincia"
-      :options="provincias"
-      showClear
-      placeholder="Provincias"
-      class="w-full md:w-56"
-      @update:modelValue="onProvinciaChanged"
-    />
-    <Select
-      v-model="state.engine"
-      :options="engines"
-      showClear
-      placeholder="Motores"
-      class="w-full md:w-56"
-      @update:modelValue="onEngineChanged"
-    />
+        <Select
+          v-model="state.provincia"
+          :options="provincias"
+          showClear
+          placeholder="Provincias"
+          class="w-full md:w-56"
+          @update:modelValue="onProvinciaChanged"
+        />
+        <Select
+          v-model="state.engine"
+          :options="engines"
+          showClear
+          placeholder="Motores"
+          class="w-full md:w-56"
+          @update:modelValue="onEngineChanged"
+        />
 
-    <Select
-      v-model="state.sub_engine"
-      :options="sub_engines"
-      showClear
-      placeholder="Sub_Motores"
-      class="w-full md:w-56"
-      @update:modelValue="onSubEngineChanged"
-    />
-  </div>
+        <Select
+          v-model="state.sub_engine"
+          :options="sub_engines"
+          showClear
+          placeholder="Sub_Motores"
+          class="w-full md:w-56"
+          @update:modelValue="onSubEngineChanged"
+        />
+      </div>
+    </template>
+    <template #end>
+        <Button icon="pi pi-search" severity="primary" text />
+      </template>
+  </Toolbar>
 </template>

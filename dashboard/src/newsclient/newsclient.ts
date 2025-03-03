@@ -10,7 +10,7 @@ import {
   newsList,
 } from "./hey/sdk.gen";
 
-import type { NewsPaperSelectorModel } from "../model/selectors";
+import type { NewsPaperSelectorModel, NewsSearch } from "../model/selectors";
 import type { Axios, AxiosResponse } from "axios";
 import type { ServerOptions } from "vue3-easy-data-table";
 
@@ -145,7 +145,7 @@ export class NewsClient {
   }
 
 
-  public async listArticles(ccaa:string,short_name:string, search:ServerOptions){
+  public async listArticles(ccaa:string,short_name:string, search:NewsSearch){
     let res = await newsList({
       client:this.apiClient, 
       path:{
@@ -156,7 +156,9 @@ export class NewsClient {
         page:search.page,
         rowsPerPage:search.rowsPerPage,
         sortBy:search.sortBy,
-        sortType:search.sortType
+        sortType:search.sortType,
+        notAfter:search.notAfter?.toISOString().slice(0, 10),
+        notBefore:search.notBefore?.toISOString().slice(0, 10)
       }
     });
     if (res.data){

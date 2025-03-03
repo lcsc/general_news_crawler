@@ -250,6 +250,7 @@ export type NewsListData = {
         sortBy?: string | Array<string> | null;
         sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
         notBefore?: string | null;
+        notAfter?: string | null;
     };
     url: '/news/{ccaa}/{short_name}/';
 };

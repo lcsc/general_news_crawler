@@ -18,6 +18,22 @@ async def get_newspapers(ccaa:str,short_name:str,query: Annotated[NewsSearch, Qu
     #mongoQuery.update({"date":{"$gt":datetime.fromisoformat("2025-02-01T00:00:00Z")}})
 
     ret = NewsSearchResult()
+
+    if query.notAfter:
+        if query.notAfter.time() == datetime.min.time():
+            query.notAfter = query.notAfter.replace(hour=23,minute=59,second=59)
+    
+    LOG.debug(f" Not Before: {query.notBefore}")
+    LOG.debug(f"  Not After: {query.notAfter}")
+
+    if query.notBefore:
+        if query.notAfter:
+            mongoQuery.update({"date":{"$gt":query.notBefore,"$lt":query.notAfter}})
+        else:
+            mongoQuery.update({"date":{"$gt":query.notBefore}})
+    elif query.notAfter:
+        mongoQuery.update({"date":{"$lt":query.notAfter}})
+
     ret.results = repos.articles.get_collection().count_documents(mongoQuery)
     ret.items = repos.articles.find_by(mongoQuery, 
                                        limit=query.rowsPerPage,

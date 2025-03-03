@@ -25,6 +25,13 @@
 html {
   font-size: 14px;
 }
+main { div.p-component{
+    margin-left: 0.25rem;
+    margin-top: 0rem;
+    margin-bottom: 0rem;
+    margin-right: 0.25rem;
+  }
+}
 
 body {
   margin: 0px;
@@ -43,3 +50,4 @@ body {
   border-radius: 10px;
   margin-bottom: 1rem;
 }
+
