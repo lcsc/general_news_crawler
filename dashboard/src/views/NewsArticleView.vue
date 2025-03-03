@@ -9,9 +9,15 @@
       v-model:server-options="serverOptions"
       :server-items-length="serverItemsLength"
       :loading="loading"
-       alternating>
+       alternating
+       :rowsPerPage="15" :rowsItems="[5,10,15,20,25]">
         <template #item-headline="item">
           <a :href="item.article_url" target="_blank">{{ item.article_headline }}</a>
+        </template>
+
+        <template #item-categories="item">
+
+          <span v-if="item.categories">{{ item.categories.join(",") }}</span>
         </template>
       </EasyDataTable>
     </div>
@@ -33,6 +39,7 @@ const data = ref<NewsArticle[]>([]);
 const headers: Header[] = [
   { text: "Articulo", value: "headline" },
   { text: "fecha", value: "date", sortable: true },
+  { text: "Categorias", value: "categories", sortable: true },
   ]
 
 const router = useRoute()
@@ -54,7 +61,7 @@ const loading = ref(false);
 const serverItemsLength = ref(0);
 const serverOptions = ref<ServerOptions>({
   page: 1,
-  rowsPerPage: 25,
+  rowsPerPage: 15,
   sortBy: undefined,
   sortType: undefined,
 });

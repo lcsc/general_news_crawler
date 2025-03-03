@@ -1,9 +1,11 @@
 <template>
   <Dialog
-    :visible="visible"
+    v-model:visible="visible"
     modal
     header="Seleccionar Periodico"
     :style="{ width: '25rem' }"
+    
+    
   >
     <div class="flex items-center gap-4 mb-4">
       <label for="state.ca" class="font-semibold w-24">CCAA</label>
@@ -48,7 +50,7 @@
         severity="secondary"
         @click="visible = false"
       ></Button>
-      <Button type="button" label="Save" @click="visible = false"></Button>
+      <Button type="button" label="Ver" @click="goToNews" :disabled="newspaper==undefined"></Button>
     </div>
   </Dialog>
 </template>
@@ -63,6 +65,7 @@ import { ref } from "vue";
 import { NewsClient } from "@/newsclient/newsclient";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 import { type NewsPaper } from "@/newsclient/hey";
+import { useRouter } from "vue-router";
 
 const visible = ref(false);
 
@@ -81,6 +84,7 @@ const engines = ref<string[] | undefined>([]);
 const sub_engines = ref<string[] | undefined>([]);
 const newspaper = ref<NewsPaper | undefined>(undefined);
 const newspapers = ref<NewsPaper[] | undefined>([]);
+const router=useRouter();
 
 let data_provincias: { [key: string]: Array<string> } | undefined;
 
@@ -137,5 +141,12 @@ function onEngineChanged(data?: string) {
 
 function onSubEngineChanged(data?: string) {
   state.value.sub_engine = data;
+}
+
+function goToNews(){
+  if(newspaper.value){
+    visible.value=false;
+    router.push({name:'news',params:{ccaa:newspaper.value.ccaa,short_name:newspaper.value.short_name}});
+  }
 }
 </script>
