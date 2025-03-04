@@ -31,9 +31,14 @@ class BcubeBackFiller(BackFiller):
         isForce=self.isForceDate(month,day)
         isStoreBf = self.isStoreBfDate(month,day)
 
+        # Nos lo traemos a memoria, para no tener problemas con el cursor
+        cats = list(cats)
+        i=1
+
         for cat in cats:
             res = None
-            LOG.debug(f"Testing {cat.cat_name}")
+            LOG.debug(f"Testing {cat.cat_name} ({i}/{len(cats)})")
+            i+=1
             if cat.isBfDone(year,month) and not isForce:
                 LOG.debug(f"Already Done")
                 continue
