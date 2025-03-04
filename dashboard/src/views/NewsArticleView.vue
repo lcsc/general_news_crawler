@@ -27,23 +27,27 @@
           filter
           placeholder="Categorias"
           class="w-full md:w-80"
-          max-selected-labels="3"
+          :max-selected-labels="3"
         />
-        <Button icon="pi pi-search" severity="primary" text @click="loadFromServer" />
+        <Button
+          icon="pi pi-search"
+          severity="primary"
+          text
+          @click="loadFromServer(true)"
+        />
       </template>
     </Toolbar>
 
     <EasyDataTable
       :headers="headers"
       :items="data"
+      alternating
       v-model:server-options="serverOptions"
       :server-items-length="serverItemsLength"
       :loading="loading"
-      alternating
       :rowsPerPage="15"
       :rowsItems="[5, 10, 15, 20, 25]"
       buttons-pagination
-      show-current-page-report
     >
       <template #item-headline="item">
         <a :href="item.article_url" target="_blank">{{ item.article_headline }}</a>
@@ -99,7 +103,7 @@ const client = NewsClient.instance;
 onMounted(async () => {
   np.value = await client.getNewsPaper(ccaa, short_name);
   categories.value = await client.listCategories(ccaa, short_name);
-  loadFromServer();
+  loadFromServer(true);
 });
 
 const loading = ref(false);
@@ -115,9 +119,11 @@ const dates = ref();
 const selectedCategories = ref();
 const categories = ref<BcubeCategory[]>();
 
-const loadFromServer = async () => {
+const loadFromServer = async (reset:boolean) => {
   if (loading.value) return;
-
+  if(reset){
+    serverOptions.value.page=1
+  }
   loading.value = true;
   const query = serverOptions.value;
   if (dates.value && dates.value.length > 0) {
@@ -154,7 +160,7 @@ const loadFromServer = async () => {
 watch(
   serverOptions,
   (value) => {
-    loadFromServer();
+    loadFromServer(false);
   },
   { deep: true }
 );

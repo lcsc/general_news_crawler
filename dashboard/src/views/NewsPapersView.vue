@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from "vue";
+import { inject, onMounted, ref, watch } from "vue";
 
 import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vue";
 
-import type { Header, Item } from "vue3-easy-data-table";
+import type { Header, Item, ServerOptions } from "vue3-easy-data-table";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
 
 import { NewsClient } from "../newsclient/newsclient";
 import type { NewsPaper } from "@/newsclient/hey";
 
 const data = ref<NewsPaper[]>([]);
+const loading = ref(false);
+const serverItemsLength = ref(0);
+const serverOptions = ref<ServerOptions>({
+  page: 1,
+  rowsPerPage: 15,
+  sortBy: undefined,
+  sortType: undefined,
+});
 
 let state: NewsPaperSelectorModel = {
   ca: undefined,
@@ -35,21 +43,47 @@ const headers: Header[] = [
 
 const mainSize = inject("mainSize");
 
-async function update(state: NewsPaperSelectorModel) {
+async function update(state: NewsPaperSelectorModel, reset: boolean) {
+  if (loading.value) return;
+  if (reset) {
+    serverOptions.value.page = 1;
+  }
+  loading.value = true;
   let client = NewsClient.instance;
-  let response = await client.listNewsPapers(state);
-
-  data.value = response;
+  try {
+    let res = await client.listNewsPapers(state, serverOptions.value);
+    if (res.results) {
+      serverItemsLength.value = res.results;
+      data.value = res.items ? res.items : [];
+    } else {
+      serverItemsLength.value = 0;
+      data.value = [];
+    }
+  } catch (e) {
+    console.error(e);
+    serverItemsLength.value = 0;
+    data.value = [];
+    serverOptions.value.page = 1;
+  }
+  loading.value = false;
 }
 
 async function onStateChanged(_state: NewsPaperSelectorModel) {
   state = _state;
-  await update(state);
+  await update(state, true);
 }
 
 onMounted(async () => {
-  update(state);
+  update(state, true);
 });
+
+watch(
+  serverOptions,
+  (value) => {
+    update(state, false);
+  },
+  { deep: true }
+);
 </script>
 
 <script lang="ts"></script>
@@ -63,8 +97,12 @@ onMounted(async () => {
       :headers="headers"
       :items="data"
       alternating
+      v-model:server-options="serverOptions"
+      :server-items-length="serverItemsLength"
+      :loading="loading"
       :rowsPerPage="15"
       :rowsItems="[5, 10, 15, 20, 25]"
+      buttons-pagination
     >
       <template #item-real_url="item">
         <a :href="item.real_url" target="_blank">{{ item.real_url }}</a>

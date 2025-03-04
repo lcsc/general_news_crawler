@@ -83,6 +83,12 @@ export type NewsPaperListerInfo = {
     src: string;
 };
 
+export type NewsPaperResult = {
+    results?: number;
+    pages?: number;
+    items?: Array<NewsPaper>;
+};
+
 export type NewsSearchResult = {
     results?: number;
     pages?: number;
@@ -140,6 +146,10 @@ export type NpListData = {
     body?: never;
     path?: never;
     query?: {
+        page?: number | null;
+        rowsPerPage?: number | null;
+        sortBy?: string | Array<string> | null;
+        sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
         engine?: string | null;
         sub_engine?: string | null;
     };
@@ -159,7 +169,7 @@ export type NpListResponses = {
     /**
      * Successful Response
      */
-    200: Array<NewsPaper>;
+    200: NewsPaperResult;
 };
 
 export type NpListResponse = NpListResponses[keyof NpListResponses];
@@ -170,6 +180,10 @@ export type NpListCcaaData = {
         ccaa: string;
     };
     query?: {
+        page?: number | null;
+        rowsPerPage?: number | null;
+        sortBy?: string | Array<string> | null;
+        sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
         engine?: string | null;
         sub_engine?: string | null;
     };
@@ -189,7 +203,7 @@ export type NpListCcaaResponses = {
     /**
      * Successful Response
      */
-    200: Array<NewsPaper>;
+    200: NewsPaperResult;
 };
 
 export type NpListCcaaResponse = NpListCcaaResponses[keyof NpListCcaaResponses];
@@ -201,6 +215,10 @@ export type NpListCcaaProvData = {
         provincia: string;
     };
     query?: {
+        page?: number | null;
+        rowsPerPage?: number | null;
+        sortBy?: string | Array<string> | null;
+        sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
         engine?: string | null;
         sub_engine?: string | null;
     };
@@ -220,7 +238,7 @@ export type NpListCcaaProvResponses = {
     /**
      * Successful Response
      */
-    200: Array<NewsPaper>;
+    200: NewsPaperResult;
 };
 
 export type NpListCcaaProvResponse = NpListCcaaProvResponses[keyof NpListCcaaProvResponses];
@@ -289,6 +307,35 @@ export type NewsListResponses = {
 };
 
 export type NewsListResponse = NewsListResponses[keyof NewsListResponses];
+
+export type NewsGetData = {
+    body?: never;
+    path: {
+        ccaa: string;
+        short_name: string;
+        id: string;
+    };
+    query?: never;
+    url: '/news/{ccaa}/{short_name}/{id}';
+};
+
+export type NewsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type NewsGetError = NewsGetErrors[keyof NewsGetErrors];
+
+export type NewsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: NewsArticle | null;
+};
+
+export type NewsGetResponse = NewsGetResponses[keyof NewsGetResponses];
 
 export type CatListData = {
     body?: never;

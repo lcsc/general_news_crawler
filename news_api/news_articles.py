@@ -47,3 +47,9 @@ async def get_newspapers(ccaa:str,short_name:str,query: Annotated[NewsSearch, Qu
     LOG.info(f" found {ret.results}")
     ret.items = [serialize_document(item) for item in ret.items]
     return ret 
+
+@api_arti.get("/{ccaa}/{short_name}/{id}", operation_id="news_get")
+async def get_newspapers(ccaa:str,short_name:str,id:str)->Optional[NewsArticle]:
+    mongoQuery={"np_ccaa":ccaa,"np_name":short_name,"article_id":id}
+    ret = repos.articles.find_one_by(mongoQuery)
+    return ret
