@@ -10,4 +10,5 @@ export type NewsPaperSelectorModel = {
 export type NewsSearch = ServerOptions & {
   notBefore?: Date;
   notAfter?: Date;
-}
+  category?: Array<string>;
+};

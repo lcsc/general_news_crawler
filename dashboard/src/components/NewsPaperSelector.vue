@@ -13,7 +13,7 @@ const sub_engines = ref<string[] | undefined>([]);
 const state = ref<NewsPaperSelectorModel>({
   ca: undefined,
   provincia: undefined,
-  engine: "bCube",
+  engine: undefined,
   sub_engine: undefined,
 });
 
@@ -117,7 +117,7 @@ function onSubEngineChanged(data?: string) {
       </div>
     </template>
     <template #end>
-        <Button icon="pi pi-search" severity="primary" text />
-      </template>
+      <Button icon="pi pi-search" severity="primary" text />
+    </template>
   </Toolbar>
 </template>

@@ -4,14 +4,15 @@ from fastapi import FastAPI, APIRouter
 import news_crawler.common.consts
 from news_crawler import initLogger 
 
-
-from .newspapers import api_np
-from .news_articles import api_arti
-
 import logging
 initLogger()
 LOG = logging.getLogger(__name__)
 # uvicorn --reload --host 0.0.0.0 --port 5000 news_api.main:app
+
+# Importing the routers after logging is initialized
+from .newspapers import api_np
+from .news_articles import api_arti
+from .categories import api_cats
 
 app = FastAPI(openapi_prefix="/news/api")
 
@@ -32,3 +33,4 @@ async def get_options()->OptionsResult:
 
 app.include_router(api_np)
 app.include_router(api_arti)
+app.include_router(api_cats)

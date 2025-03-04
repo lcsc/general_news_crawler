@@ -29,6 +29,7 @@ class PaginationParams():
 class NewsSearch(BaseModel, PaginationParams):
     notBefore:Optional[datetime]=None
     notAfter:Optional[datetime]=None
+    category:Optional[List[str]]=None
 
 class NewsSearchResult(BaseModel):
     results:int=0

@@ -14,7 +14,7 @@ const data = ref<NewsPaper[]>([]);
 let state: NewsPaperSelectorModel = {
   ca: undefined,
   provincia: undefined,
-  engine: "bCube",
+  engine: undefined,
   sub_engine: undefined,
 };
 

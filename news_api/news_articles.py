@@ -34,6 +34,9 @@ async def get_newspapers(ccaa:str,short_name:str,query: Annotated[NewsSearch, Qu
     elif query.notAfter:
         mongoQuery.update({"date":{"$lt":query.notAfter}})
 
+    if query.category:
+        mongoQuery.update({"categories":{"$in":query.category}})
+
     ret.results = repos.articles.get_collection().count_documents(mongoQuery)
     ret.items = repos.articles.find_by(mongoQuery, 
                                        limit=query.rowsPerPage,

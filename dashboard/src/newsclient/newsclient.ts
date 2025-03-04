@@ -1,4 +1,11 @@
-import type { NewsPaper, ClientOptions, OptionsResult } from "./hey/types.gen";
+import type {
+  NewsPaper,
+  ClientOptions,
+  OptionsResult,
+  BcubeCategory,
+  NewsArticle,
+  NewsSearchResult,
+} from "./hey/types.gen";
 import type { Client } from "@hey-api/client-axios";
 import { createClient, createConfig } from "@hey-api/client-axios";
 import {
@@ -8,6 +15,7 @@ import {
   npListCcaa,
   npListCcaaProv,
   newsList,
+  catList,
 } from "./hey/sdk.gen";
 
 import type { NewsPaperSelectorModel, NewsSearch } from "../model/selectors";
@@ -128,43 +136,68 @@ export class NewsClient {
     throw new Error("Server error");
   }
 
-  public async getNewsPaper(ccaa:string,short_name:string):Promise<NewsPaper>{
+  public async getNewsPaper(
+    ccaa: string,
+    short_name: string
+  ): Promise<NewsPaper> {
     let res = await npGet({
-      client:this.apiClient, 
-      path:{
-        ccaa:ccaa,
-        short_name:short_name,
-        provincia:"*"
-      }
+      client: this.apiClient,
+      path: {
+        ccaa: ccaa,
+        short_name: short_name,
+        provincia: "*",
+      },
     });
-    if (res.data){
-      return res.data
+    if (res.data) {
+      return res.data;
     }
-    
+
     throw new Error("Server error");
   }
 
-
-  public async listArticles(ccaa:string,short_name:string, search:NewsSearch){
+  public async listArticles(
+    ccaa: string,
+    short_name: string,
+    search: NewsSearch
+  ): Promise<NewsSearchResult> {
     let res = await newsList({
-      client:this.apiClient, 
-      path:{
-        ccaa:ccaa,
-        short_name:short_name,
+      client: this.apiClient,
+      path: {
+        ccaa: ccaa,
+        short_name: short_name,
       },
-      query:{
-        page:search.page,
-        rowsPerPage:search.rowsPerPage,
-        sortBy:search.sortBy,
-        sortType:search.sortType,
-        notAfter:search.notAfter?.toISOString().slice(0, 10),
-        notBefore:search.notBefore?.toISOString().slice(0, 10)
-      }
+      query: {
+        page: search.page,
+        rowsPerPage: search.rowsPerPage,
+        sortBy: search.sortBy,
+        sortType: search.sortType,
+        notAfter: search.notAfter?.toISOString().slice(0, 10),
+        notBefore: search.notBefore?.toISOString().slice(0, 10),
+        category: search.category,
+      },
     });
-    if (res.data){
-      return res.data
+    if (res.data) {
+      return res.data;
     }
-    
+
+    throw new Error("Server error");
+  }
+
+  public async listCategories(
+    ccaa: string,
+    short_name: string
+  ): Promise<BcubeCategory[]> {
+    let res = await catList({
+      client: this.apiClient,
+      path: {
+        ccaa: ccaa,
+        short_name: short_name,
+      },
+    });
+    if (res.data) {
+      return res.data;
+    }
+
     throw new Error("Server error");
   }
 }
