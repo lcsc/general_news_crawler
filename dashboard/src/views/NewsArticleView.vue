@@ -5,7 +5,10 @@
         Mostrando Articulos de {{ router.params.ccaa }} -
         {{ router.params.short_name }}
       </p>
-    </Panel>
+      <p class="m-0">
+        <YearTimeLine :data="np.backfill" /></p
+    ></Panel>
+
     <Toolbar>
       <template #center>
         <FloatLabel variant="on">
@@ -82,6 +85,8 @@ import {
   MultiSelect,
 } from "primevue";
 import type { NewsSearch } from "@/model/selectors";
+
+import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
 const mainSize = inject("mainSize");
 
 const data = ref<NewsArticle[]>([]);
@@ -119,10 +124,10 @@ const dates = ref();
 const selectedCategories = ref();
 const categories = ref<BcubeCategory[]>();
 
-const loadFromServer = async (reset:boolean) => {
+const loadFromServer = async (reset: boolean) => {
   if (loading.value) return;
-  if(reset){
-    serverOptions.value.page=1
+  if (reset) {
+    serverOptions.value.page = 1;
   }
   loading.value = true;
   const query = serverOptions.value;
