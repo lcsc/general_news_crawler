@@ -17,9 +17,16 @@ import OpenLayersMap from "vue3-openlayers";
 
 import { NewsClient } from "./newsclient/newsclient";
 import Ripple from "primevue/ripple";
+import type { NewsPaperSelectorModel } from "./model/selectors";
 
 NewsClient.instance.getOptions();
 const mainSize = ref<number>(400);
+const npSelectorState = ref<NewsPaperSelectorModel>({
+  ca: undefined,
+  provincia: undefined,
+  engine: undefined,
+  sub_engine: undefined,
+});
 
 const app = createApp(App);
 app.component("EasyDataTable", Vue3EasyDataTable);
@@ -33,5 +40,6 @@ app.use(PrimeVue, {
 app.directive("ripple", Ripple);
 
 app.provide("mainSize", mainSize);
+app.provide("npSelectorState", npSelectorState);
 
 app.mount("#app");

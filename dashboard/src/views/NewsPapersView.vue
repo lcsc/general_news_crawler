@@ -2,6 +2,7 @@
 import { inject, onMounted, ref, watch } from "vue";
 
 import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vue";
+import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
 
 import type { Header, Item, ServerOptions } from "vue3-easy-data-table";
 import type { NewsPaperSelectorModel } from "@/model/selectors";
@@ -39,9 +40,11 @@ const headers: Header[] = [
   { text: "Primer Mes", value: "first_month", sortable: true },
   { text: "Primer Articulo", value: "first_article", sortable: true },
   { text: "Ultima Comprobacion", value: "last_check", sortable: true },
+  { text: "2024", value: "backfill", width: 150 },
 ];
 
 const mainSize = inject("mainSize");
+const npState = inject<NewsPaperSelectorModel>("npSelectorState");
 
 async function update(state: NewsPaperSelectorModel, reset: boolean) {
   if (loading.value) return;
@@ -74,6 +77,7 @@ async function onStateChanged(_state: NewsPaperSelectorModel) {
 }
 
 onMounted(async () => {
+  state = npState.value;
   update(state, true);
 });
 
@@ -124,6 +128,9 @@ watch(
           }"
           ><i class="pi pi-file" title="Abrir listado de Articulos"></i
         ></RouterLink>
+      </template>
+      <template #item-backfill="item">
+        <YearTimeLine v-if="item.backfill" :data="item.backfill" year="2024" short />
       </template>
     </EasyDataTable>
   </div>

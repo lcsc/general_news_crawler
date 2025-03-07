@@ -13,9 +13,10 @@ import {
 
 import type { SelectEvent } from "ol/interaction/Select";
 import type { Coordinate } from "ol/coordinate";
+import { useRouter } from "vue-router";
 
 import ccaaUrl from "../assets/communities.geojson?url";
-
+import { ccaa_codes } from "../model/gejson_codes";
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
 const mainSize = inject("mainSize");
@@ -31,6 +32,8 @@ const tooltipCoord = ref<Coordinate | null>(null);
 const map = ref<{ map: OlMap } | null>(null);
 const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
 const mapZoom = ref(6);
+const router = useRouter();
+const npState = inject("npSelectorState");
 
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
@@ -50,7 +53,13 @@ const selectInteactionFilter = (feature: Feature) => {
 
 function onMapClick(evt: MapBrowserEvent<UIEvent>) {
   if (selectedFeature.value != null) {
-    alert("Click on " + selectedFeature.value.get("name"));
+    const cod_ccaa = selectedFeature.value.get("cod_ccaa");
+    if (ccaa_codes[cod_ccaa] != undefined) {
+      npState.value.ca = ccaa_codes[cod_ccaa].id;
+      router.push({ name: "newspapers" });
+    } else {
+      alert("Click on " + selectedFeature.value.get("cod_ccaa"));
+    }
   }
 }
 
@@ -99,13 +108,8 @@ onMounted(() => {
       <Layers.OlVectorLayer>
         <Sources.OlSourceVector :url="ccaaUrl" :format="geoJson">
           <Styles.OlStyle>
-            <Styles.OlStyleStroke
-              color="gray"
-              :width="2"
-            ></Styles.OlStyleStroke>
-            <Styles.OlStyleFill
-              color="rgba(255,255,255,0.1)"
-            ></Styles.OlStyleFill>
+            <Styles.OlStyleStroke color="gray" :width="2"></Styles.OlStyleStroke>
+            <Styles.OlStyleFill color="rgba(255,255,255,0.1)"></Styles.OlStyleFill>
           </Styles.OlStyle>
         </Sources.OlSourceVector>
       </Layers.OlVectorLayer>

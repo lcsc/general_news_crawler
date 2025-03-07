@@ -6,7 +6,13 @@
         {{ router.params.short_name }}
       </p>
       <p class="m-0">
-        <YearTimeLine :data="np.backfill" /></p
+        <YearTimeLine
+          v-if="np.backfill"
+          :data="np.backfill"
+          showLabels
+          year="2024"
+          @clik-on="monthShortCut"
+        /></p
     ></Panel>
 
     <Toolbar>
@@ -161,6 +167,15 @@ const loadFromServer = async (reset: boolean) => {
   }
   loading.value = false;
 };
+
+function monthShortCut(month: string) {
+  dates.value = [
+    new Date(2024, parseInt(month) - 1, 1),
+    new Date(2024, parseInt(month), 0),
+  ];
+
+  loadFromServer(true);
+}
 
 watch(
   serverOptions,

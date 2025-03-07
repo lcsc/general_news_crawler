@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 
 import { Button, Select, Toolbar } from "primevue";
 
@@ -10,12 +10,7 @@ const ccaa = ref<string[] | undefined>([]);
 const provincias = ref<string[] | undefined>([]);
 const engines = ref<string[] | undefined>([]);
 const sub_engines = ref<string[] | undefined>([]);
-const state = ref<NewsPaperSelectorModel>({
-  ca: undefined,
-  provincia: undefined,
-  engine: undefined,
-  sub_engine: undefined,
-});
+const state = inject<NewsPaperSelectorModel>("npSelectorState");
 
 let provs_data: { [ca: string]: string[] };
 let all_provs: string[] = [];

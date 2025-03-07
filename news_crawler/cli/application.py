@@ -8,6 +8,10 @@ from ..core.model.repos import CrawlerRepos
 from ..bcube.fetcher.prensaiberica.pi_stats import PiAnalisys
 from ..common.tools import connect_mongo, get_server_name_from_url,get_short_name_from_server_name
 from ..wordpress.fetcher.wordpress import WordPressInfoExtractor
+from ..core.newspapers.lister import getIdBasic
+from ..common import consts
+
+import json
 import time 
 
 import logging
@@ -107,6 +111,80 @@ def print_backfill_stats():
         else :
             LOG.info(f"   {cat.cat_name} -> None")
 
+def getCaID(name:str)->str:
+    ca = getIdBasic(name)
+
+    if ca in consts.ccaa:
+        return ca
+    nobasic={
+        "castilla-lamancha":"castillamancha",
+        "castilla-leon":"castillaleon",
+        "cataluña":"catalunya",
+        "ceuta":"ceutamelilla",
+        "paisvasco":"pvasco",
+        "melilla":"ceutamelilla",
+        "comunidadvalenciana":"valencia",
+        "larioja":"rioja",
+    }
+    if ca in nobasic:
+        return nobasic[ca]
+    else:
+        LOG.error(f"Unknown ccaa: {name} - {ca}")
+    return ca
+
+def getProvId(ca:str, name:str):
+    prov = getProvName(name)
+
+    if prov in consts.provincias[ca]:
+        return prov
+    
+
+    for c in consts.provincias:
+        #puede que esta mal la ca
+        if prov in consts.provincias[c]:
+            #LOG.warning(f"     {name} encontrada en {c} en vez de {ca}")
+            return prov
+    nobasic={ "acoruña":"lacoruña",
+             "larioja":"rioja",
+             "illesbalears":"baleares",
+             "ourense":"orense",
+             "santacruzdetenerife":"santacruz",}
+    
+    ret=None
+
+    if prov in nobasic:
+        ret = nobasic[prov]
+    
+    for c in consts.provincias:
+        if ret in consts.provincias[c]:
+            return ret
+
+    LOG.error(f"Unknown provincia: {name} - {prov} - {ret} ({ca})")
+    return None
+
+def extract_ccas():
+    comunities= json.load(open("dashboard/src/assets/communities.geojson"))
+
+    ccass={}
+
+    for f in comunities["features"]:
+        name = f["properties"]["name"]
+        code = f["properties"]["cod_ccaa"]
+        #LOG.info(f"  '{code}':'{name}',")
+        ccass[code]={"name":name, "id":getCaID(name)}
+    
+    LOG.info(ccass)
+
+    provinces = json.load(open("dashboard/src/assets/provinces.geojson"))
+    provs = {}
+    for f in provinces["features"]:
+        name = f["properties"]["name"]
+        code = f["properties"]["cod_prov"]
+        cod_ccaa = f["properties"]["cod_ccaa"]
+        #LOG.info(f"  '{code}':'{name}',")
+        provs[code]={"name":name, "id":getProvId(ccass[cod_ccaa]["id"], name)}
+    LOG.info(provs)
+
 def main() -> int:
     exit_code: int = 0
 
@@ -121,7 +199,9 @@ def main() -> int:
     #build_provs()
     #build_pd_ursl
     #LOG.info(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
-    print_backfill_stats()
+    #print_backfill_stats()
+    extract_ccas()
+    
     return exit_code
 
     LOG.info("{")

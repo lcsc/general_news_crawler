@@ -1,19 +1,17 @@
 <template>
-  <svg viewBox="0 0 3760 100">
-    <title>Timeline 2022</title>
+  <svg :viewBox="viewBox">
+    <title v-if="year">Timeline {{ year }}</title>
     <g class="bars">
-      <rect fill="#0066FF" x="0" width="310" height="25"></rect>
-      <rect fill="#3366AA" x="320" width="280" height="25"></rect>
-      <rect fill="#99AA33" x="610" width="310" height="25"></rect>
-      <rect fill="#99EE33" x="930" width="300" height="25"></rect>
-      <rect fill="green" x="1240" width="310" height="25"></rect>
-      <rect fill="yellow" x="1560" width="300" height="25"></rect>
-      <rect fill="gold" x="1870" width="310" height="25"></rect>
-      <rect fill="cyan" x="2190" width="310" height="25"></rect>
-      <rect fill="orange" x="2510" width="300" height="25"></rect>
-      <rect fill="red" x="2820" width="310" height="25"></rect>
-      <rect fill="brown" x="3140" width="300" height="25"></rect>
-      <rect fill="white" x="3450" width="310" height="25"></rect>
+      <rect
+        v-for="item in display"
+        :fill="item.color"
+        :x="item.x"
+        :width="item.width"
+        height="25"
+        @click="emit('clikOn', item.clickId)"
+      >
+        <title v-if="item.msg">{{ item.msg }}</title>
+      </rect>
     </g>
     <g
       class="labels"
@@ -21,24 +19,28 @@
       text-anchor="middle"
       v-if="year != null && showLabels"
     >
-      <text fill="#747474" x="0" y="80" text-anchor="start">Enero</text>
-      <text fill="#747474" x="320" y="80" text-anchor="start">Febrero</text>
-      <text fill="#747474" x="610" y="80" text-anchor="start">Marzo</text>
-      <text fill="#747474" x="930" y="80" text-anchor="start">Abril</text>
-      <text fill="#747474" x="1240" y="80" text-anchor="start">Mayo</text>
-      <text fill="#747474" x="1560" y="80" text-anchor="start">Junio</text>
-      <text fill="#747474" x="1870" y="80" text-anchor="start">Julio</text>
-      <text fill="#747474" x="2190" y="80" text-anchor="start">Agosto</text>
-      <text fill="#747474" x="2510" y="80" text-anchor="start">Septiembre</text>
-      <text fill="#747474" x="2820" y="80" text-anchor="start">Octubre</text>
-      <text fill="#747474" x="3140" y="80" text-anchor="start">Noviembre</text>
-      <text fill="#747474" x="3450" y="80" text-anchor="start">Diciembre</text>
+      <text v-for="item in display" fill="#747474" :x="item.x" y="80" text-anchor="start">
+        {{ item.label }}
+      </text>
     </g>
   </svg>
 </template>
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, ref, onMounted } from "vue";
 import type { NewsPaperBackFill } from "@/src/newsclient/hey";
+
+type displayType = {
+  x: number;
+  width: number;
+  fill: string;
+  label: string;
+  color?: string;
+  msg?: string;
+  clickId?: string;
+}[];
+
+const display = ref<displayType>([]);
+const viewBox = ref<String>("0 0 3760 100");
 
 type dataType = {
   [key: string]: {
@@ -46,20 +48,91 @@ type dataType = {
   };
 };
 
-defineProps({
+const props = defineProps({
   data: {
-    type: Object as PropType<dataType> | null,
+    type: Object as PropType<dataType>,
     required: true,
   },
   year: {
-    type: Number | null,
+    type: [Number, String],
     required: false,
-    default: null,
+    default: undefined,
   },
   showLabels: {
     type: Boolean,
     required: false,
     default: false,
   },
+  short: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
+
+const months: { [key: string]: displayType } = {
+  "1": { label: "Enero", x: 0, width: 310 },
+  "2": { label: "Febrero", x: 320, width: 280 },
+  "3": { label: "Marzo", x: 610, width: 310 },
+  "4": { label: "Abril", x: 930, width: 300 },
+  "5": { label: "Mayo", x: 1240, width: 310 },
+  "6": { label: "Junio", x: 1560, width: 300 },
+  "7": { label: "Julio", x: 1870, width: 310 },
+  "8": { label: "Agosto", x: 2190, width: 310 },
+  "9": { label: "Septiembre", x: 2510, width: 300 },
+  "10": { label: "Octubre", x: 2820, width: 310 },
+  "11": { label: "Noviembre", x: 3140, width: 300 },
+  "12": { label: "Diciembre", x: 3450, width: 310 },
+};
+
+function updateDisplay() {
+  let d: displayType = [];
+  if (props.short) {
+    viewBox.value = "0 0 376 25";
+  }
+  if (props.year) {
+    for (let month in props.data[props.year.toString()]) {
+      let item: NewsPaperBackFill = props.data[props.year.toString()][month];
+      let obj: displayType = { ...months[month] };
+      obj.clickId = month;
+      if (item.status == "OK") {
+        obj.color = "green";
+      } else if (item.status == "ERROR") {
+        obj.color = "red";
+      } else if (item.status == "Pending") {
+        obj.color = "yellow";
+      } else {
+        obj.color = "white";
+      }
+      if (props.short) {
+        obj.x = obj.x / 10;
+        obj.width = obj.width / 10;
+      }
+      obj.msg = item.msg;
+      d.push(obj);
+    }
+  } else if (props.data) {
+    /*for (let year in props.data) {
+      let x = 0;
+      for (let day in props.data[month]) {
+        let item = props.data[month][day];
+        d.push({
+          x: x,
+          width: item.n_articles,
+          fill: item.color,
+          label: item.n_articles.toString(),
+        });
+        x += item.n_articles;
+      }
+    }*/
+  }
+  display.value = d;
+}
+
+onMounted(() => {
+  updateDisplay();
+});
+const emit = defineEmits<{
+  clikOn: [selected: string];
+}>();
 </script>
