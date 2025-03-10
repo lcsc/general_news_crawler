@@ -83,6 +83,8 @@ class BcubePiBackFiller(BcubeBackFiller):
             tp = cp -1
             if tp in context.pagesHelper:
                 LOG.debug("Found in helper")
+                if context.pagesHelper[tp]['location']>=0:
+                    return tp
                 LOG.debug(f"({cp}) {context.pagesHelper[cp]['location']}")
                 LOG.debug(f"({tp}) {context.pagesHelper[tp]['location']}")
                 return None #TODO este caso 
@@ -169,6 +171,10 @@ class BcubePiBackFiller(BcubeBackFiller):
         return NewsPaperBackFill(status=BfStatus_OK)
 
     def do_backFillNews_cat(self,context:BcubeArticleReaderContext,start:datetime,end:datetime )->NewsPaperBackFill:
+        if context.category.cat_name is None or context.category.cat_name == "":
+            LOG.error("Category is None")
+            return NewsPaperBackFill(status=BfStatus_OK,msg="Category is None")
+        	
         LOG.info(f"Backfilling cat {context.category.cat_name}")
         
         (sp,res) = self.searchStartPage(context,end)

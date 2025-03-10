@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "anseki.vscode-color",
+    "GitHub.copilot",
+    "sainoba.px-to-rem",
+    "bradlc.vscode-tailwindcss",
+    "Wscats.vue",
+    "Vue.volar",
+    "EditorConfig.EditorConfig",
+    "esbenp.prettier-vscode"
+  ]
+}

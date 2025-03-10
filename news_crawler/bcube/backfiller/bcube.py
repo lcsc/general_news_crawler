@@ -42,6 +42,7 @@ class BcubeBackFiller(BackFiller):
             if cat.isBfDone(year,month) and not isForce:
                 LOG.debug(f"Already Done")
                 continue
+        
             context = BcubeArticleReaderContext(np,cat)
             try:
                 res = self.do_backFillNews_cat(context,start,end)

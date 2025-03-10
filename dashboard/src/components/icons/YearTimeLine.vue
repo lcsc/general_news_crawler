@@ -26,7 +26,7 @@
   </svg>
 </template>
 <script setup lang="ts">
-import { defineProps, ref, onMounted } from "vue";
+import { defineProps, ref, onMounted, watch, computed } from "vue";
 import type { NewsPaperBackFill } from "@/src/newsclient/hey";
 
 type displayType = {
@@ -39,7 +39,7 @@ type displayType = {
   clickId?: string;
 }[];
 
-const display = ref<displayType>([]);
+//const display = ref<displayType>([]);
 const viewBox = ref<String>("0 0 3760 100");
 
 type dataType = {
@@ -85,34 +85,37 @@ const months: { [key: string]: displayType } = {
   "12": { label: "Diciembre", x: 3450, width: 310 },
 };
 
-function updateDisplay() {
-  let d: displayType = [];
-  if (props.short) {
-    viewBox.value = "0 0 376 25";
-  }
-  if (props.year) {
-    for (let month in props.data[props.year.toString()]) {
-      let item: NewsPaperBackFill = props.data[props.year.toString()][month];
-      let obj: displayType = { ...months[month] };
-      obj.clickId = month;
-      if (item.status == "OK") {
-        obj.color = "green";
-      } else if (item.status == "ERROR") {
-        obj.color = "red";
-      } else if (item.status == "Pending") {
-        obj.color = "yellow";
-      } else {
-        obj.color = "white";
-      }
-      if (props.short) {
-        obj.x = obj.x / 10;
-        obj.width = obj.width / 10;
-      }
-      obj.msg = item.msg;
-      d.push(obj);
+//function updateDisplay() {
+const display = computed({
+  get: () => {
+    console.log("updateDisplay");
+    let d: displayType = [];
+    if (props.short) {
+      viewBox.value = "0 0 376 25";
     }
-  } else if (props.data) {
-    /*for (let year in props.data) {
+    if (props.year) {
+      for (let month in props.data[props.year.toString()]) {
+        let item: NewsPaperBackFill = props.data[props.year.toString()][month];
+        let obj: displayType = { ...months[month] };
+        obj.clickId = month;
+        if (item.status == "OK") {
+          obj.color = "green";
+        } else if (item.status == "ERROR") {
+          obj.color = "red";
+        } else if (item.status == "Pending") {
+          obj.color = "yellow";
+        } else {
+          obj.color = "white";
+        }
+        if (props.short) {
+          obj.x = obj.x / 10;
+          obj.width = obj.width / 10;
+        }
+        obj.msg = item.msg;
+        d.push(obj);
+      }
+    } else if (props.data) {
+      /*for (let year in props.data) {
       let x = 0;
       for (let day in props.data[month]) {
         let item = props.data[month][day];
@@ -125,14 +128,24 @@ function updateDisplay() {
         x += item.n_articles;
       }
     }*/
-  }
-  display.value = d;
-}
+    }
+    return d;
+  },
+  set: () => {},
+});
 
 onMounted(() => {
-  updateDisplay();
+  //updateDisplay();
 });
 const emit = defineEmits<{
   clikOn: [selected: string];
 }>();
+
+// watch(
+//   [props.data, props.year],
+//   (value) => {
+//     alert("props.data changed");
+//   },
+//   { deep: true }
+// );
 </script>

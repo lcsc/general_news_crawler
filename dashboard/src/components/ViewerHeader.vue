@@ -2,24 +2,13 @@
   <div>Aqui iran imagenes</div>
   <Menubar :model="menuItems">
     <template #item="{ item, props, hasSubmenu }">
-      <router-link
-        v-if="item.route"
-        v-slot="{ href, navigate }"
-        :to="item.route"
-        custom
-      >
+      <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
         <a v-ripple :href="href" v-bind="props.action" @click="navigate">
           <span :class="item.icon" />
           <span>{{ item.label }}</span>
         </a>
       </router-link>
-      <a
-        v-else
-        v-ripple
-        :href="item.url"
-        :target="item.target"
-        v-bind="props.action"
-      >
+      <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
         <span :class="item.icon" />
         <span>{{ item.label }}</span>
         <span v-if="hasSubmenu" class="pi pi-fw pi-angle-down" />
@@ -48,8 +37,22 @@ const menuItems = ref<MenuItem[]>([
     label: "Noticias",
     icon: "pi pi-file",
     command: () => {
-      if (paperDialog.value) paperDialog.value.visible = true;
+      if (paperDialog.value) {
+        paperDialog.value.target = "articles";
+        paperDialog.value.visible = true;
+      }
     },
+  },
+  {
+    label: "Categorias",
+    icon: "pi pi-tags",
+    route: "/categories/andalucia/elcorreoweb",
+    /*command: () => {
+      if (paperDialog.value){
+        paperDialog.value.target = "categories";
+         paperDialog.value.visible = true;
+      }
+    }*/
   },
   {
     label: "Servicios",

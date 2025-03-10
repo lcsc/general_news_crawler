@@ -99,11 +99,11 @@ def build_pd_ursl():
         LOG.info("  },")
     LOG.info("}")
 
-def print_backfill_stats():
-    np:NewsPaper = repos.newspaper.find_one_by({"ccaa":"andalucia","short_name":"elcorreoweb"})
+def print_backfill_stats(ccaa:str=None,short_name:str=None):
+    np:NewsPaper = repos.newspaper.find_one_by({"ccaa":ccaa,"short_name":short_name})
     if np.backfill is not None:
         LOG.info(np.backfill["2024"]["12"])
-    cats:List[BcubeCategory] = repos.bCubeCategories.find_by({"ccaa":"andalucia","short_name":"elcorreoweb"})
+    cats:List[BcubeCategory] = repos.bCubeCategories.find_by({"ccaa":ccaa,"short_name":short_name})
     for cat in cats:
         if cat.backfill is not None:
             if cat.backfill['2024']['12'].status != "OK":
@@ -199,12 +199,11 @@ def main() -> int:
     #build_provs()
     #build_pd_ursl
     #LOG.info(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
-    #print_backfill_stats()
-    extract_ccas()
+    print_backfill_stats("andalucia","diariocordoba")
+    #extract_ccas()
     
     return exit_code
 
-    LOG.info("{")
 if __name__ == "__main__":
     start = time.time() 
     main()

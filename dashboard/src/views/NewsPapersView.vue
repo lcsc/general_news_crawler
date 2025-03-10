@@ -128,6 +128,13 @@ watch(
           }"
           ><i class="pi pi-file" title="Abrir listado de Articulos"></i
         ></RouterLink>
+        <RouterLink
+          :to="{
+            name: 'categories',
+            params: { ccaa: item.ccaa, short_name: item.short_name },
+          }"
+          ><i class="pi pi-tag" title="Abrir listado de Categorias"></i
+        ></RouterLink>
       </template>
       <template #item-backfill="item">
         <YearTimeLine v-if="item.backfill" :data="item.backfill" year="2024" short />
