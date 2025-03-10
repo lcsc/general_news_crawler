@@ -61,6 +61,7 @@ class BCubePrensaIbericaExtractor(BCubeExtractor):
             for l in links:
                 if not hasattr(l,'href'):continue
                 href= l['href']
+                if href == "" or len(href)==0: continue
                 #print(f"  {href} -> {np.real_url}")
                 cat_name= href.replace(np.real_url,"/")
                 ret.found_cats.append(cat_name)

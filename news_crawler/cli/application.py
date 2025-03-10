@@ -107,7 +107,12 @@ def print_backfill_stats(ccaa:str=None,short_name:str=None):
     for cat in cats:
         if cat.backfill is not None:
             if cat.backfill['2024']['12'].status != "OK":
-                LOG.info(f"   {cat.cat_name} -> {cat.backfill['2024']['12']}")
+                LOG.info(f"   '{cat.cat_name}' -> {cat.backfill['2024']['12']}")
+                if cat.cat_name=="":
+                    LOG.debug(f"     {cat.id}")
+                    LOG.error("No name")
+            else:
+                LOG.info(f"   '{cat.cat_name}' -> OK")
         else :
             LOG.info(f"   {cat.cat_name} -> None")
 
@@ -199,7 +204,8 @@ def main() -> int:
     #build_provs()
     #build_pd_ursl
     #LOG.info(get_short_name_from_server_name(get_server_name_from_url("https://www.cincodias.elpais.com/")))
-    print_backfill_stats("andalucia","diariocordoba")
+    #print_backfill_stats("andalucia","diariocordoba")
+    print_backfill_stats("valencia","levante-emv")
     #extract_ccas()
     
     return exit_code

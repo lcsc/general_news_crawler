@@ -171,7 +171,9 @@ class BcubePiBackFiller(BcubeBackFiller):
         return NewsPaperBackFill(status=BfStatus_OK)
 
     def do_backFillNews_cat(self,context:BcubeArticleReaderContext,start:datetime,end:datetime )->NewsPaperBackFill:
-        if context.category.cat_name is None or context.category.cat_name == "":
+        if context.category.cat_name is None \
+            or context.category.cat_name == "":
+
             LOG.error("Category is None")
             return NewsPaperBackFill(status=BfStatus_OK,msg="Category is None")
         	
