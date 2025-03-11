@@ -19,7 +19,7 @@ do
     docker $MDB  $MDB_CON -cbCubePIMetaData -q $q > data/$ca/bCubePIMetaData.json
     docker $MDB  $MDB_CON -cNewsArticles -q $q_np > data/$ca/NewsArticles.json
     #set +x
-    tar -cvzf backup/$TAG/data_$ca_$TAG.tar.gz data/$ca
+    tar -cvzf backup/$TAG/data_${ca}_${TAG}.tar.gz data/$ca
 
 done
 
