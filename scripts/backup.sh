@@ -1,5 +1,5 @@
 #!/bin/bash
-CCAA="andalucia aragon"
+CCAA="aragon cantabria catalunya galicia navarra rioja asturias baleares castillaleon ceutamelilla madrid valencia andalucia canarias castillamancha extremadura murcia pvasco"
 
 TAG=$(date +'%Y%m%d')
 
