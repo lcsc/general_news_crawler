@@ -6,6 +6,11 @@ TAG=$(date +'%Y%m%d')
 MDB="compose exec mongodb mongoexport"
 MDB_CON="--uri="mongodb://root:example@localhost/" --authenticationDatabase=admin -dgeneral_news"
 
+if [ $# -gt 0 ]; then
+    CCAA="$@"
+fi
+
+
 for ca in $CCAA;
 do
     echo "backup $ca"
