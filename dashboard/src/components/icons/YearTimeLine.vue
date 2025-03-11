@@ -88,7 +88,7 @@ const months: { [key: string]: displayType } = {
 //function updateDisplay() {
 const display = computed({
   get: () => {
-    console.log("updateDisplay");
+    //console.log("updateDisplay");
     let d: displayType = [];
     if (props.short) {
       viewBox.value = "0 0 376 25";

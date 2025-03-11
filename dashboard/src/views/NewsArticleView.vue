@@ -107,8 +107,8 @@ const router = useRoute();
 
 const np = ref<NewsPaper | undefined>();
 
-const ccaa: string = router.params.ccaa;
-const short_name: string = router.params.short_name;
+let ccaa: string;
+let short_name: string;
 const client = NewsClient.instance;
 
 onMounted(async () => {
@@ -150,6 +150,9 @@ const loadFromServer = async (reset: boolean) => {
   } else {
     query.category = undefined;
   }
+
+  ccaa = router.params.ccaa;
+  short_name = router.params.short_name;
   try {
     let res = await client.listArticles(ccaa, short_name, query);
 
@@ -184,4 +187,7 @@ watch(
   },
   { deep: true }
 );
+watch(router, (newValue) => {
+  loadFromServer(true);
+});
 </script>

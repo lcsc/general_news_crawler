@@ -52,7 +52,7 @@ export class NewsClient {
     selector: NewsPaperSelectorModel,
     pager: ServerOptions
   ): Promise<NewsPaperResult> {
-    let ret: NewsPaperResult={};
+    let ret: NewsPaperResult = {};
 
     if (selector.ca == undefined && selector.provincia == undefined) {
       let response = await npList({
@@ -60,10 +60,10 @@ export class NewsClient {
         query: {
           engine: selector.engine,
           sub_engine: selector.sub_engine,
-          page:pager?.page,
-          rowsPerPage:pager?.rowsPerPage,
-          sortBy:pager.sortBy,
-          sortType:pager.sortType
+          page: pager?.page,
+          rowsPerPage: pager?.rowsPerPage,
+          sortBy: pager?.sortBy,
+          sortType: pager?.sortType,
         },
       });
       if (response.data) ret = response.data;
@@ -76,10 +76,10 @@ export class NewsClient {
         query: {
           engine: selector.engine,
           sub_engine: selector.sub_engine,
-          page:pager?.page,
-          rowsPerPage:pager?.rowsPerPage,
-          sortBy:pager.sortBy,
-          sortType:pager.sortType
+          page: pager?.page,
+          rowsPerPage: pager?.rowsPerPage,
+          sortBy: pager?.sortBy,
+          sortType: pager?.sortType,
         },
       });
       if (response.data) ret = response.data;
@@ -93,10 +93,10 @@ export class NewsClient {
         query: {
           engine: selector.engine,
           sub_engine: selector.sub_engine,
-          page:pager?.page,
-          rowsPerPage:pager?.rowsPerPage,
-          sortBy:pager.sortBy,
-          sortType:pager.sortType
+          page: pager?.page,
+          rowsPerPage: pager?.rowsPerPage,
+          sortBy: pager?.sortBy,
+          sortType: pager?.sortType,
         },
       });
       if (response.data) ret = response.data;
@@ -111,9 +111,9 @@ export class NewsClient {
         query: {
           engine: selector.engine,
           sub_engine: selector.sub_engine,
-          rowsPerPage:pager?.rowsPerPage,
-          sortBy:pager.sortBy,
-          sortType:pager.sortType
+          rowsPerPage: pager?.rowsPerPage,
+          sortBy: pager.sortBy,
+          sortType: pager.sortType,
         },
       });
       if (response.data) ret = response.data;

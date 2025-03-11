@@ -45,11 +45,14 @@ async def get_newspapers_ccaa(ccaa:str,query: Annotated[NewsPaperSearch, Query()
 
 @api_np.get("/{ccaa}/{provincia}/", operation_id="np_list_ccaa_prov")
 async def get_newspaper_ccaa_provincia(ccaa:str,provincia:str,query: Annotated[NewsPaperSearch, Query()])->NewsPaperResult:
-    LOG.info("Entrando")
     mongoQuery=build_query(ccaa=ccaa,provincia=provincia,query=query)
     ret = NewsPaperResult()
     ret.results = repos.newspaper.get_collection().count_documents(mongoQuery)
-    ret.items = repos.newspaper.find_by(mongoQuery, 
+    if query.page==-1 and query.rowsPerPage==-1:
+        ret.items = repos.newspaper.find_by(mongoQuery,
+                                            sort=buildSort(query.sortBy,query.sortType))
+    else:
+        ret.items = repos.newspaper.find_by(mongoQuery, 
                                        limit=query.rowsPerPage,
                                        skip=query.rowsPerPage*(query.page-1),
                                        sort=buildSort(query.sortBy,query.sortType))

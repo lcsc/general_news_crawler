@@ -71,8 +71,9 @@ import { type NewsPaper } from "@/newsclient/hey";
 import { useRouter } from "vue-router";
 
 const visible = ref(false);
+const target = ref<string>("news");
 
-defineExpose({ visible });
+defineExpose({ visible, target });
 
 const state = ref<NewsPaperSelectorModel>({
   ca: undefined,
@@ -110,7 +111,11 @@ onMounted(async () => {
 
 async function updateNewspapers() {
   if (state.value.ca && state.value.provincia) {
-    newspapers.value = await NewsClient.instance.listNewsPapers(state.value);
+    const res = await NewsClient.instance.listNewsPapers(state.value, {
+      page: -1,
+      rowsPerPage: -1,
+    });
+    newspapers.value = res.items;
     newspaper.value = undefined;
   } else {
     newspapers.value = [];
@@ -150,7 +155,7 @@ function goToNews() {
   if (newspaper.value) {
     visible.value = false;
     router.push({
-      name: "news",
+      name: target.value,
       params: {
         ccaa: newspaper.value.ccaa,
         short_name: newspaper.value.short_name,

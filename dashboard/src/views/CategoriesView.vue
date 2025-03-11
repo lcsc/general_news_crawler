@@ -74,8 +74,8 @@ const np = ref<NewsPaper | undefined>();
 const categories = ref<BcubeCategory[]>([]);
 
 const router = useRoute();
-const ccaa: string = router.params.ccaa;
-const short_name: string = router.params.short_name;
+let ccaa: string;
+let short_name: string;
 const client = NewsClient.instance;
 
 const headers: Header[] = [
@@ -89,6 +89,17 @@ const headers: Header[] = [
 ];
 
 onMounted(async () => {
+  ccaa = router.params.ccaa;
+  short_name = router.params.short_name;
+
+  np.value = await client.getNewsPaper(ccaa, short_name);
+  data.value = await client.listCategories(ccaa, short_name);
+  //  loadFromServer(true);
+});
+watch(router, async () => {
+  ccaa = router.params.ccaa;
+  short_name = router.params.short_name;
+
   np.value = await client.getNewsPaper(ccaa, short_name);
   data.value = await client.listCategories(ccaa, short_name);
   //  loadFromServer(true);

@@ -38,7 +38,7 @@ const menuItems = ref<MenuItem[]>([
     icon: "pi pi-file",
     command: () => {
       if (paperDialog.value) {
-        paperDialog.value.target = "articles";
+        paperDialog.value.target = "news";
         paperDialog.value.visible = true;
       }
     },
@@ -46,13 +46,13 @@ const menuItems = ref<MenuItem[]>([
   {
     label: "Categorias",
     icon: "pi pi-tags",
-    route: "/categories/andalucia/elcorreoweb",
-    /*command: () => {
-      if (paperDialog.value){
+    // route: "/categories/andalucia/elcorreoweb",
+    command: () => {
+      if (paperDialog.value) {
         paperDialog.value.target = "categories";
-         paperDialog.value.visible = true;
+        paperDialog.value.visible = true;
       }
-    }*/
+    },
   },
   {
     label: "Servicios",
