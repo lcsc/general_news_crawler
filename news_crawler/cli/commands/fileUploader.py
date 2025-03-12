@@ -19,7 +19,7 @@ class UploaderCmd(CommonCmd):
             if self.general.short_name is not None:
                 path+="/"+self.general.short_name
 
-        path="data/galicia/laopinioncoruna"
+#        path="data/galicia/laopinioncoruna"
         repos = self.connectMongo()
         files=glob.glob(path+"/**/*", recursive=True)
         for file in files:
