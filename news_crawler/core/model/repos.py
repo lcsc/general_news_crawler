@@ -2,14 +2,16 @@ from pymongo import database
 from .newspaper import NewsPaperRepository,NewsArticleRepository
 from ...bcube.model.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
 from ...bcube.model.bcube import BcubeCategoryRepository
-
+from .files import FileDb,FilesRepository
 import logging
 LOG = logging.getLogger(__name__)
 
-from datetime import datetime,timezone
+from datetime import datetime,timezone,timedelta
 
 import tarfile
 import os
+
+
 
 class CrawlerRepos:
     _instance = None
@@ -36,10 +38,38 @@ class CrawlerRepos:
         self.bCubeCategories=BcubeCategoryRepository(database=db)
         self.bCubePiMd = BcubePiMDRepository(database=db)
         self.piStats= PrensaIbericaStatRepository(database=db)
+        self.files=FilesRepository(database=db)
 
         return self
     
     def save_file(self, path:str, contents:any, group:str, dateNewer:datetime):
+        
+        if isinstance(dateNewer,str):
+            dateNewer=datetime.fromisoformat(dateNewer)
+        if dateNewer.tzinfo is None:
+            dateNewer=dateNewer.replace(tzinfo=timezone.utc)
+
+        file = self.files.find_one_by({"path":path,"group":group})
+        if file is None:
+            file = FileDb(path=path,group=group,format="string",contents=contents,modDate=dateNewer)
+            self.files.save(file)
+            return
+        
+        if file.modDate.tzinfo is None:
+            file.modDate=file.modDate.replace(tzinfo=timezone.utc)
+
+
+        if dateNewer > file.modDate \
+            and (dateNewer - file.modDate ) > timedelta(seconds=1):
+            
+            LOG.debug(f"Updating ... {path}")
+      
+            file.contents=contents
+            file.modDate=dateNewer
+            self.files.save(file)
+        pass
+
+    def save_file_tar(self, path:str, contents:any, group:str, dateNewer:datetime):
         
 
         dir = os.path.dirname(path)

@@ -9,6 +9,7 @@ from .commands import launchMP_CA
 
 from .commands import ListerArgs,ListerCmd
 from .commands import ExtractArgs, ExtractCmd
+from .commands import UploaderCmd
 
 from ..core.newspapers import Listers
 
@@ -128,4 +129,11 @@ def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:i
     filler= BackFillCmd(general=obj,args=args)
     filler.backFillNews()
     LOG.info(f"Total Duration: {datetime.now()-start}")
-    
+
+
+
+@main.command()
+@click.pass_obj
+def save_dir(obj:GeneralOptions):
+    cmd = UploaderCmd(obj)
+    cmd.upload()

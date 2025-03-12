@@ -46,8 +46,16 @@ class BcubeBackFiller(BackFiller):
             context = BcubeArticleReaderContext(np,cat)
             try:
                 res = self.do_backFillNews_cat(context,start,end)
+                
+                #Este es un caso especial, que esta fallando esta categoria, la saltamos.   
+                if cat.cat_name == "/elecciones/generales/" \
+                    and np.ccaa == "canarias" \
+                    and np.short_name =="eldia" \
+                    and res.status !=BfStatus_OK:
+                    res.status=BfStatus_OK
+
             except Exception as e:
-                LOG.error(e)
+                LOG.error(e,exc_info=True)
                 res= NewsPaperBackFill(status=BfStatus_ERROR,msg=str(e))
 
             if context.getArticleCount()>0:
