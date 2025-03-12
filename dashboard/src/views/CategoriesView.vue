@@ -55,7 +55,7 @@ import type { Header, Item, ServerOptions } from "vue3-easy-data-table";
 
 import { NewsClient } from "../newsclient/newsclient";
 import { useRoute } from "vue-router";
-import type { NewsPaper } from "@/newsclient/hey";
+import type { NewsPaper, BcubeCategory } from "@/newsclient/hey";
 import { DatePicker, Panel, Toolbar, Button, FloatLabel, MultiSelect } from "primevue";
 
 const mainSize = inject("mainSize");
@@ -88,17 +88,28 @@ const headers: Header[] = [
   { text: "2024", value: "backfill", width: 150 },
 ];
 
+function readRouter() {
+  if (router.params.ccaa instanceof Array) {
+    ccaa = router.params.ccaa[0];
+  } else {
+    ccaa = router.params.ccaa;
+  }
+  if (router.params.short_name instanceof Array) {
+    short_name = router.params.short_name[0];
+  } else {
+    short_name = router.params.short_name;
+  }
+}
+
 onMounted(async () => {
-  ccaa = router.params.ccaa;
-  short_name = router.params.short_name;
+  readRouter();
 
   np.value = await client.getNewsPaper(ccaa, short_name);
   data.value = await client.listCategories(ccaa, short_name);
   //  loadFromServer(true);
 });
 watch(router, async () => {
-  ccaa = router.params.ccaa;
-  short_name = router.params.short_name;
+  readRouter();
 
   np.value = await client.getNewsPaper(ccaa, short_name);
   data.value = await client.listCategories(ccaa, short_name);

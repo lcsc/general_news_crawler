@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, inject, type Ref } from "vue";
 
 import { Button, Select, Toolbar } from "primevue";
 
@@ -10,12 +10,14 @@ const ccaa = ref<string[] | undefined>([]);
 const provincias = ref<string[] | undefined>([]);
 const engines = ref<string[] | undefined>([]);
 const sub_engines = ref<string[] | undefined>([]);
-const state = inject<NewsPaperSelectorModel>("npSelectorState");
+const state = inject<Ref<NewsPaperSelectorModel>>("npSelectorState");
 
 let provs_data: { [ca: string]: string[] };
 let all_provs: string[] = [];
 
 function update_provs() {
+  if (state == undefined) return;
+
   if (state.value.ca == null) {
     provincias.value = all_provs;
   } else {
@@ -50,6 +52,8 @@ const emit = defineEmits<{
 }>();
 
 function onCcaaChanged(data?: string) {
+  if (state == undefined) return;
+
   state.value.ca = data;
   state.value.provincia = undefined;
   update_provs();
@@ -57,16 +61,19 @@ function onCcaaChanged(data?: string) {
 }
 
 function onProvinciaChanged(data?: string) {
+  if (state == undefined) return;
   state.value.provincia = data;
   emit("stateChannged", state.value);
 }
 
 function onEngineChanged(data?: string) {
+  if (state == undefined) return;
   state.value.engine = data;
   emit("stateChannged", state.value);
 }
 
 function onSubEngineChanged(data?: string) {
+  if (state == undefined) return;
   state.value.sub_engine = data;
   emit("stateChannged", state.value);
 }
@@ -76,6 +83,7 @@ function onSubEngineChanged(data?: string) {
     <template #center>
       <div style="display: inline-flex">
         <Select
+          v-if="state"
           v-model="state.ca"
           :options="ccaa"
           showClear
@@ -85,6 +93,7 @@ function onSubEngineChanged(data?: string) {
         />
 
         <Select
+          v-if="state"
           v-model="state.provincia"
           :options="provincias"
           showClear
@@ -93,6 +102,7 @@ function onSubEngineChanged(data?: string) {
           @update:modelValue="onProvinciaChanged"
         />
         <Select
+          v-if="state"
           v-model="state.engine"
           :options="engines"
           showClear
@@ -102,6 +112,7 @@ function onSubEngineChanged(data?: string) {
         />
 
         <Select
+          v-if="state"
           v-model="state.sub_engine"
           :options="sub_engines"
           showClear

@@ -1,6 +1,12 @@
 // Description: This file contains the codes of the CCAA in Spain.
 // Date of creation: 14/06/2020
-export const ccaa_codes = {
+export type Ccaa_Code = {
+  name: string;
+  id: string;
+};
+export type Ccaa_CodeDict = { [key: string]: Ccaa_Code };
+
+export const ccaa_codes: Ccaa_CodeDict = {
   "07": { name: "Castilla-Leon", id: "castillaleon" },
   "09": { name: "Cataluña", id: "catalunya" },
   "18": { name: "Ceuta", id: "ceutamelilla" },
@@ -22,7 +28,7 @@ export const ccaa_codes = {
   "16": { name: "Pais Vasco", id: "pvasco" },
 };
 
-export const province_codes = {
+export const province_codes: Ccaa_CodeDict = {
   "07": { name: "Illes Balears", id: "baleares" },
   "33": { name: "Asturias", id: "asturias" },
   "15": { name: "A Coruña", id: "lacoruña" },

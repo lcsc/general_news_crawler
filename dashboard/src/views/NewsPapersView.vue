@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, watch } from "vue";
+import { inject, onMounted, ref, watch, type Ref } from "vue";
 
 import { default as NewsPaperSelector } from "../components/NewsPaperSelector.vue";
 import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
@@ -44,7 +44,7 @@ const headers: Header[] = [
 ];
 
 const mainSize = inject("mainSize");
-const npState = inject<NewsPaperSelectorModel>("npSelectorState");
+const npState = inject<Ref<NewsPaperSelectorModel>>("npSelectorState");
 
 async function update(state: NewsPaperSelectorModel, reset: boolean) {
   if (loading.value) return;
@@ -77,7 +77,7 @@ async function onStateChanged(_state: NewsPaperSelectorModel) {
 }
 
 onMounted(async () => {
-  state = npState.value;
+  if (npState) state = npState.value;
   update(state, true);
 });
 

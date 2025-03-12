@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Feature, type Map as OlMap, type MapBrowserEvent } from "ol";
 import { fromLonLat } from "ol/proj";
-import { inject, onMounted, provide, ref } from "vue";
+import { inject, onMounted, provide, ref, type Ref } from "vue";
 import {
   Map,
   Layers,
@@ -17,6 +17,7 @@ import { useRouter } from "vue-router";
 
 import ccaaUrl from "../assets/communities.geojson?url";
 import { ccaa_codes } from "../model/gejson_codes";
+import type { NewsPaperSelectorModel } from "@/model/selectors";
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
 const mainSize = inject("mainSize");
@@ -33,7 +34,7 @@ const map = ref<{ map: OlMap } | null>(null);
 const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
 const mapZoom = ref(6);
 const router = useRouter();
-const npState = inject("npSelectorState");
+const npState = inject<Ref<NewsPaperSelectorModel>>("npSelectorState");
 
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
@@ -52,6 +53,8 @@ const selectInteactionFilter = (feature: Feature) => {
 };
 
 function onMapClick(evt: MapBrowserEvent<UIEvent>) {
+  if (npState == undefined) return;
+
   if (selectedFeature.value != null) {
     const cod_ccaa = selectedFeature.value.get("cod_ccaa");
     if (ccaa_codes[cod_ccaa] != undefined) {

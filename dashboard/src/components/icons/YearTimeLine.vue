@@ -26,21 +26,28 @@
   </svg>
 </template>
 <script setup lang="ts">
-import { defineProps, ref, onMounted, watch, computed } from "vue";
-import type { NewsPaperBackFill } from "@/src/newsclient/hey";
+import {
+  defineProps,
+  ref,
+  onMounted,
+  watch,
+  computed,
+  type PropType,
+} from "vue";
+import type { NewsPaperBackFill } from "@/newsclient/hey";
 
 type displayType = {
   x: number;
   width: number;
-  fill: string;
+  fill?: string;
   label: string;
   color?: string;
   msg?: string;
   clickId?: string;
-}[];
+};
 
 //const display = ref<displayType>([]);
-const viewBox = ref<String>("0 0 3760 100");
+const viewBox = ref<string>("0 0 3760 100");
 
 type dataType = {
   [key: string]: {
@@ -89,7 +96,7 @@ const months: { [key: string]: displayType } = {
 const display = computed({
   get: () => {
     //console.log("updateDisplay");
-    let d: displayType = [];
+    let d: displayType[] = [];
     if (props.short) {
       viewBox.value = "0 0 376 25";
     }
@@ -111,7 +118,11 @@ const display = computed({
           obj.x = obj.x / 10;
           obj.width = obj.width / 10;
         }
-        obj.msg = item.msg;
+        if (item.msg == null) {
+          obj.msg = undefined;
+        } else {
+          obj.msg = item.msg;
+        }
         d.push(obj);
       }
     } else if (props.data) {
@@ -138,7 +149,7 @@ onMounted(() => {
   //updateDisplay();
 });
 const emit = defineEmits<{
-  clikOn: [selected: string];
+  clikOn: [selected: string | undefined];
 }>();
 
 // watch(

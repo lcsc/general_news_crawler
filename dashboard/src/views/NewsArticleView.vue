@@ -93,6 +93,7 @@ import {
 import type { NewsSearch } from "@/model/selectors";
 
 import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
+import { StringType } from "ol/expr/expression";
 const mainSize = inject("mainSize");
 
 const data = ref<NewsArticle[]>([]);
@@ -111,7 +112,21 @@ let ccaa: string;
 let short_name: string;
 const client = NewsClient.instance;
 
+function readRouter() {
+  if (router.params.ccaa instanceof Array) {
+    ccaa = router.params.ccaa[0];
+  } else {
+    ccaa = router.params.ccaa;
+  }
+  if (router.params.short_name instanceof Array) {
+    short_name = router.params.short_name[0];
+  } else {
+    short_name = router.params.short_name;
+  }
+}
+
 onMounted(async () => {
+  readRouter();
   np.value = await client.getNewsPaper(ccaa, short_name);
   categories.value = await client.listCategories(ccaa, short_name);
   loadFromServer(true);
@@ -127,7 +142,7 @@ const serverOptions = ref<NewsSearch>({
 });
 
 const dates = ref();
-const selectedCategories = ref();
+const selectedCategories = ref<BcubeCategory[]>();
 const categories = ref<BcubeCategory[]>();
 
 const loadFromServer = async (reset: boolean) => {
@@ -151,8 +166,7 @@ const loadFromServer = async (reset: boolean) => {
     query.category = undefined;
   }
 
-  ccaa = router.params.ccaa;
-  short_name = router.params.short_name;
+  readRouter();
   try {
     let res = await client.listArticles(ccaa, short_name, query);
 
@@ -171,11 +185,15 @@ const loadFromServer = async (reset: boolean) => {
   loading.value = false;
 };
 
-function monthShortCut(month: string) {
-  dates.value = [
-    new Date(2024, parseInt(month) - 1, 1),
-    new Date(2024, parseInt(month), 0),
-  ];
+function monthShortCut(month: string | undefined) {
+  if (month) {
+    dates.value = [
+      new Date(2024, parseInt(month) - 1, 1),
+      new Date(2024, parseInt(month), 0),
+    ];
+  } else {
+    dates.value = undefined;
+  }
 
   loadFromServer(true);
 }
