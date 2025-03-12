@@ -1,4 +1,5 @@
 from pymongo import database
+from pymongo.synchronous.collection import Collection
 from .newspaper import NewsPaperRepository,NewsArticleRepository
 from ...bcube.model.prensaiberica import BcubePiMDRepository, PrensaIbericaStatRepository
 from ...bcube.model.bcube import BcubeCategoryRepository
@@ -38,7 +39,7 @@ class CrawlerRepos:
         self.bCubeCategories=BcubeCategoryRepository(database=db)
         self.bCubePiMd = BcubePiMDRepository(database=db)
         self.piStats= PrensaIbericaStatRepository(database=db)
-        self.files=FilesRepository(database=db)
+        self.db=db
 
         return self
     
@@ -49,24 +50,31 @@ class CrawlerRepos:
         if dateNewer.tzinfo is None:
             dateNewer=dateNewer.replace(tzinfo=timezone.utc)
 
-        file = self.files.find_one_by({"path":path,"group":group})
+        repo_name=path.split("/")
+        repo_name=f"{repo_name[0]}_{repo_name[1]}"
+        #LOG.debug(f"Using {repo_name}")
+        files:Collection = self.db[repo_name]
+        file = files.find_one({"path":path,"group":group})
+        
+
+
         if file is None:
-            file = FileDb(path=path,group=group,format="string",contents=contents,modDate=dateNewer)
-            self.files.save(file)
+            file = {"path":path,"group":group,"format":"string","contents":contents,"modDate":dateNewer}
+            files.insert_one(file)
             return
         
-        if file.modDate.tzinfo is None:
-            file.modDate=file.modDate.replace(tzinfo=timezone.utc)
+        if file["modDate"].tzinfo is None:
+            file["modDate"]=file["modDate"].replace(tzinfo=timezone.utc)
 
 
-        if dateNewer > file.modDate \
-            and (dateNewer - file.modDate ) > timedelta(seconds=1):
+        if dateNewer > file["modDate"] \
+            and (dateNewer - file["modDate"] ) > timedelta(seconds=1):
             
             LOG.debug(f"Updating ... {path}")
       
-            file.contents=contents
-            file.modDate=dateNewer
-            self.files.save(file)
+            file["contents"]=contents
+            file["modDate"]=dateNewer
+            files.update_one(file)
         pass
 
     def save_file_tar(self, path:str, contents:any, group:str, dateNewer:datetime):
