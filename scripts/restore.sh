@@ -33,7 +33,7 @@ do
 
     q="{\"ccaa\":\"$ca\"}"
     q_np="{\"np_ccaa\":\"$ca\"}"
-    set -x
+    #set -x
     docker $MSH $MSH_CON -eval "db.NewsPapers.deleteMany(${q})"
     docker $MSH $MSH_CON -eval "db.bCubeCategory.deleteMany(${q})"
     docker $MSH $MSH_CON -eval "db.bCubePIMetaData.deleteMany(${q})"
@@ -43,6 +43,6 @@ do
     cat data/${ca}/bCubeCategory.json | docker $MDB $MDB_CON -cbCubeCategory
     cat data/${ca}/bCubePIMetaData.json | docker $MDB $MDB_CON -cbCubePIMetaData
     cat data/${ca}/NewsArticles.json | docker $MDB $MDB_CON -cNewsArticles
-    
-    set +x
+    cat data/${ca}/data_${ca}.json | docker $MDB $MDB_CON -cdata_${ca} --drop
+    #set +x
 done

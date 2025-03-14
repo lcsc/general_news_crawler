@@ -16,6 +16,7 @@ do
     echo "backup $ca"
     
     mkdir -p backup/$TAG
+    mkdir -p data/$ca
     q="{\"ccaa\":\"$ca\"}"
     q_np="{\"np_ccaa\":\"$ca\"}"
     #set -x
@@ -23,6 +24,7 @@ do
     docker $MDB  $MDB_CON -cbCubeCategory -q $q > data/$ca/bCubeCategory.json
     docker $MDB  $MDB_CON -cbCubePIMetaData -q $q > data/$ca/bCubePIMetaData.json
     docker $MDB  $MDB_CON -cNewsArticles -q $q_np > data/$ca/NewsArticles.json
+    docker $MDB  $MDB_CON -cdata_${ca} > data/$ca/data_${ca}.json
     #set +x
     tar -cvzf backup/$TAG/data_${ca}_${TAG}.tar.gz data/$ca
 

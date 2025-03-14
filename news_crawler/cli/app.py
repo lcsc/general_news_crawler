@@ -131,9 +131,23 @@ def backfillnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:i
     LOG.info(f"Total Duration: {datetime.now()-start}")
 
 
+def do_Upload(obj:GeneralOptions,args:CommonArgs):
+    cmd = UploaderCmd(obj)
+    cmd.upload()
+
 
 @main.command()
 @click.pass_obj
 def save_dir(obj:GeneralOptions):
-    cmd = UploaderCmd(obj)
-    cmd.upload()
+    start = datetime.now()
+
+    LOG.info("Uploading")
+    args = DetectArgs()
+
+    if obj.ccaa is None:
+        launchMP_CA(do_Upload,obj,args)
+    else:
+        do_Upload(obj,args)
+
+    LOG.info(f"Total Duration: {datetime.now()-start}")
+
