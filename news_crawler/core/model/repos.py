@@ -74,7 +74,11 @@ class CrawlerRepos:
       
             file["contents"]=contents
             file["modDate"]=dateNewer
-            files.update_one(file)
+            if "_id" in file:
+                files.replace_one({"_id":file["_id"]},file)
+            else:
+                LOG.error(f"No id in file {file.keys()}")
+                raise SystemError("file to update without _id")
         pass
 
     def save_file_tar(self, path:str, contents:any, group:str, dateNewer:datetime):
