@@ -1,0 +1,5 @@
+https://www.leonoticias.com/ajax/v22/archive?type-crono=archive-interval&page=1&device=desktop&archive-text=&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=01&archive-startMonth=12&archive-startYear=2024&archive-endDay=31&archive-endMonth=12&archive-endYear=2024&archive-format=
+
+
+https://www.leonoticias.com/ajax/v22/archive?type-crono=archive-text&page=1&device=desktop&archive-text=leon&archive-date=20241201-20241231&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&date=20241201-20241231&section[]=leon&section[]=espana&section[]=culturas
+cat vocento.json | jq ".html" -r> vocento.html

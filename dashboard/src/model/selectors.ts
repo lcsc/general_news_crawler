@@ -12,3 +12,7 @@ export type NewsSearch = ServerOptions & {
   notAfter?: Date;
   category?: Array<string>;
 };
+
+export type MapConfigOptions = {
+  layer: "Comunidades" | "Provincias" | "Municipios";
+};

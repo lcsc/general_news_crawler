@@ -9,6 +9,7 @@ import {
   Styles,
   type Vue3OpenlayersGlobalOptions,
   Interactions,
+  MapControls,
 } from "vue3-openlayers";
 
 import type { SelectEvent } from "ol/interaction/Select";
@@ -16,8 +17,14 @@ import type { Coordinate } from "ol/coordinate";
 import { useRouter } from "vue-router";
 
 import ccaaUrl from "../assets/communities.geojson?url";
+import provsUrl from "../assets/provinces.geojson?url";
 import { ccaa_codes } from "../model/gejson_codes";
-import type { NewsPaperSelectorModel } from "@/model/selectors";
+import {
+  type MapConfigOptions,
+  type NewsPaperSelectorModel,
+} from "@/model/selectors";
+import MapConfigDialog from "@/components/dialogs/MapConfigDialog.vue";
+
 const selectConditions = inject("ol-selectconditions");
 const format = inject("ol-format");
 const mainSize = inject("mainSize");
@@ -35,6 +42,13 @@ const mapCenter = ref(fromLonLat([-3.7038, 40.4168], "EPSG:4326"));
 const mapZoom = ref(6);
 const router = useRouter();
 const npState = inject<Ref<NewsPaperSelectorModel>>("npSelectorState");
+
+type mcdType = InstanceType<typeof MapConfigDialog>;
+const configDialog = ref<mcdType | null>(null);
+const config: Ref<MapConfigOptions> | undefined = ref<MapConfigOptions>({
+  layer: "Comunidades",
+});
+provide("MapConfig", config);
 
 const featureSelected = (event: SelectEvent) => {
   let selectedArray = event.selected;
@@ -66,6 +80,10 @@ function onMapClick(evt: MapBrowserEvent<UIEvent>) {
   }
 }
 
+function handleClick(event: PointerEvent) {
+  if (configDialog.value) configDialog.value.visible = true;
+}
+
 const getCoord = (event: MapBrowserEvent<UIEvent>) => {
   if (event.dragging) {
     return;
@@ -88,6 +106,7 @@ onMounted(() => {
       :style="{ height: mainSize + 'px' }"
       id="map"
       @click="onMapClick"
+      :controls="[]"
     >
       <Map.OlView :center="mapCenter" :zoom="mapZoom" projection="EPSG:4326" />
       <Layers.OlTileLayer>
@@ -108,8 +127,17 @@ onMounted(() => {
       <!-- <Interactions.OlInteractionPointer @move="getCoord($event)"> 
       </Interactions.OlInteractionPointer>-->
 
-      <Layers.OlVectorLayer>
+      <Layers.OlVectorLayer :visible="config.layer == 'Comunidades'">
         <Sources.OlSourceVector :url="ccaaUrl" :format="geoJson">
+          <Styles.OlStyle>
+            <Styles.OlStyleStroke color="gray" :width="2"></Styles.OlStyleStroke>
+            <Styles.OlStyleFill color="rgba(255,255,255,0.1)"></Styles.OlStyleFill>
+          </Styles.OlStyle>
+        </Sources.OlSourceVector>
+      </Layers.OlVectorLayer>
+
+      <Layers.OlVectorLayer :visible="config.layer == 'Provincias'">
+        <Sources.OlSourceVector :url="provsUrl" :format="geoJson">
           <Styles.OlStyle>
             <Styles.OlStyleStroke color="gray" :width="2"></Styles.OlStyleStroke>
             <Styles.OlStyleFill color="rgba(255,255,255,0.1)"></Styles.OlStyleFill>
@@ -127,11 +155,19 @@ onMounted(() => {
           <Styles.OlStyleFill color="rgba(255,255,64,0.5)"></Styles.OlStyleFill>
         </Styles.OlStyle>
       </Interactions.OlInteractionSelect>
+      <MapControls.OlZoomControl />
+      <MapControls.OlAttributionControl />
+      <MapControls.OlButtonControl
+        html="<span class='pi pi-wrench' />"
+        className="config-btn"
+        :handleClick="handleClick"
+      />
     </Map.OlMap>
   </div>
+  <MapConfigDialog ref="configDialog" />
 </template>
 
-<style scoped>
+<style>
 .mapa {
   /* height: 600px; */
   min-width: 400px;
@@ -148,5 +184,13 @@ onMounted(() => {
   font-size: 12px;
   cursor: default;
   user-select: none;
+}
+
+.config-btn {
+  top: 65px;
+  left: 0.5em;
+}
+.ol-touch .config-btn {
+  top: 80px;
 }
 </style>
