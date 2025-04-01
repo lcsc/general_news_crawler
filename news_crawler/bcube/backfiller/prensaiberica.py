@@ -57,7 +57,7 @@ class BcubePiBackFiller(BcubeBackFiller):
             tp = cp+10
             response =self._downloader.get_url_cat(context,tp)
             
-            while response.status_code!=200:
+            while response.status_code!=200 or context.lastFound is None:
                 tp = tp-1
                 # Aqui hemos llegado al incio de las publicaciones
                 # Nuestra fecha de incio puede ser anterior a la primera noticia
