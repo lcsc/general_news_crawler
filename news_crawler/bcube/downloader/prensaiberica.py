@@ -3,7 +3,7 @@ from ...common.tools import get_url
 import requests
 from .bcube import BcubeArticleReaderContext
 from ...core.model.repos import CrawlerRepos
-from datetime import datetime
+from datetime import datetime,timezone
 from ...common.consts import ENGINE_ID_bCube,SUBENGINE_ID_bc_PrensaIberica
 from .bcube import BcubeArticleReader
  
@@ -96,11 +96,26 @@ class BcubePiArticleReader(BcubeArticleReader):
         if date is None and dateU is not None:
             date = dateU
         if date is None:
-            print("article without any date")
-            return None
+            LOG.debug("article without any date")
+            url = data["data-url"]
+            date_str = url.removeprefix(np.real_url)
+            date_str= date_str.removeprefix(cat.cat_name[1:])
+            date_str = date_str[0:10]
+            date = date_str.replace("/","-")
+            try:
+                date= datetime.fromisoformat(date) 
+                if date.tzinfo is None:
+                    date = date.replace(tzinfo=timezone.utc)
+                date = date.isoformat()
+            
+            except Exception as e:
+                LOG.debug(f"Error parsing date {date_str} of {url}")
+                LOG.debug(e)
+                return None
+
         date = datetime.fromisoformat(date)
         data["category"]=context.category.cat_name
-        ret = None
+        ret = None 
         try:
             article_id  =self._guess_id(data)
             ret = self.createOrUpdateArticle(np=np,
