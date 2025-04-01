@@ -97,17 +97,16 @@ class BcubePiArticleReader(BcubeArticleReader):
             date = dateU
         if date is None:
             LOG.debug("article without any date")
-            url = data["data-url"]
-            date_str = url.removeprefix(np.real_url)
-            date_str= date_str.removeprefix(cat.cat_name[1:])
-            date_str = date_str[0:10]
-            date = date_str.replace("/","-")
             try:
+                url = data["data-url"]
+                date_str = url.removeprefix(np.real_url)
+                date_str= date_str.removeprefix(cat.cat_name[1:])
+                date_str = date_str[0:10]
+                date = date_str.replace("/","-")
                 date= datetime.fromisoformat(date) 
                 if date.tzinfo is None:
                     date = date.replace(tzinfo=timezone.utc)
                 date = date.isoformat()
-            
             except Exception as e:
                 LOG.debug(f"Error parsing date {date_str} of {url}")
                 LOG.debug(e)
