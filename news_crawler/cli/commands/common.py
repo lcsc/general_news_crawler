@@ -60,3 +60,16 @@ class CommonCmd():
                 ret.update({"engine.sub_engine":self.args.sub_engine})
 
         return ret
+
+    def buildFilterArticles(self) -> dict:
+        ret = self.buildFilterNewsPaper()
+        if "ccaa" in ret:
+            ret.update({"np_ccaa": ret["ccaa"]})
+            ret.pop("ccaa", None)
+        # if "provincia" in ret:
+        #     ret.update({"np_provincia": ret["provincia"]})
+        #     ret.pop("provincia", None)
+        if "short_name" in ret:
+            ret.update({"np_name": ret["short_name"]})
+            ret.pop("short_name", None)
+        return ret

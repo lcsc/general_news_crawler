@@ -10,6 +10,7 @@ from .commands import launchMP_CA
 from .commands import ListerArgs,ListerCmd
 from .commands import ExtractArgs, ExtractCmd
 from .commands import UploaderCmd
+from .commands import DownloadNewsArgs, DownloadNewsCmd
 
 from ..core.newspapers import Listers
 
@@ -151,3 +152,34 @@ def save_dir(obj:GeneralOptions):
 
     LOG.info(f"Total Duration: {datetime.now()-start}")
 
+def run_downloadnews_day(obj:GeneralOptions,args:CommonArgs):
+    filler= DownloadNewsCmd(general=obj,args=args)
+    filler.downloadNews()
+
+
+@main.command()
+@click.option('-e',"engine", type=click.Choice(engines, case_sensitive=False), default=None)
+@click.option('-se',"sub_engine",type=click.Choice(sub_engines, case_sensitive=False), default=None)
+@click.option('-w',"workers",type=int,default=10)
+@click.argument('year',type=int)
+@click.argument('month',type=int,required=False)
+@click.argument('day',type=int, required=False)
+@click.pass_obj
+def downloadnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:int,month:int,day:int):
+    start = datetime.now()
+
+    LOG.info("Downloading news")
+    args = DownloadNewsArgs(engine=engine,sub_engine=sub_engine,
+        year=year,month=month,day=day,workers=workers)
+
+    if  obj.ccaa is not None and obj.short_name is not None:
+         # nos piden un Periodico concreto
+        if month is not None:
+            # Si solo se genera un Job (y ya lo sabemos)
+            run_downloadnews_day(obj,args)
+            LOG.info(f"Total Duration: {datetime.now()-start}")
+            return
+    
+    filler= DownloadNewsCmd(general=obj,args=args)
+    filler.downloadNews()
+    LOG.info(f"Total Duration: {datetime.now()-start}")

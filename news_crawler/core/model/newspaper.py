@@ -96,7 +96,8 @@ class NewsArticle(BaseModel):
     date:datetime
     engine_id:str
     engine_data:Optional[any]=None
-    raw_data:Optional[any]=None
+    raw_data:Optional[str]=None
+    article_data:Optional[str]=None
     categories:Optional[List[str]]=None
     
     class Config:
