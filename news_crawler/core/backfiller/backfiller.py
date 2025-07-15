@@ -1,6 +1,7 @@
 from ...core.model.repos import CrawlerRepos
 from ...core.model.newspaper import NewsArticle,NewsPaper,NewsPaperEngine, NewsPaperBackFill
 from ...common.consts import BfStatus_OK
+from ...common.dates import get_range
 
 
 from typing import List,Tuple,Dict
@@ -29,28 +30,7 @@ class BackFiller():
         return month is not None and day is None
 
     def get_range(self,year:int,month:int=None,day:int=None)->Tuple[datetime,datetime]:
-        '''
-        Convierte los parametros de usuaro en un rango de comienzo fin
-        return (comienzo,fin)
-        '''
-        if month is None:
-            LOG.debug("Nos solicitan un Año")
-            #2017-02-01T15:12:09.000Z
-            start = datetime.fromisoformat(f"{year}-01-01T00:00:00Z")
-            end = datetime.fromisoformat(f"{year+1}-01-01T00:00:00Z")-timedelta(seconds=1)
-            return (start,end)
-        if day is None:
-            LOG.debug("Nos solicitan un Mes")
-            #2017-02-01T15:12:09.000Z
-            start = datetime.fromisoformat(f"{year}-{month:02}-01T00:00:00Z")
-            if month==12:
-                end = datetime.fromisoformat(f"{year+1}-01-01T00:00:00Z")-timedelta(seconds=1)
-            else:
-                end = datetime.fromisoformat(f"{year}-{month+1:02}-01T00:00:00Z")-timedelta(seconds=1)
-            return (start,end)
-        start = datetime.fromisoformat(f"{year}-{month:02}-{day:02}T00:00:00Z")
-        end = start+timedelta(days=1)-timedelta(seconds=1)
-        return (start,end)
+        return get_range(year,month,day)
         
 
     def do_backFillNews(self,np:NewsPaper,year:int,month:int=None,day:int=None)->NewsPaperBackFill:

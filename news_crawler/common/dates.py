@@ -2,9 +2,12 @@ from datetime import datetime,timezone
 import sys
 from datetime import timedelta
 
-from typing import List,Dict
+from typing import List,Dict,Tuple
 from ..core.model.newspaper import NewsArticle
 from .consts import month_thresold
+import logging
+
+LOG:logging.Logger=logging.getLogger(__name__)
 
 #diferentes codificaciones de 0
 invalid_dates= [datetime.fromisoformat("1970-01-01 00:00:00Z"),datetime.fromisoformat("1970-01-01 00:00:01Z"),
@@ -56,3 +59,28 @@ def find_first_month(histogram:Dict[str,int])->str:
             if m < first_month:
                 first_month=m
     return first_month
+
+
+def get_range(year:int,month:int=None,day:int=None)->Tuple[datetime,datetime]:
+    '''
+    Convierte los parametros de usuaro en un rango de comienzo fin
+    return (comienzo,fin)
+    '''
+    if month is None:
+        LOG.debug("Nos solicitan un Año")
+        #2017-02-01T15:12:09.000Z
+        start = datetime.fromisoformat(f"{year}-01-01T00:00:00Z")
+        end = datetime.fromisoformat(f"{year+1}-01-01T00:00:00Z")-timedelta(seconds=1)
+        return (start,end)
+    if day is None:
+        LOG.debug("Nos solicitan un Mes")
+        #2017-02-01T15:12:09.000Z
+        start = datetime.fromisoformat(f"{year}-{month:02}-01T00:00:00Z")
+        if month==12:
+            end = datetime.fromisoformat(f"{year+1}-01-01T00:00:00Z")-timedelta(seconds=1)
+        else:
+            end = datetime.fromisoformat(f"{year}-{month+1:02}-01T00:00:00Z")-timedelta(seconds=1)
+        return (start,end)
+    start = datetime.fromisoformat(f"{year}-{month:02}-{day:02}T00:00:00Z")
+    end = start+timedelta(days=1)-timedelta(seconds=1)
+    return (start,end)
