@@ -40,6 +40,13 @@ class JsonArticleExtractor():
     def __init__(self):
         pass
     
+    def _get_type_id(self,type:str, ret:Dict):
+        if type not in ret:
+            return ret
+        i= 0
+        while f"{type}_{i}" in ret:
+            i += 1
+        return f"{type}_{i}"
     
     def extract(self, article:NewsArticle, html:requests.Response) -> List[Dict]:
         if html is None:
@@ -59,8 +66,12 @@ class JsonArticleExtractor():
                     type = item.get("@type", None)
                     if type is None:
                         continue
-                    if type not in ret:
-                        ret[type] = item
+                    if type in ret:
+                        LOG.warning(f"Duplicate JSON-LD type {type} found for article {article.article_id}.")
+                        type = self._get_type_id(type, ret)
+                        LOG.info(f"Using JSON-LD type {type} for article {article.article_id}.")
+                    ret[type] = item
+                
             except json.JSONDecodeError as e:
                 LOG.error(f"Error decoding JSON-LD data for article {article.article_id}: {e}")
         return ret if len(ret) > 0 else None
