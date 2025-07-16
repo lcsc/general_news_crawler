@@ -65,6 +65,9 @@ class DownloadNewsCmd(CommonCmd):
         lock = manager.Lock()
 
         for np in nps:
+            if np.n_articulos is None or np.n_articulos < 1:
+                LOG.warning(f"Newspaper {np.name} has no articles to download, skipping")
+                continue
             filter= self.buildFilterArticles(np_short_name=np.short_name)
             filter["date"] = {"$gte": start, "$lt": end}
             articles = repos.articles.find_by(filter)
