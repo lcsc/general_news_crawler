@@ -23,22 +23,26 @@ class DownloadNewsArgs(CommonArgs):
 
 
 def doDownloadNewsMp(data):
-    name, taks = data
-    downloader=GeneralDownloader(name, taks)
+    general:GeneralOptions = None
+    name, tasks, general = data
+    cmd = CommonCmd(general,None)
+    repos = cmd.connectMongo()
+    downloader=GeneralDownloader(name, tasks,repos)
     downloader.donwload()
 
 
 
 class DownloadWorker(NewsWorker):
-    def __init__(self, name:str, args:List):
+    def __init__(self, name:str, args:List, general:GeneralOptions):
         super().__init__(name)
         self.args = args
+        self.general = general
 
     def getTarget(self):
         return doDownloadNewsMp
 
     def getArgs(self):
-        return (self.name,self.args)
+        return (self.name,self.args,self.general)
 
 class DownloadNewsCmd(CommonCmd):
     def __init__(self, general:GeneralOptions, args:DownloadNewsArgs):
@@ -66,7 +70,7 @@ class DownloadNewsCmd(CommonCmd):
             articles = repos.articles.find_by(filter)
             articles = [article for article in articles if article.article_data is None]
             
-            articles = articles[:min(5,len(articles))]  # Limit to 5 articles for each newspaper
+            # articles = articles[:min(2,len(articles))]  # Limit to 5 articles for each newspaper
             
             LOG.info(f"Found {len(articles)} articles to download of {np.name}")
             if len(articles) != 0:
@@ -76,7 +80,7 @@ class DownloadNewsCmd(CommonCmd):
         workers = []
 
         for i in range(min(self.args.workers,len(tasks))):
-            worker = DownloadWorker(f"DownloadWorker-{i}", tasks)
+            worker = DownloadWorker(f"DownloadWorker-{i}", tasks,self.general)
             workers.append(worker)
 
         launchMP_Workers(workers)

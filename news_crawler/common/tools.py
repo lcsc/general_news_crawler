@@ -10,7 +10,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-def get_url(api_url):
+def get_url(api_url)-> requests.Response:
     headers = { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"}
     response = requests.get(api_url , timeout=(3,60), headers=headers) # 3s connection, 60s download)
     LOG.info(f"{api_url} {response.status_code}")

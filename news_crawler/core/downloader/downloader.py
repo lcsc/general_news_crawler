@@ -7,8 +7,11 @@ from typing import Dict, List
 from datetime import datetime
 from news_crawler.core.model import NewsPaper, NewsArticle
 
-import multiprocessing
-import ctypes
+from news_crawler.common.tools import get_url
+import requests
+from bs4 import BeautifulSoup
+import json
+from news_crawler.core.model.repos import CrawlerRepos
 
 LOG:logging.Logger=logging.getLogger(__name__)
 
@@ -33,10 +36,41 @@ class DownloadNewsJob():
 
         pass
 
+class JsonArticleExtractor():
+    def __init__(self):
+        pass
+    
+    
+    def extract(self, article:NewsArticle, html:requests.Response) -> List[Dict]:
+        if html is None:
+            return None
+        doc = BeautifulSoup(html.content, 'lxml')
+        scripts = doc.find("script", {"type": "application/ld+json"})
+        if scripts is None or len(scripts) == 0:
+            LOG.warning(f"No JSON-LD data found for article {article.article_id}")
+            return None
+        ret = {}
+        for data in scripts:
+            try:
+                json_data = json.loads(data.string)
+                if isinstance(json_data, dict):
+                    json_data = [json_data]  # Convert single dict to list for consistencyº
+                for item in json_data:
+                    type = item.get("@type", None)
+                    if type is None:
+                        continue
+                    if type not in ret:
+                        ret[type] = item
+            except json.JSONDecodeError as e:
+                LOG.error(f"Error decoding JSON-LD data for article {article.article_id}: {e}")
+        return ret if len(ret) > 0 else None
+        
 class GeneralDownloader():
-    def __init__(self, name:str, task:List[DownloadNewsJob]):
+    def __init__(self, name:str, task:List[DownloadNewsJob], repos:CrawlerRepos):
         self.name = name
         self.tasks = task
+        self.extractor = [JsonArticleExtractor()]
+        self.repos = repos
         pass
 
 
@@ -57,13 +91,47 @@ class GeneralDownloader():
             LOG.warning(f"No articles to download for {job.news_paper.name}")
             return
         
-        article = job.downloaded_articles[job.data["next_article"]]
+        article:NewsArticle = job.downloaded_articles[job.data["next_article"]]
+        
+        #puesto solamente para probar el crawler
+        # while "/videos/" in article.article_url:
+        #     LOG.warning(f"Skipping video article {article.article_id} for {job.news_paper.name}")
+        #     job.data["next_article"] += 1
+        #     if job.data["next_article"] >= len(job.downloaded_articles):
+        #         LOG.info(f"All articles downloaded for {job.news_paper.name}")
+        #         return
+        #     article = job.downloaded_articles[job.data["next_article"]]
+
         LOG.info(f"Worker {name} is downloading article {article.article_id} for {job.news_paper.name}")
-        # Here you would implement the actual downloading logic
-        time.sleep(random.uniform(0.2, 0.6))  # Simulate download time
-        LOG.info(f"Downloaded article {article.article_id} for {job.news_paper.name}")
-        with job.lock:
-            job.data["next_article"] += 1
+        
+        try:
+
+            response = get_url(article.article_url)
+            if response.status_code != 200:
+                LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {response.status_code}")
+                return
+            for extractor in self.extractor:
+                data = extractor.extract(article, response)
+                if data is not None:
+                    #article.data = data
+                    LOG.info(f"Extracted data for article {article.article_id} for {job.news_paper.name}")
+                    #path =f"{np_base_path(context.news_paper)}{cat}{article.article_id}.list_raw"
+                    
+                    path = article.raw_data.replace(".list_raw", ".json")
+                    LOG.info(f"Saving article {article.article_id} for {job.news_paper.name} to {path}")
+
+                    self.repos.save_file(path, str(data),'list',article.date)
+                    article.article_data = path
+                    self.repos.articles.save(article)
+                    LOG.info(f"Saved article {article.article_id} for {job.news_paper.name}")
+                    break
+        except Exception as e:
+            LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {e}")
+        finally:
+            # usamos el finally para asegurarnos de que se marca como descargado
+            LOG.info(f"End Downloaded article {article.article_id} for {job.news_paper.name} (finally)")
+            with job.lock:
+                job.data["next_article"] += 1
 
         
 

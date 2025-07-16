@@ -6,3 +6,5 @@ cat vocento.json | jq ".html" -r> vocento.html
 
 
 crawler -c extremadura downloadnews 2024 01 7 -w 8
+
+crawler -c extremadura -s elperiodicoextremadura downloadnews 2024 01 7 -w 8
