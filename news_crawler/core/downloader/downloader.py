@@ -3,14 +3,13 @@ import os
 import time
 import random
 
-from typing import Dict, List
+from typing import List
 from datetime import datetime
 from news_crawler.core.model import NewsPaper, NewsArticle
+from .extractors import JsonArticleExtractor, ArticleExtractor, WpListContentExtractor
 
 from news_crawler.common.tools import get_url
-import requests
-from bs4 import BeautifulSoup
-import json
+
 from news_crawler.core.model.repos import CrawlerRepos
 
 LOG:logging.Logger=logging.getLogger(__name__)
@@ -36,52 +35,20 @@ class DownloadNewsJob():
 
         pass
 
-class JsonArticleExtractor():
-    def __init__(self):
-        pass
-    
-    def _get_type_id(self,type:str, ret:Dict):
-        if type not in ret:
-            return ret
-        i= 0
-        while f"{type}_{i}" in ret:
-            i += 1
-        return f"{type}_{i}"
-    
-    def extract(self, article:NewsArticle, html:requests.Response) -> List[Dict]:
-        if html is None:
-            return None
-        doc = BeautifulSoup(html.content, 'lxml')
-        scripts = doc.find("script", {"type": "application/ld+json"})
-        if scripts is None or len(scripts) == 0:
-            LOG.warning(f"No JSON-LD data found for article {article.article_id}")
-            return None
-        ret = {}
-        for data in scripts:
-            try:
-                json_data = json.loads(data.string)
-                if isinstance(json_data, dict):
-                    json_data = [json_data]  # Convert single dict to list for consistencyº
-                for item in json_data:
-                    type = item.get("@type", None)
-                    if type is None:
-                        continue
-                    if type in ret:
-                        LOG.warning(f"Duplicate JSON-LD type {type} found for article {article.article_id}.")
-                        type = self._get_type_id(type, ret)
-                        LOG.info(f"Using JSON-LD type {type} for article {article.article_id}.")
-                    ret[type] = item
-                
-            except json.JSONDecodeError as e:
-                LOG.error(f"Error decoding JSON-LD data for article {article.article_id}: {e}")
-        return ret if len(ret) > 0 else None
         
 class GeneralDownloader():
-    def __init__(self, name:str, task:List[DownloadNewsJob], repos:CrawlerRepos):
+    def __init__(self, name:str, task:List[DownloadNewsJob], repos:CrawlerRepos,
+                  min_np_Delay_s=13, report_interval_m=10,no_task_wait_s=0.5):
+        
         self.name = name
         self.tasks = task
-        self.extractor = [JsonArticleExtractor()]
+        self.extractor: List[ArticleExtractor] = [JsonArticleExtractor(repos),
+                                                  WpListContentExtractor(repos)]
         self.repos = repos
+        self.last_report = datetime.now()
+        self.min_np_Delay_s = min_np_Delay_s  # Minimum delay between downloads for the same news paper
+        self.report_interval_m = report_interval_m  # Interval to report statistics in minutes
+        self.no_task_wait_s = no_task_wait_s  # Time to wait when no tasks are available
         pass
 
 
@@ -157,11 +124,27 @@ class GeneralDownloader():
 
                 if job.sync["owner"] is not None: continue
 
-                if job.sync["last_downloaded"] is None or (datetime.now() - job.sync["last_downloaded"]).total_seconds() > 35:  # If the job was not downloaded in the last 35s
+                if job.sync["last_downloaded"] is None or (datetime.now() - job.sync["last_downloaded"]).total_seconds() > self.min_np_Delay_s:  # If the job was not downloaded in the last min_np_Delay_s seconds
                     job.sync["owner"] = name
                     LOG.debug(f"Selected task {job.news_paper.name} for {job.sync['owner']}")
                     return job
         return None
+
+    def print_stats(self):
+        """
+        Prints the statistics of the downloader.
+        """
+        if (datetime.now() - self.last_report).total_seconds() < (60*self.report_interval_m):
+            return
+        LOG.info(f"Downloader {self.name} statistics:")
+        total_articles = 0
+        total_done = 0
+        for job in self.tasks:
+            #no usamos lock porque es solo lectura y estadisticas
+            total_articles += len(job.downloaded_articles)
+            total_done += job.data["next_article"] -1 # -1 because next_article is the index of the next article to download
+        LOG.info(f"Progress: {total_done}/{total_articles} articles downloaded {total_done/total_articles*100:.2f}%")        
+        self.last_report = datetime.now()
 
     def donwload(self):
         name= self.name
@@ -176,17 +159,18 @@ class GeneralDownloader():
         while True:
             if all(job.data["done"] for job in tasks):
                 LOG.info("All jobs are done, exiting")
-                break   
+                break
+            self.print_stats()
             
             job = self.select_one_task(tasks,name)
             #LOG.debug(f"Selected job: {job}")
             if job is None:
                 #LOG.debug(f"No more tasks available for {name}, waiting")
-                time.sleep(0.5+random.random())  # Wait for a while before checking again
+                time.sleep(self.no_task_wait_s+random.random())  # Wait for a while before checking again
                 continue
             if job.sync["owner"] != name:
                 #LOG.debug(f"task {job.news_paper.name} is not assigned to {name}, waiting")
-                time.sleep(0.5+random.random())  # Wait for a while before checking again
+                time.sleep(self.no_task_wait_s+random.random())  # Wait for a while before checking again
                 continue
             LOG.info(f"Worker {name} is processing task for {job.news_paper.name}")
             try:

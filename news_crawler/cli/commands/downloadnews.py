@@ -27,12 +27,14 @@ def doDownloadNewsMp(data):
     name, tasks, general = data
     cmd = CommonCmd(general,None)
     repos = cmd.connectMongo()
-    downloader=GeneralDownloader(name, tasks,repos)
+    downloader=GeneralDownloader(name, tasks,repos,
+                                 #report_interval_m=1
+                                 )
     downloader.donwload()
 
 
 
-class DownloadWorker(NewsWorker):
+class  DownloadWorker(NewsWorker):
     def __init__(self, name:str, args:List, general:GeneralOptions):
         super().__init__(name)
         self.args = args

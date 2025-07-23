@@ -43,6 +43,25 @@ class CrawlerRepos:
 
         return self
     
+    def read_file(self, path:str, group:str) -> any:
+        """
+        Reads a file from the database.
+        """
+        repo_name=path.split("/")
+        repo_name=f"{repo_name[0]}_{repo_name[1]}"
+        #LOG.debug(f"Using {repo_name}")
+        files:Collection = self.db[repo_name]
+        file = files.find_one({"path":path,"group":group})
+        
+        if file is None:
+            return None
+        
+        if "contents" not in file:
+            LOG.error(f"No contents in file {file.keys()}")
+            raise SystemError("file without contents")
+        
+        return file["contents"]
+    
     def save_file(self, path:str, contents:any, group:str, dateNewer:datetime):
         
         if isinstance(dateNewer,str):
