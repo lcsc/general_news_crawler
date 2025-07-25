@@ -6,7 +6,7 @@ import random
 from typing import List
 from datetime import datetime
 from news_crawler.core.model import NewsPaper, NewsArticle
-from .extractors import JsonArticleExtractor, ArticleExtractor, WpListContentExtractor
+from .extractors import JsonArticleExtractor, ArticleExtractor, WpListContentExtractor, BcubeBrandedContent
 
 from news_crawler.common.tools import get_url
 
@@ -43,7 +43,8 @@ class GeneralDownloader():
         self.name = name
         self.tasks = task
         self.extractor: List[ArticleExtractor] = [JsonArticleExtractor(repos),
-                                                  WpListContentExtractor(repos)]
+                                                  WpListContentExtractor(repos),
+                                                  BcubeBrandedContent(repos)]
         self.repos = repos
         self.last_report = datetime.now()
         self.min_np_Delay_s = min_np_Delay_s  # Minimum delay between downloads for the same news paper
@@ -70,6 +71,7 @@ class GeneralDownloader():
             return
         
         article:NewsArticle = job.downloaded_articles[job.data["next_article"]]
+        paper = job.news_paper
         
         #puesto solamente para probar el crawler
         # while "/videos/" in article.article_url:
@@ -88,8 +90,18 @@ class GeneralDownloader():
             if response.status_code != 200:
                 LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {response.status_code}")
                 return
+            
+            if response.headers.get('Content-Type', '')=='application/pdf' or \
+               response.headers.get('content-type', '')=='application/pdf':
+                LOG.info(f"Article {article.article_id} is a PDF, saving directly")
+                path = article.raw_data.replace(".list_raw", ".pdf")
+                self.repos.save_file(path, response.content,'article',article.date)
+                article.article_data = path
+                self.repos.articles.save(article)
+                LOG.info(f"Saved article {article.article_id} for {job.news_paper.name}")
+                return
             for extractor in self.extractor:
-                data = extractor.extract(article, response)
+                data = extractor.extract(paper, article, response)
                 if data is not None:
                     #article.data = data
                     LOG.info(f"Extracted data for article {article.article_id} for {job.news_paper.name}")
@@ -98,7 +110,7 @@ class GeneralDownloader():
                     path = article.raw_data.replace(".list_raw", ".json")
                     LOG.info(f"Saving article {article.article_id} for {job.news_paper.name} to {path}")
 
-                    self.repos.save_file(path, str(data),'list',article.date)
+                    self.repos.save_file(path, str(data),'article',article.date)
                     article.article_data = path
                     self.repos.articles.save(article)
                     LOG.info(f"Saved article {article.article_id} for {job.news_paper.name}")
@@ -107,7 +119,7 @@ class GeneralDownloader():
             LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {e}")
         finally:
             # usamos el finally para asegurarnos de que se marca como descargado
-            LOG.info(f"End Downloaded article {article.article_id} for {job.news_paper.name} (finally)")
+            LOG.info(f"End Downloaded article {article.article_id} for {job.news_paper.name} (en finally)")
             with job.lock:
                 job.data["next_article"] += 1
 

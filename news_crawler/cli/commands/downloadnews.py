@@ -76,6 +76,7 @@ class DownloadNewsCmd(CommonCmd):
             articles = [article for article in articles if article.article_data is None]
             
             # articles = articles[:min(2,len(articles))]  # Limit to 5 articles for each newspaper
+            # articles = [article for article in articles if article.article_url.endswith(".pdf")]
             
             LOG.info(f"Found {len(articles)} articles to download of {np.name}")
             if len(articles) != 0:

@@ -8,16 +8,39 @@ from news_crawler.core.model import NewsPaper, NewsArticle
 
 import logging
 from news_crawler.core.model.repos import CrawlerRepos
+from news_crawler.common.consts import ENGINE_ID_bCube
 
 LOG:logging.Logger=logging.getLogger(__name__)
 
 import ast
 
+def build_article_data(headline: str, body: str, date: str, url: str, article: NewsArticle, a_type="NewsArticle") -> Dict:
+    """
+    Builds a dictionary with the article data.
+    """
+    if headline is None or len(headline) == 0:
+            LOG.warning(f"No headline found for article {article.article_id}")
+            return None
+    if body is None or len(body) == 0:
+        LOG.warning(f"No body content found for article {article.article_id}")
+        return None
+    if date is None:
+        LOG.warning(f"No date found for article {article.article_id}")
+        return None
+    if url is None:
+        LOG.warning(f"No URL found for article {article.article_id}")
+        return None
+    return {"NewsArticle":{"@type":a_type,
+                            "headline":headline,
+                            "articleBody":body,
+                            "datePublished":date,
+                            "mainEntityOfPage":url}}
+
 class ArticleExtractor():
     def __init__(self, repos:CrawlerRepos):
         self.repos = repos
         pass
-    def extract(self, article:NewsArticle, html:requests.Response) -> Dict:
+    def extract(self, paper:NewsPaper, article:NewsArticle, html:requests.Response) -> Dict:
         """
         Extracts data from the article HTML.
         This method should be overridden by subclasses.
@@ -38,20 +61,22 @@ class JsonArticleExtractor(ArticleExtractor):
             i += 1
         return f"{type}_{i}"
     
-    def extract(self, article:NewsArticle, html:requests.Response) -> Dict:
+    def extract(self, paper:NewsPaper, article:NewsArticle, html:requests.Response) -> Dict:
         if html is None:
             return None
         doc = BeautifulSoup(html.content, 'lxml')
-        scripts = doc.find("script", {"type": "application/ld+json"})
+        scripts = doc.find_all("script", {"type": "application/ld+json"})
         if scripts is None or len(scripts) == 0:
             LOG.warning(f"No JSON-LD data found for article {article.article_id}")
             return None
+        LOG.debug(f"Found {len(scripts)} JSON-LD scripts for article {article.article_id}")
         ret = {}
+
         for data in scripts:
-            try:
+            try:    
                 json_data = json.loads(data.string)
                 if isinstance(json_data, dict):
-                    json_data = [json_data]  # Convert single dict to list for consistencyº
+                    json_data = [json_data]  # Convert single dict to list for consistency
                 for item in json_data:
                     type = item.get("@type", None)
                     if type is None:
@@ -65,6 +90,7 @@ class JsonArticleExtractor(ArticleExtractor):
                 
             except json.JSONDecodeError as e:
                 LOG.error(f"Error decoding JSON-LD data for article {article.article_id}: {e}")
+        
         return ret if len(ret) > 0 else None
 class WpListContentExtractor(ArticleExtractor):
     def __init__(self, repos:CrawlerRepos):
@@ -94,7 +120,7 @@ class WpListContentExtractor(ArticleExtractor):
 
         return text
 
-    def extract(self, article:NewsArticle, html:requests.Response) -> Dict:
+    def extract(self,paper:NewsPaper,  article:NewsArticle, html:requests.Response) -> Dict:
        content= self.repos.read_file(article.raw_data, "list")
        LOG.debug(f"Extracting content from {article.raw_data} for article {article.article_id}")
 
@@ -133,20 +159,49 @@ class WpListContentExtractor(ArticleExtractor):
        except Exception as e:
             LOG.error(f"Error decoding WP data for article {article.article_id}: {e}")
             return None
-       if headline is None or len(headline) == 0:
-            LOG.warning(f"No headline found for article {article.article_id}")
+       return build_article_data(headline, body, date, url,article)
+
+brandedContentFoundPapers=["elperiodicoextremadura"]
+
+class BcubeBrandedContent(ArticleExtractor):
+    def __init__(self, repos:CrawlerRepos):
+        super().__init__(repos)
+        pass
+
+    def is_branded_content(self, doc:BeautifulSoup) -> bool:
+        scripts = doc.find_all("script")
+        for script in scripts:
+            if script.string and "branded content" in script.string:
+                LOG.debug("Branded content found in script tag.")
+                return True
+        return False
+    
+    def extract(self, paper:NewsPaper, article:NewsArticle, html:requests.Response) -> Dict:
+        LOG.debug(f"Extracting branded content for article {article.article_id} for paper {paper.name}")
+        if  not paper.engine or paper.engine.engine != ENGINE_ID_bCube:
+            LOG.debug(f"Paper {paper.name} is not a {ENGINE_ID_bCube} paper, skipping branded content extraction. ({paper.engine})")
             return None
-       if body is None or len(body) == 0:
-            LOG.warning(f"No body content found for article {article.article_id}")
+        if paper.short_name not in brandedContentFoundPapers:
+            LOG.debug(f"Paper {paper.short_name} is not in the list of branded content papers, skipping extraction.")
             return None
-       if date is None:
-            LOG.warning(f"No date found for article {article.article_id}")
+        if html is None:
             return None
-       if url is None:
-            LOG.warning(f"No URL found for article {article.article_id}")
+
+
+        doc = BeautifulSoup(html.content, 'lxml')
+
+        if not self.is_branded_content(doc):
+            LOG.debug(f"No \"branded content\" found in article {article.article_id} for paper {paper.name}.")
             return None
-       return {"NewsArticle":{"@type":"NewsArticle",
-                              "headline":headline,
-                              "articleBody":body,
-                              "datePublished":date,
-                              "mainEntityOfPage":url}}
+
+        headline = doc.find("title").text if doc.find("title") else None
+        
+        body = doc.find("div", {"class": "inner"}).text if doc.find("div", {"class": "inner"}) else None
+        
+        if body is None:
+            body=doc.find("div", {"class": "content-inner"}).text if doc.find("div", {"class": "content-inner"}) else None
+        
+        date = article.date
+        url = article.article_url
+
+        return build_article_data(headline, body, date, url,article)

@@ -40,7 +40,47 @@ class BcubePiBackFiller(BcubeBackFiller):
         LOG.error(f"No se puede dar ({first.date}, {last.date}) ? {testDate}")
         return None
 
-    def goUp(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
+    def _estimateStartPage(self, tp:int,context:BcubeArticleReaderContext,start:datetime) -> int:
+        if tp is None or tp <= 0:
+            return None
+        
+        
+        pages = list(context.pagesHelper.keys())
+        if len(pages) == 1:
+            return None
+        
+        pages = sorted(pages)
+        itp = pages.index(tp)
+        sp = pages[itp-1]
+        
+        
+
+        LOG.debug(f"Estimating start page from {tp} to {sp}")
+        f_start = context.pagesHelper[sp]["first"]
+        l_start = context.pagesHelper[tp]["first"]
+        
+        LOG.debug(f"cp {sp} -> ({f_start.date})") 
+        LOG.debug(f"tp {tp} -> ({l_start.date})")
+        diff_time_pages = (f_start.date - l_start.date).total_seconds()
+        diff_time_pages_page = diff_time_pages/(tp-sp)
+        LOG.debug(f"tp-sp: {diff_time_pages} seconds -> {diff_time_pages_page} seconds per page")
+
+        diff_times_sp = (f_start.date - start).total_seconds()
+        LOG.debug(f"diff_times_sp: {diff_times_sp} seconds")
+        page_obj = int(sp + diff_times_sp / diff_time_pages_page)
+        LOG.debug(f"page_obj: {page_obj} pages")
+
+        estimated_diff = page_obj - tp
+        LOG.debug(f"page_obj_diff: {estimated_diff} pages")
+        if estimated_diff <0 and estimated_diff >= -10: 
+            ret=0 # nos hemos pasado de pagina, pero no mucho
+
+        factor = min(0.8,abs((tp-sp)/100))        
+        ret =  int(factor * estimated_diff)
+        LOG.debug(f"ret: {ret} pages")
+        return ret
+
+    def goAproximation(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
         LOG.debug(f"   Found {len(context.lastFound)}")
         
         first,last = self.extractFirstLastDates(context.lastFound)
@@ -53,6 +93,47 @@ class BcubePiBackFiller(BcubeBackFiller):
         if location<=0: return (cp,cp,location)
 
         #LOG.debug (f" page :{cp} ({first.date}, {last.date}) -> {start}")
+        movement = self._estimateStartPage(cp,context,start)
+        while movement !=0:
+            if movement is None:
+                movement = 10
+            tp = cp+movement
+            response =self._downloader.get_url_cat(context,tp)
+            
+            while response.status_code!=200 or context.lastFound is None:
+                tp = tp-1
+                # Aqui hemos llegado al incio de las publicaciones
+                # Nuestra fecha de incio puede ser anterior a la primera noticia
+                # Buscamos la ultima pagina con noticias
+                #LOG.debug(f"Respuesta no 200, probamos con {tp}")
+                if tp == cp:
+                    # Hemos llegado a la ulima pagina (que ya hemos leido correctamente)
+                    return (None,None,location)
+                response =self._downloader.get_url_cat(context,tp)
+
+            first,last = self.extractFirstLastDates(context.lastFound)
+            location = self.objetivePageLocation(first,last,start)
+            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
+            #LOG.debug (f" page :{tp} ({first.date}, {last.date}) -> {start}")
+            cp=tp
+            if location >0 and tp > lpp:lpp=tp
+            movement = self._estimateStartPage(cp,context,start)
+        return (cp,lpp,location)
+
+    def _goUp(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
+        LOG.debug(f"   Found {len(context.lastFound)}")
+        
+        first,last = self.extractFirstLastDates(context.lastFound)
+        location = self.objetivePageLocation(first,last,start)
+        
+        context.pagesHelper[cp]={"first":first,"last":last,"location":location}
+        tp:int=None
+        lpp:int=0
+        if location==0: return (cp,cp,location)
+        if location<=0: return (cp,cp,location)
+
+        #LOG.debug (f" page :{cp} ({first.date}, {last.date}) -> {start}")
+    
         while location > 0:
             tp = cp+10
             response =self._downloader.get_url_cat(context,tp)
@@ -121,7 +202,7 @@ class BcubePiBackFiller(BcubeBackFiller):
         if context.lastFound is None:
             return (None,NewsPaperBackFill(status=BfStatus_OK,msg="Sin Noticias"))
         
-        (cp,lpp,location) = self.goUp(context,start,cp)
+        (cp,lpp,location) = self.goAproximation(context,start,cp)
 
         if cp is None and location>0:
             # La fecha buscada es anterior a la primera noticia
