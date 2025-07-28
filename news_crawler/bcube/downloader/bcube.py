@@ -16,6 +16,7 @@ class BcubeArticleReaderContext(NewsArticleReaderContext):
         super().__init__(news_paper)
         self.category=category
         self.last_page=1
+        self.first_404=None
         self.page_size={}
         self.pagesHelper:Dict[int,Dict]={}
 

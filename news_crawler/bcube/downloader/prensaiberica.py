@@ -155,7 +155,14 @@ class BcubePiDownloader():
                 response =get_url(np.real_url+"webapi/module-pagination/?url="+cat.cat_name+"&page="+str(page))
                 count+=1
         t_download = datetime.now()
-    
+        
+        if response.status_code == 404:
+            if context.first_404 is None:
+                context.first_404 = page
+            else:
+                context.first_404 = min(context.first_404,page)
+            return response
+
         if response.status_code==200:
             json = response.json()
             articles =self._reader.extract_list(context,json)

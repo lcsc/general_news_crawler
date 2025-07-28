@@ -61,6 +61,8 @@ class BcubePiBackFiller(BcubeBackFiller):
         
         LOG.debug(f"cp {sp} -> ({f_start.date})") 
         LOG.debug(f"tp {tp} -> ({l_start.date})")
+        LOG.debug(f"start   -> ({start})")
+
         diff_time_pages = (f_start.date - l_start.date).total_seconds()
         diff_time_pages_page = diff_time_pages/(tp-sp)
         LOG.debug(f"tp-sp: {diff_time_pages} seconds -> {diff_time_pages_page} seconds per page")
@@ -83,6 +85,24 @@ class BcubePiBackFiller(BcubeBackFiller):
         LOG.debug(f"ret: {ret} pages")
         return ret
 
+    def _getlastPlusPage(self,context:BcubeArticleReaderContext)->int:
+        page =  0
+        for p in context.pagesHelper:
+            if context.pagesHelper[p]["location"] > 0 and p> page:
+                page = p
+        return page
+    
+    def _getFisrtMinusPage(self,context:BcubeArticleReaderContext)->int:
+        page =  None
+        for p in context.pagesHelper:       
+            if context.pagesHelper[p]["location"]  <0:
+                if page is None:
+                    page = p
+                if p < page:
+                    page = p
+
+        return page
+    
     def goAproximation(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
         LOG.debug(f"   Found {len(context.lastFound)}")
         
@@ -97,26 +117,57 @@ class BcubePiBackFiller(BcubeBackFiller):
 
         #LOG.debug (f" page :{cp} ({first.date}, {last.date}) -> {start}")
         movement = self._estimateStartPage(cp,context,start)
+        LOG.debug(f"Movement: {movement} pages")
         while movement !=0:
             if movement is None:
                 movement = 10
-            tp = cp+movement
-            response =self._downloader.get_url_cat(context,tp)
-            
-            while response.status_code!=200 or context.lastFound is None:
-                tp = tp-movement/10
-                # Aqui hemos llegado al incio de las publicaciones
-                # Nuestra fecha de incio puede ser anterior a la primera noticia
-                # Buscamos la ultima pagina con noticias
-                #LOG.debug(f"Respuesta no 200, probamos con {tp}")
-                if tp == cp:
-                    # Hemos llegado a la ulima pagina (que ya hemos leido correctamente)
-                    return (None,None,location)
-                response =self._downloader.get_url_cat(context,tp)
+            tp = int(cp+movement)
 
-            first,last = self.extractFirstLastDates(context.lastFound)
-            location = self.objetivePageLocation(first,last,start)
-            context.pagesHelper[tp]={"first":first,"last":last,"location":location}
+            lastPlusPage = self._getlastPlusPage(context)
+            if tp < lastPlusPage:
+                # Si estimamos por debajo de la ultima pagina que nos pide subir,
+                # Probamos con la siguente.
+                LOG.debug(f"Page {tp} is less than lastOkPage")
+                tp =lastPlusPage+1
+            firstMinusPage = self._getFisrtMinusPage(context)
+            if firstMinusPage is not None and tp > firstMinusPage:
+                # Si estimamos por debajo de la primera pagina que nos pide bajar,
+                # Probamos con la anterior.
+                LOG.debug(f"Page {tp} is greater than firstMinusPage")
+                tp = firstMinusPage-1
+
+            if context.first_404 is not None and tp > context.first_404:
+                tp = context.first_404 -1
+            
+            LOG.debug(f"Checking page {tp}")
+            if tp in context.pagesHelper:
+                LOG.debug("Found in helper")
+
+                #sacamos los valres de la pagina
+                first = context.pagesHelper[tp]["first"]
+                last = context.pagesHelper[tp]["last"]
+                location = context.pagesHelper[tp]["location"]
+                if tp == (context.first_404-1) and location >= 0:
+                    # Aqui hemos llegado al incio de las publicaciones
+                    return (None,None,location)
+            else:
+                LOG.debug(f"Not found in helper, trying {tp}")    
+                response =self._downloader.get_url_cat(context,tp)
+                while response.status_code!=200 or context.lastFound is None:
+                    tp = int(tp-movement/10)
+                    # Aqui hemos llegado al incio de las publicaciones
+                    # Nuestra fecha de incio puede ser anterior a la primera noticia
+                    # Buscamos la ultima pagina con noticias
+                    #LOG.debug(f"Respuesta no 200, probamos con {tp}")
+                    if tp == cp:
+                        # Hemos llegado a la ulima pagina (que ya hemos leido correctamente)
+                        return (None,None,location)
+                    response =self._downloader.get_url_cat(context,tp)
+
+                first,last = self.extractFirstLastDates(context.lastFound)
+                location = self.objetivePageLocation(first,last,start)
+                context.pagesHelper[tp]={"first":first,"last":last,"location":location}
+
             #LOG.debug (f" page :{tp} ({first.date}, {last.date}) -> {start}")
             cp=tp
             if location >0 and tp > lpp:lpp=tp
