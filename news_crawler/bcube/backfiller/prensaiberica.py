@@ -123,21 +123,7 @@ class BcubePiBackFiller(BcubeBackFiller):
                 movement = 10
             tp = int(cp+movement)
 
-            lastPlusPage = self._getlastPlusPage(context)
-            if tp < lastPlusPage:
-                # Si estimamos por debajo de la ultima pagina que nos pide subir,
-                # Probamos con la siguente.
-                LOG.debug(f"Page {tp} is less than lastOkPage")
-                tp =lastPlusPage+1
-            firstMinusPage = self._getFisrtMinusPage(context)
-            if firstMinusPage is not None and tp > firstMinusPage:
-                # Si estimamos por debajo de la primera pagina que nos pide bajar,
-                # Probamos con la anterior.
-                LOG.debug(f"Page {tp} is greater than firstMinusPage")
-                tp = firstMinusPage-1
-
-            if context.first_404 is not None and tp > context.first_404:
-                tp = context.first_404 -1
+            tp = self._fixTpLimits(context, tp)
             
             LOG.debug(f"Checking page {tp}")
             if tp in context.pagesHelper:
@@ -155,6 +141,7 @@ class BcubePiBackFiller(BcubeBackFiller):
                 response =self._downloader.get_url_cat(context,tp)
                 while response.status_code!=200 or context.lastFound is None:
                     tp = int(tp-movement/10)
+                    tp = self._fixTpLimits(context, tp)
                     # Aqui hemos llegado al incio de las publicaciones
                     # Nuestra fecha de incio puede ser anterior a la primera noticia
                     # Buscamos la ultima pagina con noticias
@@ -173,6 +160,24 @@ class BcubePiBackFiller(BcubeBackFiller):
             if location >0 and tp > lpp:lpp=tp
             movement = self._estimateStartPage(cp,context,start)
         return (cp,lpp,location)
+
+    def _fixTpLimits(self, context, tp):
+        lastPlusPage = self._getlastPlusPage(context)
+        if tp < lastPlusPage:
+                # Si estimamos por debajo de la ultima pagina que nos pide subir,
+                # Probamos con la siguente.
+            LOG.debug(f"Page {tp} is less than lastOkPage")
+            tp =lastPlusPage+1
+        firstMinusPage = self._getFisrtMinusPage(context)
+        if firstMinusPage is not None and tp > firstMinusPage:
+                # Si estimamos por debajo de la primera pagina que nos pide bajar,
+                # Probamos con la anterior.
+            LOG.debug(f"Page {tp} is greater than firstMinusPage")
+            tp = firstMinusPage-1
+
+        if context.first_404 is not None and tp > context.first_404:
+            tp = context.first_404 -1
+        return tp
 
     def _goUp(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
         LOG.debug(f"   Found {len(context.lastFound)}")
