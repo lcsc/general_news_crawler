@@ -68,6 +68,9 @@ class BcubePiBackFiller(BcubeBackFiller):
         LOG.debug(f"tp-sp: {diff_time_pages} seconds -> {diff_time_pages_page} seconds per page")
 
         diff_times_sp = (f_start.date - start).total_seconds()
+        if diff_time_pages_page == 0:
+            LOG.debug("diff_time_pages_page is 0, returning 1")
+            return 1
         LOG.debug(f"diff_times_sp: {diff_times_sp} seconds")
         page_obj = int(sp + diff_times_sp / diff_time_pages_page)
         LOG.debug(f"page_obj: {page_obj} pages")
@@ -175,7 +178,7 @@ class BcubePiBackFiller(BcubeBackFiller):
             LOG.debug(f"Page {tp} is greater than firstMinusPage")
             tp = firstMinusPage-1
 
-        if context.first_404 is not None and tp > context.first_404:
+        if context.first_404 is not None and tp >= context.first_404:
             tp = context.first_404 -1
         return tp
 
