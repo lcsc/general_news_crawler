@@ -73,9 +73,12 @@ class BcubePiBackFiller(BcubeBackFiller):
         estimated_diff = page_obj - tp
         LOG.debug(f"page_obj_diff: {estimated_diff} pages")
         if estimated_diff <0 and estimated_diff >= -10: 
-            ret=0 # nos hemos pasado de pagina, pero no mucho
-
-        factor = min(0.8,abs((tp-sp)/100))        
+            return 0 # nos hemos pasado de pagina, pero no mucho
+        
+        factor = 0.8
+        if estimated_diff > 10*(tp-sp):
+            factor = min(0.8,abs((tp-sp)/100))        
+            LOG.debug(f"Too much diff factor: {factor}")
         ret =  int(factor * estimated_diff)
         LOG.debug(f"ret: {ret} pages")
         return ret
