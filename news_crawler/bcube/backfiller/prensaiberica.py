@@ -136,7 +136,7 @@ class BcubePiBackFiller(BcubeBackFiller):
                 first = context.pagesHelper[tp]["first"]
                 last = context.pagesHelper[tp]["last"]
                 location = context.pagesHelper[tp]["location"]
-                if tp == (context.first_404-1) and location >= 0:
+                if context.first_404 and tp == (context.first_404-1) and location >= 0:
                     # Aqui hemos llegado al incio de las publicaciones
                     return (None,None,location)
             else:

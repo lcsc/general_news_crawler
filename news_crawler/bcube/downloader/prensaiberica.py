@@ -30,7 +30,25 @@ class BcubePiArticleReader(BcubeArticleReader):
         id:str = url[-1]
         id=id.removesuffix(".html")
         return id
-        
+
+    def _extract_date_from_url_regex(self, url:str)->datetime:
+        """
+        Extracts the date from the URL using a regex pattern.
+        The expected format is .../YYYY/MM/DD/....
+        """
+        import re
+        match = re.search(r'(/\d{4}/\d{2}/\d{2}/)', url)
+        if match:
+            date_str = match.group(1)
+            date_str = date_str[1:-1]  # Remove leading and trailing slashes
+            date_str = date_str.replace("/", "-")  # Replace slashes with dashes
+            date = datetime.fromisoformat(date_str)
+
+            if date.tzinfo is None:
+                date = date.replace(tzinfo=timezone.utc)
+            LOG.debug(f"Extracted date from URL: {date.isoformat()}")
+            return date.isoformat()
+        return None        
 
     def _extract_list_one(self,context:BcubeArticleReaderContext,object:any)->NewsArticle:
         tag = object
@@ -108,9 +126,12 @@ class BcubePiArticleReader(BcubeArticleReader):
                     date = date.replace(tzinfo=timezone.utc)
                 date = date.isoformat()
             except Exception as e:
-                LOG.debug(f"Error parsing date {date_str} of {url}")
+                LOG.debug(f"Error parsing date {date_str} of {url}, trying regex")
                 LOG.debug(e)
-                return None
+                date = self._extract_date_from_url_regex(data["data-url"])
+        if date is None:
+            LOG.debug("No date Found")
+            return None
 
         date = datetime.fromisoformat(date)
         data["category"]=context.category.cat_name
