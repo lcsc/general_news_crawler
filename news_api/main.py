@@ -13,6 +13,7 @@ LOG = logging.getLogger(__name__)
 from .newspapers import api_np
 from .news_articles import api_arti
 from .categories import api_cats
+from .files import api_files
 
 app = FastAPI(openapi_prefix="/news/api")
 
@@ -34,3 +35,4 @@ async def get_options()->OptionsResult:
 app.include_router(api_np)
 app.include_router(api_arti)
 app.include_router(api_cats)
+app.include_router(api_files)

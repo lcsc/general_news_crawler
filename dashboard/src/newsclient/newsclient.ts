@@ -17,6 +17,7 @@ import {
   npListCcaaProv,
   newsList,
   catList,
+  getFile,
 } from "./hey/sdk.gen";
 
 import type { NewsPaperSelectorModel, NewsSearch } from "../model/selectors";
@@ -215,6 +216,22 @@ export class NewsClient {
       return res.data;
     }
 
+    throw new Error("Server error");
+  }
+
+  public async getFile(group: string, path: string): Promise<any> {
+    let res = await getFile({
+      client: this.apiClient,
+      path: {
+        group: group,
+      },
+      query: {
+        file_path: path,
+      },
+    });
+    if (res.data) {
+      return res.data;
+    }
     throw new Error("Server error");
   }
 }

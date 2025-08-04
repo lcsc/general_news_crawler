@@ -65,8 +65,20 @@
       <template #item-categories="item">
         <span v-if="item.categories">{{ item.categories.join(",") }}</span>
       </template>
+
+      <template #item-data-actions="item">
+        <div class="flex gap-1">
+          <a v-if="item.raw_data" @click="() => openListData(item)"
+            ><i class="pi pi-folder" title="Ver Listado"></i
+          ></a>
+          <a v-if="item.article_data" @click="() => openLdData(item)"
+            ><i class="pi pi-eye" title="Abrir Ariculo"></i
+          ></a>
+        </div>
+      </template>
     </EasyDataTable>
   </div>
+  <ArticleViewDialog ref="articleViewDialog" />
 </template>
 
 <style></style>
@@ -94,13 +106,19 @@ import type { NewsSearch } from "@/model/selectors";
 
 import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
 import { StringType } from "ol/expr/expression";
+import ArticleViewDialog from "@/components/dialogs/ArticleViewDialog.vue";
+
+type avdType = InstanceType<typeof ArticleViewDialog>;
+const articleViewDialog = ref<avdType | null>(null);
+
 const mainSize = inject("mainSize");
 
 const data = ref<NewsArticle[]>([]);
 
 const headers: Header[] = [
   { text: "Articulo", value: "headline" },
-  { text: "fecha", value: "date", sortable: true },
+  { text: "Acciones", value: "data-actions" },
+  { text: "Fecha", value: "date", sortable: true },
   { text: "Categorias", value: "categories" },
 ];
 
@@ -196,6 +214,22 @@ function monthShortCut(month: string | undefined) {
   }
 
   loadFromServer(true);
+}
+
+function openListData(item: NewsArticle) {
+  if (item.raw_data && articleViewDialog.value) {
+    articleViewDialog.value.openListData(item);
+  } else {
+    window.alert("No hay datos disponibles");
+  }
+}
+
+function openLdData(item: NewsArticle) {
+  if (item.article_data && articleViewDialog.value) {
+    articleViewDialog.value.openLdJsonData(item);
+  } else {
+    window.alert("No hay datos disponibles");
+  }
 }
 
 watch(

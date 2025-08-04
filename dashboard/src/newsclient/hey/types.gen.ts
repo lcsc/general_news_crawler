@@ -30,7 +30,8 @@ export type NewsArticle = {
     date: string;
     engine_id: string;
     engine_data?: unknown | null;
-    raw_data?: unknown | null;
+    raw_data?: string | null;
+    article_data?: string | null;
     categories?: Array<string> | null;
 };
 
@@ -364,6 +365,33 @@ export type CatListResponses = {
 };
 
 export type CatListResponse = CatListResponses[keyof CatListResponses];
+
+export type GetFileData = {
+    body?: never;
+    path: {
+        group: string;
+    };
+    query: {
+        file_path: string;
+    };
+    url: '/files/get/{group}';
+};
+
+export type GetFileErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetFileError = GetFileErrors[keyof GetFileErrors];
+
+export type GetFileResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ClientOptions = {
     baseURL: `${string}://${string}/news/api` | (string & {});
