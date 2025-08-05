@@ -6,3 +6,5 @@ from .lister import ListerArgs, ListerCmd
 from .extract import ExtractArgs, ExtractCmd
 from .fileUploader import UploaderCmd
 from .downloadnews import DownloadNewsArgs, DownloadNewsCmd
+from .fixArticlesProvinces import FixArticlesProvs
+from .classifyHeadLines import ClassifyHeadLines

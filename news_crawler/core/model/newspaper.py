@@ -90,6 +90,7 @@ class NewsArticle(BaseModel):
     id: Optional[PydanticObjectId] = None
     np_name: str
     np_ccaa: str
+    np_provincia: Optional[str] = None
     article_id:str
     article_url:str
     article_headline:str
@@ -99,6 +100,7 @@ class NewsArticle(BaseModel):
     raw_data:Optional[str]=None
     article_data:Optional[str]=None
     categories:Optional[List[str]]=None
+    is_headline_drought:Optional[bool]=None
     
     class Config:
         # Configuración para manejar la conversión con MongoDB

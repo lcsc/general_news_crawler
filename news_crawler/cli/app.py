@@ -11,6 +11,8 @@ from .commands import ListerArgs,ListerCmd
 from .commands import ExtractArgs, ExtractCmd
 from .commands import UploaderCmd
 from .commands import DownloadNewsArgs, DownloadNewsCmd
+from .commands import FixArticlesProvs
+from .commands import ClassifyHeadLines
 
 from ..core.newspapers import Listers
 
@@ -137,20 +139,20 @@ def do_Upload(obj:GeneralOptions,args:CommonArgs):
     cmd.upload()
 
 
-@main.command()
-@click.pass_obj
-def save_dir(obj:GeneralOptions):
-    start = datetime.now()
+# @main.command()
+# @click.pass_obj
+# def save_dir(obj:GeneralOptions):
+#     start = datetime.now()
 
-    LOG.info("Uploading")
-    args = DetectArgs()
+#     LOG.info("Uploading")
+#     args = DetectArgs()
 
-    if obj.ccaa is None:
-        launchMP_CA(do_Upload,obj,args)
-    else:
-        do_Upload(obj,args)
+#     if obj.ccaa is None:
+#         launchMP_CA(do_Upload,obj,args)
+#     else:
+#         do_Upload(obj,args)
 
-    LOG.info(f"Total Duration: {datetime.now()-start}")
+#     LOG.info(f"Total Duration: {datetime.now()-start}")
 
 def run_downloadnews_day(obj:GeneralOptions,args:CommonArgs):
     filler= DownloadNewsCmd(general=obj,args=args)
@@ -182,4 +184,42 @@ def downloadnews(obj:GeneralOptions,engine:str,sub_engine:str,workers:int,year:i
     
     filler= DownloadNewsCmd(general=obj,args=args)
     filler.downloadNews()
+    LOG.info(f"Total Duration: {datetime.now()-start}")
+
+# Arreglar provincias de los articulos de los periodicos
+def do_fix_articles_provs(obj:GeneralOptions,args:CommonArgs):
+    cmd = FixArticlesProvs(obj,args)
+    cmd.fixArticlesProvs()
+
+@main.command()
+@click.pass_obj
+def fixarticlesprov(obj:GeneralOptions):
+    start = datetime.now()
+
+    args = DetectArgs()
+
+    if obj.ccaa is None:
+        launchMP_CA(do_fix_articles_provs,obj,args)
+    else:
+        do_fix_articles_provs(obj,args)
+
+    LOG.info(f"Total Duration: {datetime.now()-start}")
+
+# Clasificar headlines de sequeas
+def do_classify_headlines(obj:GeneralOptions,args:CommonArgs):
+    cmd = ClassifyHeadLines(obj,args)
+    cmd.classifyHeadLines()
+
+@main.command()
+@click.pass_obj
+def classifyHeadLines(obj:GeneralOptions):
+    start = datetime.now()
+
+    args = DetectArgs()
+
+    if obj.ccaa is None:
+        launchMP_CA(do_classify_headlines,obj,args)
+    else:
+        do_classify_headlines(obj,args)
+
     LOG.info(f"Total Duration: {datetime.now()-start}")

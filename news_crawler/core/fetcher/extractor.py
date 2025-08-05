@@ -83,9 +83,10 @@ class NewsArticleReader():
                                                     "article_id":article_id,
                                                     })
         if ret is None:
-            ret = NewsArticle(id=None,
+            ret =NewsArticle( id=None,
                         np_ccaa=np.ccaa,
                         np_name=np.short_name,
+                        np_provincia=np.provincia,
                         article_id=article_id,
                         ##
                         article_headline=title,

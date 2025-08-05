@@ -20,10 +20,16 @@
       <div>
         <h2>Texto Obtenido</h2>
         <span
+          v-if="file_txt"
           class="text-sm text-gray-500"
           :style="{ maxHeight: '200px', display: 'block', overflowY: 'scroll' }"
           >{{ file_txt }}</span
         >
+        <VueJsonPretty
+          v-if="file_json"
+          :data="file_json"
+          :style="{ maxHeight: '300px', display: 'block', overflowY: 'scroll' }"
+        />
       </div>
     </div>
   </Dialog>
@@ -36,10 +42,14 @@ import type { NewsArticle } from "@/newsclient/hey";
 import { NewsClient } from "@/newsclient/newsclient";
 import { default as Select } from "primevue/select";
 
+import VueJsonPretty from "vue-json-pretty";
+import "vue-json-pretty/lib/styles.css";
+
 const visible = ref(false);
 const article = ref<NewsArticle | null>(null);
 const file_txt = ref<string>("Loading...");
 const is_ld_json = ref<boolean>(false);
+const file_json = ref<any | null>(null);
 const typesOptions = ref<string[]>([]);
 const typeSelected = ref<string | null>(null);
 
@@ -50,6 +60,7 @@ function openListData(articleData: NewsArticle) {
   visible.value = true;
   is_ld_json.value = false;
   file_txt.value = "Cargando datos...";
+  file_json.value = null;
 
   if (articleData.raw_data) {
     client
@@ -69,6 +80,7 @@ function openLdJsonData(articleData: NewsArticle) {
   visible.value = true;
   is_ld_json.value = true;
   file_txt.value = "Cargando datos...";
+  file_json.value = null;
 
   if (articleData.article_data) {
     client
@@ -83,11 +95,8 @@ function openLdJsonData(articleData: NewsArticle) {
         }
         typesOptions.value = Object.keys(data_json);
         typeSelected.value = typesOptions.value[0];
-        file_txt.value = JSON.stringify(
-          data_json[typesOptions.value[0]],
-          null,
-          2
-        );
+        file_json.value = data_json[typesOptions.value[0]];
+        file_txt.value = null;
       })
       .catch((error) => {
         console.error("Error loading file:", error);
