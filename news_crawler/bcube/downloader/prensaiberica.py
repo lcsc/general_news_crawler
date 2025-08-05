@@ -93,6 +93,11 @@ class BcubePiArticleReader(BcubeArticleReader):
             if title_el is not None:
                 data["title"]=title_el["title"]
         if "title" not in data:
+            LOG.info("No title found in article, using empty title")
+            print("****** Failed *****")
+            print(tag)
+            print(data)
+            print("****** Failed *****")
             data["title"]="" # TODO: return None?
 
         data_id = tag.find_all(attrs={"data-content-id":True})

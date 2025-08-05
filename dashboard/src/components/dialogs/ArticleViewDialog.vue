@@ -47,7 +47,7 @@ import "vue-json-pretty/lib/styles.css";
 
 const visible = ref(false);
 const article = ref<NewsArticle | null>(null);
-const file_txt = ref<string>("Loading...");
+const file_txt = ref<string | null>("Loading...");
 const is_ld_json = ref<boolean>(false);
 const file_json = ref<any | null>(null);
 const typesOptions = ref<string[]>([]);
