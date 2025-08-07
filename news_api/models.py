@@ -13,6 +13,11 @@ class SortTypeEnum(str, Enum):
     asc = "asc"
     desc = "desc"
 
+class BoolEmptyEnum(str, Enum):
+    empty = "empty"
+    true = "true"
+    false = "false"
+
 class PaginationParams():
     page:Optional[int]=1
     rowsPerPage:Optional[int]=25
@@ -40,6 +45,7 @@ class NewsSearch(BaseModel, PaginationParams):
     notBefore:Optional[datetime]=None
     notAfter:Optional[datetime]=None
     category:Optional[List[str]]=None
+    headlineDrought:Optional[BoolEmptyEnum]=None
 
 class NewsSearchResult(BaseModel,PagedResult):
     items:List[NewsArticle]=[]

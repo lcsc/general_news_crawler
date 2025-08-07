@@ -36,6 +36,14 @@ async def get_newspapers(ccaa:str,short_name:str,query: Annotated[NewsSearch, Qu
 
     if query.category:
         mongoQuery.update({"categories":{"$in":query.category}})
+    
+    if query.headlineDrought:
+        if "empty" in query.headlineDrought.lower():
+            mongoQuery.update({"is_headline_drought": None})
+        elif "true" in query.headlineDrought.lower():
+            mongoQuery.update({"is_headline_drought": True})
+        elif "false" in query.headlineDrought.lower():
+            mongoQuery.update({"is_headline_drought": False})
 
     ret.results = repos.articles.get_collection().count_documents(mongoQuery)
     ret.items = repos.articles.find_by(mongoQuery, 
