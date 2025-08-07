@@ -173,6 +173,24 @@ export class NewsClient {
     throw new Error("Server error");
   }
 
+  private formatDate(date: Date | undefined | null): string | null | undefined {
+    if (date == null) {
+      return null;
+    }
+    if (date == undefined) {
+      return undefined;
+    }
+    return (
+      date.getFullYear() +
+      "-" +
+      String(date.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(date.getDate()).padStart(2, "0")
+    );
+
+    //return date.toISOString().slice(0, 10);
+  }
+
   public async listArticles(
     ccaa: string,
     short_name: string,
@@ -189,8 +207,10 @@ export class NewsClient {
         rowsPerPage: search.rowsPerPage,
         sortBy: search.sortBy,
         sortType: search.sortType,
-        notAfter: search.notAfter?.toISOString().slice(0, 10),
-        notBefore: search.notBefore?.toISOString().slice(0, 10),
+        //        notAfter: search.notAfter?.toISOString().slice(0, 10),
+        //        notBefore: search.notBefore?.toISOString().slice(0, 10),
+        notAfter: this.formatDate(search.notAfter),
+        notBefore: this.formatDate(search.notBefore),
         category: search.category,
       },
     });
