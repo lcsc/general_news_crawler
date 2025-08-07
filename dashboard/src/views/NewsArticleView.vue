@@ -38,6 +38,14 @@
           class="w-full md:w-80"
           :max-selected-labels="3"
         />
+
+        <Select
+          v-model="headline_drought_filter"
+          :options="BoolOptionsSelect"
+          option-label="label"
+          option-value="value"
+        >
+        </Select>
         <Button
           icon="pi pi-search"
           severity="primary"
@@ -76,6 +84,22 @@
           ></a>
         </div>
       </template>
+      <template #item-drought="item">
+        <div class="flex gap-1">
+          <span v-if="item.is_headline_drought == undefined"
+            ><i class="pi pi-book" style="color: red" title="Titular Sequia Pendiente"></i
+          ></span>
+          <span v-if="item.is_headline_drought == false"
+            ><i class="pi pi-book" style="color: lightgray" title="Titular sin Sequia"></i
+          ></span>
+          <span v-if="item.is_headline_drought == true"
+            ><i class="pi pi-book" style="color: green" title="Titular Sequia"></i
+          ></span>
+          <i class="pi pi-comments" style="color: lightgray" title="Cuerpo Sequia"></i>
+          <i class="pi pi-euro" style="color: lightgray" title="Impactos"></i>
+          <i class="pi pi-map-marker" style="color: lightgray" title="Localizaciones"></i>
+        </div>
+      </template>
     </EasyDataTable>
   </div>
   <ArticleViewDialog ref="articleViewDialog" />
@@ -101,12 +125,13 @@ import {
   Button,
   FloatLabel,
   MultiSelect,
+  Select,
 } from "primevue";
 import type { NewsSearch } from "@/model/selectors";
 
 import { default as YearTimeLine } from "@/components/icons/YearTimeLine.vue";
-import { StringType } from "ol/expr/expression";
 import ArticleViewDialog from "@/components/dialogs/ArticleViewDialog.vue";
+import type { BoolEmptyEnum } from "@/newsclient/hey";
 
 type avdType = InstanceType<typeof ArticleViewDialog>;
 const articleViewDialog = ref<avdType | null>(null);
@@ -117,11 +142,17 @@ const data = ref<NewsArticle[]>([]);
 
 const headers: Header[] = [
   { text: "Articulo", value: "headline" },
+  { text: "Sequia", value: "drought" },
   { text: "Acciones", value: "data-actions" },
   { text: "Fecha", value: "date", sortable: true },
   { text: "Categorias", value: "categories" },
 ];
-
+const BoolOptionsSelect = [
+  { label: "Todos", value: undefined },
+  { label: "Cabecera Sequia", value: "true" },
+  { label: "Cabecera No Sequia", value: "false" },
+  { label: "Cabecera No Disponible", value: "empty" },
+];
 const router = useRoute();
 
 const np = ref<NewsPaper | undefined>();
@@ -162,6 +193,7 @@ const serverOptions = ref<NewsSearch>({
 const dates = ref();
 const selectedCategories = ref<BcubeCategory[]>();
 const categories = ref<BcubeCategory[]>();
+const headline_drought_filter = ref<string | undefined>(undefined);
 
 const loadFromServer = async (reset: boolean) => {
   if (loading.value) return;
@@ -182,6 +214,11 @@ const loadFromServer = async (reset: boolean) => {
     query.category = selectedCategories.value.map((c) => c.cat_name);
   } else {
     query.category = undefined;
+  }
+  if (headline_drought_filter.value) {
+    query.headline_drought = headline_drought_filter.value;
+  } else {
+    query.headline_drought = undefined;
   }
 
   readRouter();

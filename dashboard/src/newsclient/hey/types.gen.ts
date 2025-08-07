@@ -16,6 +16,8 @@ export type BcubeCategory = {
     n_articulos?: number | null;
 };
 
+export type BoolEmptyEnum = 'empty' | 'true' | 'false';
+
 export type HttpValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -24,6 +26,7 @@ export type NewsArticle = {
     id?: string | null;
     np_name: string;
     np_ccaa: string;
+    np_provincia?: string | null;
     article_id: string;
     article_url: string;
     article_headline: string;
@@ -33,6 +36,7 @@ export type NewsArticle = {
     raw_data?: string | null;
     article_data?: string | null;
     categories?: Array<string> | null;
+    is_headline_drought?: boolean | null;
 };
 
 export type NewsPaper = {
@@ -287,6 +291,7 @@ export type NewsListData = {
         notBefore?: string | null;
         notAfter?: string | null;
         category?: Array<string> | null;
+        headlineDrought?: BoolEmptyEnum | null;
     };
     url: '/news/{ccaa}/{short_name}/';
 };

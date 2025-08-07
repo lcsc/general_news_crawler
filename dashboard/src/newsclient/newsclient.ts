@@ -212,6 +212,7 @@ export class NewsClient {
         notAfter: this.formatDate(search.notAfter),
         notBefore: this.formatDate(search.notBefore),
         category: search.category,
+        headlineDrought: search.headline_drought,
       },
     });
     if (res.data) {

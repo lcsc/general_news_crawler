@@ -6,6 +6,14 @@
         <h2>Fecha</h2>
         <span class="text-sm text-gray-500">{{ article.date }}</span>
       </div>
+      <div>
+        <h2>Clasificacion Sequía</h2>
+        <div>
+          <span class="text-sm text-gray-500"
+            >Titular: {{ article.is_headline_drought ? "si" : "no" }}</span
+          >
+        </div>
+      </div>
       <div v-if="is_ld_json">
         <h2>Fuente</h2>
         <Select
