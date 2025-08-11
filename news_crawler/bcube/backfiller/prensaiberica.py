@@ -126,9 +126,9 @@ class BcubePiBackFiller(BcubeBackFiller):
                 movement = 10
             tp = int(cp+movement)
 
-            tp = self._fixTpLimits(context, tp)
+            tp = self._fixTpLimits(context, tp,lpp)
             
-            LOG.debug(f"Checking page {tp}")
+            LOG.debug(f"Checking page {tp} (lpp : {lpp})")
             if tp in context.pagesHelper:
                 LOG.debug("Found in helper")
 
@@ -136,15 +136,18 @@ class BcubePiBackFiller(BcubeBackFiller):
                 first = context.pagesHelper[tp]["first"]
                 last = context.pagesHelper[tp]["last"]
                 location = context.pagesHelper[tp]["location"]
-                if context.first_404 and tp == (context.first_404-1) and location >= 0:
-                    # Aqui hemos llegado al incio de las publicaciones
-                    return (None,None,location)
+                if context.first_404 and tp == (context.first_404-1):
+                    if location > 0:
+                        # Aqui hemos llegado al incio de las publicaciones
+                        return (None,None,location)
+                    if location == 0:
+                        return (cp,lpp,location)
             else:
                 LOG.debug(f"Not found in helper, trying {tp}")    
                 response =self._downloader.get_url_cat(context,tp)
                 while response.status_code!=200 or context.lastFound is None:
                     tp = int(tp-movement/10)
-                    tp = self._fixTpLimits(context, tp)
+                    tp = self._fixTpLimits(context, tp,lpp)
                     # Aqui hemos llegado al incio de las publicaciones
                     # Nuestra fecha de incio puede ser anterior a la primera noticia
                     # Buscamos la ultima pagina con noticias
@@ -164,7 +167,7 @@ class BcubePiBackFiller(BcubeBackFiller):
             movement = self._estimateStartPage(cp,context,start)
         return (cp,lpp,location)
 
-    def _fixTpLimits(self, context, tp):
+    def _fixTpLimits(self, context, tp, lpp):
         lastPlusPage = self._getlastPlusPage(context)
         if tp < lastPlusPage:
                 # Si estimamos por debajo de la ultima pagina que nos pide subir,
@@ -180,6 +183,9 @@ class BcubePiBackFiller(BcubeBackFiller):
 
         if context.first_404 is not None and tp >= context.first_404:
             tp = context.first_404 -1
+
+        if tp == lpp:
+            tp=tp+1
         return tp
 
     def _goUp(self,context:BcubeArticleReaderContext,start:datetime, cp:int)->Tuple[int, int, int]:
@@ -271,6 +277,7 @@ class BcubePiBackFiller(BcubeBackFiller):
             return (None,NewsPaperBackFill(status=BfStatus_OK,msg="Antes de la primera noticia"))
 
         if location ==0:
+
             LOG.debug(f"Found going up: {cp}, ({context.pagesHelper[cp]['first'].date}, {context.pagesHelper[cp]['last'].date})? {start}")
             return (cp,None)
         
