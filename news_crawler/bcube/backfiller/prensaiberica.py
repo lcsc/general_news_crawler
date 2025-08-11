@@ -152,7 +152,7 @@ class BcubePiBackFiller(BcubeBackFiller):
                     # Nuestra fecha de incio puede ser anterior a la primera noticia
                     # Buscamos la ultima pagina con noticias
                     #LOG.debug(f"Respuesta no 200, probamos con {tp}")
-                    if tp == cp:
+                    if tp == cp or tp == context.first_404:
                         # Hemos llegado a la ulima pagina (que ya hemos leido correctamente)
                         return (None,None,location)
                     response =self._downloader.get_url_cat(context,tp)
