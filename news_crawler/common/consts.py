@@ -108,3 +108,6 @@ sub_engines = [SUBENGINE_ID_bc_PrensaIberica, SUBENGINE_ID_wp_json]
 BfStatus_PENDING = "Pending"
 BfStatus_OK = "OK"
 BfStatus_ERROR = "ERROR"
+
+DownloadStatus_OK = "ok"
+DownloadStatus_NOT_FOUND = "not_found"

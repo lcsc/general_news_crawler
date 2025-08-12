@@ -5,8 +5,9 @@ import random
 
 from typing import List
 from datetime import datetime
+from news_crawler.common.consts import DownloadStatus_NOT_FOUND, DownloadStatus_OK
 from news_crawler.core.model import NewsPaper, NewsArticle
-from .extractors import JsonArticleExtractor, ArticleExtractor, WpListContentExtractor, BcubeBrandedContent
+from .extractors import JsonArticleExtractor, ArticleExtractor, WpListContentExtractor, BcubeBrandedContent, ArticleContent
 
 from news_crawler.common.tools import get_url
 
@@ -44,7 +45,8 @@ class GeneralDownloader():
         self.tasks = task
         self.extractor: List[ArticleExtractor] = [JsonArticleExtractor(repos),
                                                   WpListContentExtractor(repos),
-                                                  BcubeBrandedContent(repos)]
+                                                  BcubeBrandedContent(repos),
+                                                  ArticleContent(repos)]
         self.repos = repos
         self.last_report = datetime.now()
         self.min_np_Delay_s = min_np_Delay_s  # Minimum delay between downloads for the same news paper
@@ -60,7 +62,16 @@ class GeneralDownloader():
         if len(job.downloaded_articles)==job.data["next_article"] :
             return True
         return False
-
+    
+    def save_content_type(self, job, article, response, ct, ext) -> bool:
+        if response.headers.get('Content-Type', '')==ct or \
+               response.headers.get('content-type', '')==ct:
+            LOG.info(f"Article {article.article_id} is a {ct}, saving directly")
+            self.save_article(article, response.content,ext)
+            LOG.info(f"Saved article {article.article_id} for {job.news_paper.name} in {article.article_data}")
+            return True
+        return False
+        
     def download_one(self,job:DownloadNewsJob, name:str):
         """
         Downloads the news for the given job.
@@ -86,43 +97,54 @@ class GeneralDownloader():
         
         try:
 
+            if article.article_url.startswith("#DOMINIO#/"):
+                LOG.debug(f"Replacing #DOMINIO# in article URL for {job.news_paper.real_url}")
+                article.article_url = article.article_url.replace("#DOMINIO#/", paper.real_url)
+                self.repos.articles.save(article)
+
             response = get_url(article.article_url)
             if response.status_code != 200:
+                if response.status_code == 404:
+                    article.download_status = DownloadStatus_NOT_FOUND
+                    self.repos.articles.save(article)
                 LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {response.status_code}")
                 return
             
-            if response.headers.get('Content-Type', '')=='application/pdf' or \
-               response.headers.get('content-type', '')=='application/pdf':
-                LOG.info(f"Article {article.article_id} is a PDF, saving directly")
-                path = article.raw_data.replace(".list_raw", ".pdf")
-                self.repos.save_file(path, response.content,'article',article.date)
-                article.article_data = path
-                self.repos.articles.save(article)
-                LOG.info(f"Saved article {article.article_id} for {job.news_paper.name}")
-                return
+            if self.save_content_type(job, article, response,"application/pdf",".pdf"): return
+            if self.save_content_type(job, article, response,"image/jpeg",".jpg"): return
+            if self.save_content_type(job, article, response,"application/vnd.openxmlformats-officedocument.wordprocessingml.document",".docx"): return
+            
+
             for extractor in self.extractor:
                 data = extractor.extract(paper, article, response)
                 if data is not None:
                     #article.data = data
                     LOG.info(f"Extracted data for article {article.article_id} for {job.news_paper.name}")
                     #path =f"{np_base_path(context.news_paper)}{cat}{article.article_id}.list_raw"
-                    
-                    path = article.raw_data.replace(".list_raw", ".json")
-                    LOG.info(f"Saving article {article.article_id} for {job.news_paper.name} to {path}")
-
-                    self.repos.save_file(path, str(data),'article',article.date)
-                    article.article_data = path
-                    self.repos.articles.save(article)
+                    self.save_article(article,str(data), ".json")
                     LOG.info(f"Saved article {article.article_id} for {job.news_paper.name}")
                     break
         except Exception as e:
             LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {e}")
+            if "formula1.lne.es" in str(e):
+                LOG.debug(f"Error accediendo a formula1.lne.es ({article.article_url})")
+                # Hay una redireccion a un servidor que no funciona bien (lo tienen mal ellos)
+                # Lo marcamos como 404, 
+                # Esta url, ademas es de datos en directo que no nos interesa guardar
+                article.download_status = DownloadStatus_NOT_FOUND
+                self.repos.articles.save(article)
         finally:
             # usamos el finally para asegurarnos de que se marca como descargado
             LOG.info(f"End Downloaded article {article.article_id} for {job.news_paper.name} (en finally)")
             with job.lock:
                 job.data["next_article"] += 1
 
+    def save_article(self, article:NewsArticle, data, extension:str):
+        path = article.raw_data.replace(".list_raw", extension)
+        self.repos.save_file(path, data,'article',article.date)
+        article.article_data = path
+        article.download_status = DownloadStatus_OK
+        self.repos.articles.save(article)
         
 
     def select_one_task(self,tasks:List[DownloadNewsJob], name:str)-> DownloadNewsJob:

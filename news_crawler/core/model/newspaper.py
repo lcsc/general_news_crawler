@@ -101,7 +101,8 @@ class NewsArticle(BaseModel):
     article_data:Optional[str]=None
     categories:Optional[List[str]]=None
     is_headline_drought:Optional[bool]=None
-    
+    download_status:Optional[str]=None
+
     class Config:
         # Configuración para manejar la conversión con MongoDB
         arbitrary_types_allowed = True

@@ -161,7 +161,7 @@ class WpListContentExtractor(ArticleExtractor):
             return None
        return build_article_data(headline, body, date, url,article)
 
-brandedContentFoundPapers=["elperiodicoextremadura"]
+brandedContentFoundPapers=["elperiodicoextremadura","lacronicabadajoz"]
 
 class BcubeBrandedContent(ArticleExtractor):
     def __init__(self, repos:CrawlerRepos):
@@ -194,13 +194,43 @@ class BcubeBrandedContent(ArticleExtractor):
             LOG.debug(f"No \"branded content\" found in article {article.article_id} for paper {paper.name}.")
             return None
 
-        headline = doc.find("title").text if doc.find("title") else None
+        headline = doc.find("title").text if doc.find("title") else article.article_headline
         
         body = doc.find("div", {"class": "inner"}).text if doc.find("div", {"class": "inner"}) else None
         
         if body is None:
             body=doc.find("div", {"class": "content-inner"}).text if doc.find("div", {"class": "content-inner"}) else None
         
+        if body is None:
+            body = doc.find("article", {"class": "post"}).text if doc.find("article", {"class": "post"}) else None
+
+        if body is None:
+            body = doc.find("main", {"class": "main-root"}).text if doc.find("main", {"class": "main-root"}) else None
+
+        if body is None:
+            body=doc.find("div", {"class": "project-info"}).text if doc.find("div", {"class": "project-info"}) else None
+
+        # <div id="blog-page"
+        if body is None:
+            body=doc.find("div", {"id": "blog-page"}).text if doc.find("div", {"id": "blog-page"}) else None
+
+        date = article.date
+        url = article.article_url
+
+        return build_article_data(headline, body, date, url,article)
+    
+class ArticleContent(ArticleExtractor):
+    def __init__(self, repos:CrawlerRepos):
+        super().__init__(repos)
+        pass
+
+    def extract(self, paper:NewsPaper, article:NewsArticle, html:requests.Response) -> Dict:
+
+        doc = BeautifulSoup(html.content, 'lxml')
+
+        body = doc.find("article", {"id": "article"}).text if doc.find("article", {"id": "article"}) else None
+
+        headline = doc.find("title").text if doc.find("title") else article.article_headline
         date = article.date
         url = article.article_url
 
