@@ -213,6 +213,12 @@ class BcubeBrandedContent(ArticleExtractor):
         # <div id="blog-page"
         if body is None:
             body=doc.find("div", {"id": "blog-page"}).text if doc.find("div", {"id": "blog-page"}) else None
+        # <main   
+        if body is None:
+            body=doc.find("main").text if doc.find("main") else None
+
+
+
 
         date = article.date
         url = article.article_url
