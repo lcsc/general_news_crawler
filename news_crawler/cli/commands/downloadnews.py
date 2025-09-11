@@ -14,12 +14,13 @@ from news_crawler.common.consts import DownloadStatus_NOT_FOUND
 LOG:logging.Logger=logging.getLogger(__name__)
 
 class DownloadNewsArgs(CommonArgs):
-    def __init__(self, engine:str,sub_engine:str,year:int,month:int,day:int, workers:int):
+    def __init__(self, engine:str,sub_engine:str,year:int,month:int,day:int, workers:int,delay:float):
         super().__init__(engine=engine,sub_engine=sub_engine)
         self.year=year
         self.month=month
         self.day=day
         self.workers=workers
+        self.delay=delay
         #self._bfillers:Dict[str,BackFiller]
 
 
@@ -27,10 +28,12 @@ class DownloadNewsArgs(CommonArgs):
 
 def doDownloadNewsMp(data):
     general:GeneralOptions = None
-    name, tasks, general = data
+    download_args:DownloadNewsArgs = None
+    name, tasks, general, download_args = data
     cmd = CommonCmd(general,None)
     repos = cmd.connectMongo()
     downloader=GeneralDownloader(name, tasks,repos,
+                                 min_np_Delay_s=download_args.delay,
                                  #report_interval_m=1
                                  )
     downloader.donwload()
@@ -38,16 +41,17 @@ def doDownloadNewsMp(data):
 
 
 class  DownloadWorker(NewsWorker):
-    def __init__(self, name:str, args:List, general:GeneralOptions):
+    def __init__(self, name:str, args:List, general:GeneralOptions, download_args:DownloadNewsArgs):
         super().__init__(name)
         self.args = args
         self.general = general
+        self.download_args = download_args
 
     def getTarget(self):
         return doDownloadNewsMp
 
     def getArgs(self):
-        return (self.name,self.args,self.general)
+        return (self.name,self.args,self.general,self.download_args)
 
 
 
@@ -104,7 +108,7 @@ class DownloadNewsCmd(CommonCmd):
         workers = []
 
         for i in range(min(self.args.workers,len(tasks))):
-            worker = DownloadWorker(f"DownloadWorker-{i}", tasks,self.general)
+            worker = DownloadWorker(f"DownloadWorker-{i}", tasks,self.general, self.args)
             workers.append(worker)
 
         launchMP_Workers(workers)

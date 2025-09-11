@@ -9,6 +9,9 @@ crawler -c extremadura downloadnews 2024 01 7 -w 8
 
 crawler -c extremadura -s elperiodicoextremadura backfillnews 2023 04
 
+
+crawler -c extremadura -s elperiodicoextremadura downloadnews -d 0 2020 01
+
 ./scripts/launch_cmd.sh crawler -c extremadura backfillnews 2021 
 ./scripts/launch_cmd.sh crawler -c extremadura downloadnews 2024 07
 
