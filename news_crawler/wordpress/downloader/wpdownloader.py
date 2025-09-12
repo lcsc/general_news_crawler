@@ -50,6 +50,14 @@ class WpArticleReader(NewsArticleReader):
         data["modified"]=object["modified"]
         data["modified_gmt"]=object["modified_gmt"]
         data["data-url"]=object["link"]
+
+        if data["modified"] is None or data["modified"].startswith("-"):
+            LOG.warning(f"WARN: El articulo {article_id} no tiene fecha de modificacion valida, se pone la de creacion")
+            data["modified"]=data["date"]
+        if data["modified_gmt"] is None or data["modified_gmt"].startswith("-"):
+            LOG.warning(f"WARN: El articulo {article_id} no tiene fecha GMT de modificacion valida, se pone la de creacion")
+            data["modified_gmt"]=data["date_gmt"]
+
         date = data["date_gmt"]
         if not isValidDay(date):
             date=data["modified_gmt"]
