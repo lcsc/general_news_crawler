@@ -8,6 +8,7 @@ from ...common.consts import BfStatus_OK
 class BcubeCategory(BaseModel,BackFillBase):
     id: Optional[PydanticObjectId] = None
     ccaa:str
+    provincia:Optional[str]=None
     short_name:str
     cat_name:str
     cat_url:str

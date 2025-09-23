@@ -1,9 +1,15 @@
 https://www.leonoticias.com/ajax/v22/archive?type-crono=archive-interval&page=1&device=desktop&archive-text=&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=01&archive-startMonth=12&archive-startYear=2024&archive-endDay=31&archive-endMonth=12&archive-endYear=2024&archive-format=
 
-
 https://www.leonoticias.com/ajax/v22/archive?type-crono=archive-text&page=1&device=desktop&archive-text=leon&archive-date=20241201-20241231&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&date=20241201-20241231&section[]=leon&section[]=espana&section[]=culturas
 cat vocento.json | jq ".html" -r> vocento.html
 
+https://hemeroteca.hoy.es/more-news?&page=1&/buscador?filterSelector=dia&query=rogativas
+
+https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=0&device=desktop&archive-text=rogativas&archive-date=20240101-20241231&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&date=20240101-20241231
+https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=1&device=desktop&archive-text=rogativas&archive-date=20240101-20241231&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&date=20240101-20241231
+
+https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=1&device=desktop&archive-text=cnc&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&order=%2Bfecha
+https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=1&device=desktop&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&order=%2Bfecha
 
 crawler -c extremadura downloadnews 2024 01 7 -w 8
 
@@ -20,3 +26,54 @@ mongosh "mongodb://root:example@localhost/general_news" --authenticationDatabase
 
 mongosh "mongodb://root:example@localhost/general_news" --authenticationDatabase=admin \
  --eval 'console.log({path:/json$/,group:"list"});'
+
+
+crawler -c extremadura extract -e Vocento
+
+https://www.hoy.es/ajax/v22/archive?
+    type-crono=archive-text
+    &page=1
+    &device=desktop
+    &archive-text=hermano
+    &archive-date=20240101-20241231
+    &archive-day=
+    &archive-month=
+    &archive-year=
+    &archive-startDay=
+    &archive-startMonth=
+    &archive-startYear=
+    &archive-endDay=
+    &archive-endMonth=
+    &archive-endYear=
+    &archive-format=
+    &filter=true
+    &section[]=extremadura
+    &subsection[]=caceres%2Fvirgen-montana
+    &date=20240101-20241231
+
+https://www.hoy.es/ajax/v22/archive
+    ?type-crono=archive-text
+    &page=1
+    &device=desktop
+    &archive-text=hermano
+    &archive-date=20240101-20241231
+    &archive-day=
+    &archive-month=
+    &archive-year=
+    &archive-startDay=
+    &archive-startMonth=
+    &archive-startYear=
+    &archive-endDay=
+    &archive-endMonth=
+    &archive-endYear=
+    &archive-format=
+    &filter=true
+    &section[0]=extremadura
+    &subsection[0]=caceres%2Fvirgen-montana
+    &date=20240101-20241231
+    &order=%2Bfecha
+
+
+
+
+https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=2&device=desktop&archive-text=&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&subsection[]=internacional%2Foceania&section[]=internacional&order=%2Bfecha

@@ -93,6 +93,7 @@ ENGINE_ID_Vocento = "Vocento"
 
 SUBENGINE_ID_bc_PrensaIberica = "PrensaIberica"
 SUBENGINE_ID_wp_json = "wp-json"
+SUBENGINE_ID_vc_v22="v22"
 
 engines = [ENGINE_ID_bCube,
            ENGINE_ID_WordPress,

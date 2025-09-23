@@ -4,6 +4,12 @@ import logging
 
 from ...bcube.fetcher import BCubePrensaIbericaExtractor
 from ...wordpress.fetcher import WordPressInfoExtractor
+from ...vocento.fetcher import VocentoInfoExtractor
+
+from ...common.consts import ENGINE_ID_bCube,ENGINE_ID_WordPress,ENGINE_ID_Vocento
+from ...common.consts import SUBENGINE_ID_bc_PrensaIberica,SUBENGINE_ID_wp_json,SUBENGINE_ID_vc_v22
+
+from typing import List
 
 LOG = logging.getLogger(__name__)
 
@@ -25,17 +31,22 @@ class ExtractCmd(CommonCmd):
         LOG.info(f"Query to Mongo: {basic_filter}") 
         args:ExtractArgs=self.args
         
-        if args.sub_engine is None or args.sub_engine == "PrensaIberica":
-            extractor:NewsPaperExtractor = BCubePrensaIbericaExtractor(repos)
-            candidates = extractor.get_candidates(try_no_engine=args._tryUnknown,filter=basic_filter)
-            candidates = list(candidates)
-            LOG.info(f"Found {len(candidates)} NewsPapers")
+        extractors:List[NewsPaperExtractor] = []
+        if args.engine is None or args.engine == ENGINE_ID_bCube:
+            if args.sub_engine is None or args.sub_engine == SUBENGINE_ID_bc_PrensaIberica:
+                extractors.append(BCubePrensaIbericaExtractor(repos))
+        if args.engine is None or args.engine == ENGINE_ID_WordPress:
+            if args.sub_engine is None or args.sub_engine == SUBENGINE_ID_wp_json:
+                extractors.append(WordPressInfoExtractor(repos))
+        if args.engine is None or args.engine == ENGINE_ID_Vocento:
+            if args.sub_engine is None or args.sub_engine == SUBENGINE_ID_vc_v22:
+                extractors.append(VocentoInfoExtractor(repos))
 
-            extractor.extract_many(candidates, force= args._force)
-        if args.sub_engine is None or args.sub_engine == "wp-json":
-            extractor:NewsPaperExtractor = WordPressInfoExtractor(repos)
+            
+        for extractor in extractors:
             candidates = extractor.get_candidates(try_no_engine=args._tryUnknown,filter=basic_filter)
             candidates = list(candidates)
-            LOG.info(f"Found {len(candidates)} NewsPapers")
+            LOG.info(f"Found {len(candidates)} NewsPapers for extractor {extractor.__class__.__name__}")
             extractor.extract_many(candidates, force= args._force)
-        pass
+
+        

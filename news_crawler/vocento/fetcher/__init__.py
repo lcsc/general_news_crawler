@@ -1,0 +1,1 @@
+from .vocento import VocentoInfoExtractor
