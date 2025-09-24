@@ -28,7 +28,7 @@ mongosh "mongodb://root:example@localhost/general_news" --authenticationDatabase
  --eval 'console.log({path:/json$/,group:"list"});'
 
 
-crawler -c extremadura extract -e Vocento
+crawler -c extremadura -s hoy extract -e Vocento
 
 https://www.hoy.es/ajax/v22/archive?
     type-crono=archive-text

@@ -9,6 +9,8 @@ LOG = logging.getLogger(__name__)
 
 from datetime import datetime,timezone,timedelta
 
+from pymongo.database import Database
+
 import tarfile
 import os
 
@@ -24,14 +26,14 @@ class CrawlerRepos:
     
     def __init__(self):
         if not hasattr(self, "newspaper"):
-            self.newspaper = None
-            self.articles= None
+            self.newspaper:NewsPaperRepository|None = None
+            self.articles:NewsArticleRepository|None = None
 
-            self.bCubeCategories = None
-            self.bCubePiMd = None
-            self.piStats= None
-    
-    def connect(self,db:database=None):
+            self.bCubeCategories:BcubeCategoryRepository|None = None
+            self.bCubePiMd:BcubePiMDRepository|None = None
+            self.piStats:PrensaIbericaStatRepository|None = None
+
+    def connect(self,db:Database):
         LOG.info ("Connecting to DataBase")
         self.newspaper = NewsPaperRepository(database=db)
         self.articles= NewsArticleRepository(database=db)
