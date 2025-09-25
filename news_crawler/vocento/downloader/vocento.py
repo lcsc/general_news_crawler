@@ -6,7 +6,7 @@ from ...core.fetcher.extractor import NewsArticleReaderContext, NewsArticleReade
 from ...core.model.newspaper import NewsPaper, NewsArticle
 from ...core.model.repos import CrawlerRepos
 
-from typing import List,Dict
+from typing import List,Dict, Tuple
 from ...common.tools import get_url, print_exception
 
 from ...common.consts import ENGINE_ID_Vocento, SUBENGINE_ID_vc_v22
@@ -110,7 +110,7 @@ class VocentoArticleReader(NewsArticleReader):
                 return date
         return None
     
-    def _get_title_url(self,html:bs4.element.Tag)->(str | None,str | None):
+    def _get_title_url(self,html:bs4.element.Tag)->Tuple[str | None,str | None]:
         la = html.find_all('a')
         for a in la:
             if a.has_attr('title') and a.has_attr('href'):
@@ -123,6 +123,8 @@ class VocentoArticleReader(NewsArticleReader):
         #print(html.prettify())
         date = self._find_date(html)
         title, url = self._get_title_url(html)
+        if url is not None and url.startswith('/'):
+            url = context.news_paper.real_url+url.lstrip('/')
         id:str = url.split('/')[-1] if url is not None else None
         if id is not None and id.endswith('.html'):
             id = id.removesuffix('.html')
@@ -187,14 +189,14 @@ class VocentoDownloader():
         self._reader=reader
         pass
 
-    def get_category_page(self,np:NewsPaper,context:VocentoArticleReaderContext,cat:BcubeCategory,page:int,date_range=None):
+    def get_category_page(self,np:NewsPaper,context:VocentoArticleReaderContext,cat:BcubeCategory,page:int,start=None,end=None)->str:
         
         base_url = np.real_url+"ajax/v22/archive?"
         params = {
                 "type-crono": "archive-text",
                 "page": page,
                 "device": "desktop",
-                "archive-text": "",
+                #"archive-text": "",
                 "archive-date": "",
                 "archive-day": "",
                 "archive-month": "",
@@ -212,6 +214,9 @@ class VocentoDownloader():
                 "date": "",
                 "order": "+fecha"
         }
+        if start is not None and end is not None:
+            params["archive-date"] = f"{start.year}{start.month:02}{start.day:02}-{end.year}{end.month:02}{end.day:02}"
+            params["date"] = params["archive-date"]
 
         url = base_url + urllib.parse.urlencode(params, doseq=True)
         

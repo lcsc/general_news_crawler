@@ -4,6 +4,7 @@ from time import sleep
 from ...core.backfiller.backfiller import BackFiller,BackFillerManager
 from ...wordpress.backfiller.wordpress import WpBackFiller
 from ...bcube.backfiller.prensaiberica import BcubePiBackFiller
+from ...vocento.backfiller.vocento import VocentoBackFiller
 from ...core.model.newspaper import NewsPaper
 from ...common.consts import BfStatus_OK
 
@@ -98,6 +99,7 @@ class BackFillCmd(CommonCmd):
         mgr = BackFillerManager(repos)
         mgr.addBackFiller(WpBackFiller(repos))
         mgr.addBackFiller(BcubePiBackFiller(repos))
+        mgr.addBackFiller(VocentoBackFiller(repos))
         mgr.backfillManyNews(candidates,arg.year,arg.month,arg.day)
         pass
 
