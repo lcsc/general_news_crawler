@@ -58,6 +58,7 @@ def doBackFillMp(jobs:List[BackFillJob]):
     mgr = BackFillerManager(repos)
     mgr.addBackFiller(WpBackFiller(repos))
     mgr.addBackFiller(BcubePiBackFiller(repos))
+    mgr.addBackFiller(VocentoBackFiller(repos))
     
     grouped = getGroupedJobs(jobs)
     LOG.debug(f"Grouped Jobs {len(grouped)}")
