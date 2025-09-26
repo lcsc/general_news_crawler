@@ -126,6 +126,7 @@ class GeneralDownloader():
                     break
         except Exception as e:
             LOG.error(f"Error downloading article {article.article_id} for {job.news_paper.name}: {e}")
+            LOG.debug(f"Exception details: ", exc_info=True)
             if "formula1.lne.es" in str(e):
                 LOG.debug(f"Error accediendo a formula1.lne.es ({article.article_url})")
                 # Hay una redireccion a un servidor que no funciona bien (lo tienen mal ellos)
@@ -140,7 +141,20 @@ class GeneralDownloader():
                 job.data["next_article"] += 1
 
     def save_article(self, article:NewsArticle, data, extension:str):
-        path = article.raw_data.replace(".list_raw", extension)
+        path = ""
+        if article.raw_data is not None:
+            path = article.raw_data.replace(".list_raw", extension)
+        else:
+            if article.categories is not None and len(article.categories) > 0:
+                cat = article.categories[0] 
+                if cat.endswith("/"):
+                    cat = cat[:-1]
+                if cat.startswith("/"):
+                   cat = cat[1:]
+                path = f"data/{article.np_ccaa}/{article.np_name}/{cat}/{article.article_id}{extension}"
+            else:
+                path = f"data/{article.np_ccaa}/{article.np_name}/{article.article_id}{extension}"
+
         self.repos.save_file(path, data,'article',article.date)
         article.article_data = path
         article.download_status = DownloadStatus_OK
