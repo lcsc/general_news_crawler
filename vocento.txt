@@ -77,3 +77,10 @@ https://www.hoy.es/ajax/v22/archive
 
 
 https://www.hoy.es/ajax/v22/archive?type-crono=archive-text&page=2&device=desktop&archive-text=&archive-date=&archive-day=&archive-month=&archive-year=&archive-startDay=&archive-startMonth=&archive-startYear=&archive-endDay=&archive-endMonth=&archive-endYear=&archive-format=&filter=true&subsection[]=internacional%2Foceania&section[]=internacional&order=%2Bfecha
+
+
+mongosh "mongodb://root:example@localhost/general_news" --authenticationDatabase=admin \
+ --eval 'db.bCubeCategory.find({ccaa:"extremadura",short_name:"hoy"})'
+
+mongosh "mongodb://root:example@localhost/general_news" --authenticationDatabase=admin \
+ --eval 'db.bCubeCategory.updateMany({ccaa:"extremadura",short_name:"hoy"},{$set: {backfill:null}})'

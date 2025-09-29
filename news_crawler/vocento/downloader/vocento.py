@@ -10,6 +10,7 @@ from typing import List,Dict, Tuple
 from ...common.tools import get_url, print_exception
 
 from ...common.consts import ENGINE_ID_Vocento, SUBENGINE_ID_vc_v22
+from ...common.tools import np_base_path
 
 import bs4.element
 import time
@@ -144,6 +145,17 @@ class VocentoArticleReader(NewsArticleReader):
 
 
         return ret
+    
+    def _save_list_article(self,context:VocentoArticleReaderContext,article:NewsArticle,raw:bs4.element.Tag):
+        cat = context.category.cat_name if context.category is not None else "root"
+        if not cat.endswith("/"): cat =cat +"/"
+        if not cat.startswith("/"): cat ="/"+ cat
+        path =f"{np_base_path(context.news_paper)}{cat}{article.article_id}.list_raw"
+        modDate = article.date
+    
+        self.repos.save_file(path, raw.prettify(),'list',modDate)
+        article.raw_data=path
+        pass
 
     def get_articles(self,context:VocentoArticleReaderContext,html:str)->List[NewsArticle]:
         vcReader:VocentoArticleReader = VocentoArticleReader(self.repos) # type: ignore
@@ -155,6 +167,7 @@ class VocentoArticleReader(NewsArticleReader):
             try:
                 article = vcReader.parse_article(it,context)
                 if article is not None:
+                    self._save_list_article(context,article,it)
                     articles.append(article)
                     context.addArticle(article)
 

@@ -50,7 +50,6 @@ class VocentoInfoExtractor(NewsPaperExtractor):
         
         return ret
     
-
     def extract_one_category(self,np:NewsPaper,cat:BcubeCategory)->List[NewsArticle]:
         print(f"  Extracting {cat.cat_name}")
         context = VocentoArticleReaderContext(np,cat)
