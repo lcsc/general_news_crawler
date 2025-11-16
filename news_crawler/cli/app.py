@@ -13,7 +13,7 @@ from .commands import UploaderCmd
 from .commands import DownloadNewsArgs, DownloadNewsCmd
 from .commands import FixArticlesProvs
 from .commands import ClassifyHeadLines
-
+from .commands import stats_cmd
 from ..core.newspapers import Listers
 
 from datetime import datetime
@@ -224,3 +224,9 @@ def classifyHeadLines(obj:GeneralOptions):
         do_classify_headlines(obj,args)
 
     LOG.info(f"Total Duration: {datetime.now()-start}")
+
+@main.command()
+@click.pass_obj
+def stats(obj:GeneralOptions):
+    
+    stats_cmd(obj)
