@@ -172,3 +172,8 @@ cython_debug/
 data
 log
 backup
+color_map_papers_ccaa.png
+color_map_articles_ccaa.png
+stats_2024.csv
+stats_provs_2024.csv
+stats_ccaa_2024.csv

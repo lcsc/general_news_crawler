@@ -13,7 +13,7 @@ from .commands import UploaderCmd
 from .commands import DownloadNewsArgs, DownloadNewsCmd
 from .commands import FixArticlesProvs
 from .commands import ClassifyHeadLines
-from .commands import stats_cmd
+from .commands import stats_cmd, color_map_cmd
 from ..core.newspapers import Listers
 
 from datetime import datetime
@@ -230,3 +230,25 @@ def classifyHeadLines(obj:GeneralOptions):
 def stats(obj:GeneralOptions):
     
     stats_cmd(obj)
+
+@main.command()
+@click.pass_obj
+@click.argument('mode',type=click.Choice(["ccaa","provs"], case_sensitive=False), required=True)
+@click.option('-c','--csv_file', type=click.Path(), required=False)
+@click.option('-g','--geo_file', type=click.Path(), required=False)
+def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None):
+    print ("Color Map")
+    if mode not in ["ccaa","provs"]:
+        LOG.error(f"Modo desconocido {mode}")
+        return 
+    if csv_file is None:
+        if mode=="ccaa":
+            csv_file="stats_ccaa_2024.csv"
+        else:
+            csv_file="stats_provs_2024.csv"
+    if geo_file is None:
+        if mode=="ccaa":
+            geo_file="dashboard/src/assets/communities.geojson"
+        else:
+            geo_file="provinces.geojson"
+    color_map_cmd(mode, csv_file, geo_file)

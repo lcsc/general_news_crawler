@@ -78,6 +78,27 @@ provincias={
 
 ccaa = provincias.keys()
 
+ccaa_geo_map={
+'01':'andalucia', # COMUNIDAD AUTONOMA DE ANDALUCIA
+'02':'aragon', # COMUNIDAD AUTONOMA DE ARAGON
+'03':'asturias', # COMUNIDAD AUTONOMA DEL PRINCIPADO DE AST
+'04':'baleares', # COMUNIDAD AUTONOMA DE LAS ILLES BALEARS
+'05':'canarias', # COMUNIDAD AUTONOMA DE CANARIAS
+'06':'cantabria', # COMUNIDAD AUTONOMA DE CANTABRIA
+'07':'castillaleon', # COMUNIDAD DE CASTILLA Y LEON
+'08':'castillamancha', # COMUNIDAD AUTONOMA DE CASTILLA-LA MANCHA
+'09':'catalunya', # COMUNIDAD AUTONOMA DE CATALUÑA
+'10':'valencia', # COMUNIDAD VALENCIANA
+'11':'extremadura', # COMUNIDAD AUTONOMA DE EXTREMADURA
+'12':'galicia', # COMUNIDAD AUTONOMA DE GALICIA
+'13':'madrid', # COMUNIDAD DE MADRID
+'14':'murcia', # COMUNIDAD AUTONOMA DE LA REGION DE MURCI
+'15':'navarra', # COMUNIDAD FORAL DE NAVARRA
+'16':'pvasco', # COMUNIDAD AUTONOMA DEL PAIS VASCO O DE E
+'17':'rioja', # COMUNIDAD AUTONOMA DE LA RIOJA
+'18':'ceutamelilla', # CIUDAD DE CEUTA
+'19':'ceutamelilla', # CIUDAD DE MELILLA
+}
 
 
 # Minimo de articulos para considerar que el mes esta activo
