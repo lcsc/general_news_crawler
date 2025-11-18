@@ -250,5 +250,5 @@ def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None
         if mode=="ccaa":
             geo_file="dashboard/src/assets/communities.geojson"
         else:
-            geo_file="provinces.geojson"
+            geo_file="dashboard/src/assets/provinces.geojson"
     color_map_cmd(mode, csv_file, geo_file)
