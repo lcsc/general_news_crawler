@@ -77,6 +77,17 @@ def get_prov_n(stats, prov_cod,campo="newspaper_count"):
     #print (f"Provincia no encontrada en las stats: {prov_cod} - {prov}")
     return None
 
+def move_canarias(data, cod_ccaa='05'):
+    import shapely
+    #aumentar canarias latitud en 5 grados
+    for idx, row in data.iterrows():
+        if row['cod_ccaa']==cod_ccaa:
+            geo = row['geometry']
+            print(type(geo))
+            #es un multipolygon usamos transform
+            data.at[idx,'geometry'] = shapely.transform(geo, lambda x=None: x+[9,6.5] )
+    return data
+
 def color_map_cmd(mode, csv_file, geo_file):
     import geopandas as gpd
     import geoplot
@@ -89,6 +100,9 @@ def color_map_cmd(mode, csv_file, geo_file):
 
     stats = pd.read_csv(csv_file)
   
+    data = move_canarias(data, cod_ccaa='05' if mode=="ccaa" else '04')
+    
+
   
     if mode=="ccaa":
         data["n_periodicos"] = data.apply(
