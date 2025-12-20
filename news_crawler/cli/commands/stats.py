@@ -1,8 +1,9 @@
 
+from typing import Optional
 from news_crawler.cli.commands.common import CommonArgs, CommonCmd, GeneralOptions
 from news_crawler.common.dates import get_range
 from news_crawler.core.model.repos import CrawlerRepos
-from news_crawler.common.consts import provincias, ccaa_geo_map,ccaa_id_geo_map,prov_geo_map
+from news_crawler.common.consts import provincias, ccaa_geo_map,ccaa_id_geo_map,prov_geo_map, DownloadStatus_OK
 import csv
 
 import logging
@@ -35,21 +36,65 @@ def stats_ccaa(repos:CrawlerRepos, year:int):
         data.append( {"ccaa":ccaa,"newspaper_count":np_count,"article_count":art_count} )
     return data
 
-def stats_cmd(args:GeneralOptions):
+def stats_papers(cmd:CommonCmd, repos:CrawlerRepos, year:int):
+    data = []
+    start,end = get_range(year)
+    filter = cmd.buildFilterNewsPaper()
+    print (filter)
+    newspapers = list( repos.newspaper.find_by( filter ) )
+    print (f"Found {len(newspapers)} newspapers")
+    for paper in newspapers:
+        LOG.info(f"Processing {paper.short_name} ")
+        #    np_name: str
+        #np_ccaa: str
+        #np_provincia: Optional[str] = None
+
+        np_fiter =  {"np_ccaa":paper.ccaa,
+                     "np_provincia":paper.provincia,
+                     "np_name": paper.short_name,
+                     "date":{"$gte": start, "$lt": end}} 
+        #print(np_fiter)
+        articles = list( repos.articles.find_by( np_fiter ) )
+        art_count = len( articles )
+        n_sequias= 0
+        n_downloaded=0
+        n_downloaded_with_sequias=0
+        for art in articles:
+            if art.is_headline_drought is True:
+                n_sequias+=1
+            if art.download_status is not None and art.download_status==DownloadStatus_OK:
+                n_downloaded+=1
+                if art.is_headline_drought is True:
+                    n_downloaded_with_sequias+=1
+        data.append( {"news_paper":paper.name,"ccaa":paper.ccaa,"provincia":paper.provincia,"n_articles":art_count,"n_sequias":n_sequias,"n_downloaded":n_downloaded,"n_downloaded_with_sequias":n_downloaded_with_sequias} )
+    return data
+
+def stats_cmd(args:GeneralOptions, mode, year:int):
     cmd = CommonCmd(general=args,args=None)
     repos:CrawlerRepos = cmd.connectMongo()
-    data = stats_provs(repos, 2024)
-    keys = data[0].keys()
-    with open('stats_provs_2024.csv', 'w', newline='', encoding='utf-8') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(data)
-    data = stats_ccaa(repos, 2024)
-    keys = data[0].keys()
-    with open('stats_ccaa_2024.csv', 'w', newline='', encoding='utf-8') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(data)
+    if mode=="provs":
+        data = stats_provs(repos, year)
+        keys = data[0].keys()
+        with open(f'stats_provs_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(data)
+    elif mode=="ccaa":
+        data = stats_ccaa(repos, year)
+        keys = data[0].keys()
+        with open(f'stats_ccaa_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(data)
+    else: # papers  
+        data = stats_papers(cmd, repos, year)
+        keys = data[0].keys()
+        with open(f'stats_papers_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(data)
+
+
 
 def get_ccaa_n(stats, ccaa_cod,campo="newspaper_count"):
     if ccaa_cod not in ccaa_geo_map:

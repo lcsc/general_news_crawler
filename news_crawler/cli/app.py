@@ -227,9 +227,10 @@ def classifyHeadLines(obj:GeneralOptions):
 
 @main.command()
 @click.pass_obj
-def stats(obj:GeneralOptions):
-    
-    stats_cmd(obj)
+@click.argument('mode',type=click.Choice(["ccaa","provs","papers"], case_sensitive=False), required=True)
+@click.argument('year',type=int, required=False, default=2024)
+def stats(obj:GeneralOptions, mode:str, year:int):    
+    stats_cmd(obj, mode, year)
 
 @main.command()
 @click.pass_obj
