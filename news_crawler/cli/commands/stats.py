@@ -40,7 +40,7 @@ def stats_papers(cmd:CommonCmd, repos:CrawlerRepos, year:int):
     data = []
     start,end = get_range(year)
     filter = cmd.buildFilterNewsPaper()
-    print (filter)
+    #print (filter)
     newspapers = list( repos.newspaper.find_by( filter ) )
     print (f"Found {len(newspapers)} newspapers")
     for paper in newspapers:
@@ -62,11 +62,21 @@ def stats_papers(cmd:CommonCmd, repos:CrawlerRepos, year:int):
         for art in articles:
             if art.is_headline_drought is True:
                 n_sequias+=1
+            if art.download_status is None and art.article_data is not None:
+                # marcar como descargado
+                art.download_status=DownloadStatus_OK
+                repos.articles.save(art)
+
             if art.download_status is not None and art.download_status==DownloadStatus_OK:
                 n_downloaded+=1
                 if art.is_headline_drought is True:
                     n_downloaded_with_sequias+=1
-        data.append( {"news_paper":paper.name,"ccaa":paper.ccaa,"provincia":paper.provincia,"n_articles":art_count,"n_sequias":n_sequias,"n_downloaded":n_downloaded,"n_downloaded_with_sequias":n_downloaded_with_sequias} )
+        
+        if art_count>0: # solo guardamos los que tienen articulos
+            data.append( {"news_paper":paper.name,"ccaa":paper.ccaa,"provincia":paper.provincia,
+                          "engine":paper.engine.engine,
+                          "n_articles":art_count,"n_sequias":n_sequias,
+                          "n_downloaded":n_downloaded,"n_downloaded_with_sequias":n_downloaded_with_sequias} )
     return data
 
 def stats_cmd(args:GeneralOptions, mode, year:int):
@@ -75,21 +85,21 @@ def stats_cmd(args:GeneralOptions, mode, year:int):
     if mode=="provs":
         data = stats_provs(repos, year)
         keys = data[0].keys()
-        with open(f'stats_provs_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_provs_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
     elif mode=="ccaa":
         data = stats_ccaa(repos, year)
         keys = data[0].keys()
-        with open(f'stats_ccaa_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_ccaa_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
     else: # papers  
         data = stats_papers(cmd, repos, year)
         keys = data[0].keys()
-        with open(f'stats_papers_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_papers_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
@@ -191,7 +201,7 @@ def color_map_cmd(mode, csv_file, geo_file):
         
     )
     plt.title(f"Mapa de Articulos por {'Comunidades Autonomas' if mode == 'ccaa' else 'Provincias'} año 2024")
-    plt.savefig(f"color_map_articles_{mode}.png")
+    plt.savefig(f"./out/color_map_articles_{mode}.png")
     pass
 
 # Funciones para imprimir los mapas de provincias y ccaa

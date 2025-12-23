@@ -244,9 +244,9 @@ def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None
         return 
     if csv_file is None:
         if mode=="ccaa":
-            csv_file="stats_ccaa_2024.csv"
+            csv_file="./out/stats_ccaa_2024.csv"
         else:
-            csv_file="stats_provs_2024.csv"
+            csv_file="./out/stats_provs_2024.csv"
     if geo_file is None:
         if mode=="ccaa":
             geo_file="dashboard/src/assets/communities.geojson"
