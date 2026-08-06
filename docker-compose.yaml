@@ -4,7 +4,7 @@ services:
     ports:
       - '27017:27017'
     volumes:
-      - dbdata8:/data/db
+      - /srv/mongodb:/data/db
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
@@ -27,7 +27,6 @@ services:
       - "traefik.http.routers.mongo.entrypoints=web"
   
   news_api:
-    image: general_news_crawler_api
     build:
       context: .
     environment:
@@ -73,6 +72,11 @@ services:
     volumes:
       - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro"
 
-    
-volumes:
-  dbdata8:
+
+# volumes:
+#   dbdata8:
+#     driver: local
+#     driver_opts:
+#       type: 'none'
+#       o: 'bind'
+#       device: '/srv/monogdb'

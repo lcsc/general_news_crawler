@@ -16,3 +16,4 @@ Pasos para hacer una captura :
 ```
 
 
+docker run -it --rm -e https_proxy=socks5h://172.17.0.1:1080 python:3.11 bash
