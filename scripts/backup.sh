@@ -27,7 +27,7 @@ do
     docker $MDB  $MDB_CON -cdata_${ca} > data/$ca/data_${ca}.json
     #set +x
     tar -cvzf backup/$TAG/data_${ca}_${TAG}.tar.gz data/$ca
-
+    rm -r data/$ca
 done
 
 exit 1 
