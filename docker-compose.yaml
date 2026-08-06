@@ -4,7 +4,7 @@ services:
     ports:
       - '27017:27017'
     volumes:
-      - /srv/mongodb:/data/db
+      - /srv/mongodb/news_crawler:/data/db
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
@@ -14,7 +14,7 @@ services:
     image: mongo-express
     restart: unless-stopped
     ports:
-      - 8081:8081
+      - 8082:8081
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER:-root}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD:-example}
@@ -48,7 +48,7 @@ services:
     build: 
       context: dashboard
     ports:
-      - 8082:80
+      - 8083:80
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
@@ -56,7 +56,7 @@ services:
       - "traefik.http.routers.news_dashboard.entrypoints=web"
 
   traefik:
-    image: "traefik:v3.3"
+    image: "traefik:v3.7"
     container_name: "traefik"
     command:
       #- "--log.level=DEBUG"
@@ -67,8 +67,8 @@ services:
       - "--accesslog=true"
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "8080:8080"
+      - "81:80"
+      - "8081:8080"
     volumes:
       - "${DOCKER_SOCK:-/var/run/docker.sock}:/var/run/docker.sock:ro"
 
