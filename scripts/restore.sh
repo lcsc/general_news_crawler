@@ -4,15 +4,21 @@ CCAA="aragon cantabria catalunya galicia navarra rioja asturias baleares castill
 
 TAG=$1
 
-MSH="compose exec mongodb mongosh"
-MSH_CON="mongodb://root:example@localhost/general_news --authenticationDatabase=admin"
+MONGO_PASS=$(kubectl -n news-crawler get secret mongodb-creds -o jsonpath='{.data.password}' | base64 -d)
+MONGO_USER=$(kubectl -n news-crawler get secret mongodb-creds -o jsonpath='{.data.username}' | base64 -d)
+MONGO_HOST=dana-monzondb:32717
 
-MDB="compose exec -T mongodb mongoimport"
-MDB_CON="--uri="mongodb://root:example@localhost/" --authenticationDatabase=admin -dgeneral_news"
+MSH="mongosh"
+MSH_CON="mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/general_news --authenticationDatabase=admin"
+
+MDB="mongoimport"
+MDB_CON="--uri=mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/general_news --authenticationDatabase=admin"
+
+echo "MDB_CON: $MDB_CON"
 
 if [ $# -lt 1 ]; then
     echo "At least require the tag to load"
-    echo "$0 <TAG> [CCAA] [CCAA ...]"
+    echo "$0 <TAG> [CCAA] [CCAA ...]":bash
     exit -1
 fi
 
@@ -34,15 +40,15 @@ do
     q="{\"ccaa\":\"$ca\"}"
     q_np="{\"np_ccaa\":\"$ca\"}"
     #set -x
-    docker $MSH $MSH_CON -eval "db.NewsPapers.deleteMany(${q})"
-    docker $MSH $MSH_CON -eval "db.bCubeCategory.deleteMany(${q})"
-    docker $MSH $MSH_CON -eval "db.bCubePIMetaData.deleteMany(${q})"
-    docker $MSH $MSH_CON -eval "db.NewsArticles.deleteMany(${q_np})"
+    $MSH $MSH_CON -eval "db.NewsPapers.deleteMany(${q})"
+    $MSH $MSH_CON -eval "db.bCubeCategory.deleteMany(${q})"
+    $MSH $MSH_CON -eval "db.bCubePIMetaData.deleteMany(${q})"
+    $MSH $MSH_CON -eval "db.NewsArticles.deleteMany(${q_np})"
     
-    cat data/${ca}/NewsPapers.json | docker $MDB $MDB_CON -cNewsPapers
-    cat data/${ca}/bCubeCategory.json | docker $MDB $MDB_CON -cbCubeCategory
-    cat data/${ca}/bCubePIMetaData.json | docker $MDB $MDB_CON -cbCubePIMetaData
-    cat data/${ca}/NewsArticles.json | docker $MDB $MDB_CON -cNewsArticles
-    cat data/${ca}/data_${ca}.json | docker $MDB $MDB_CON -cdata_${ca} --drop
+    cat data/${ca}/NewsPapers.json | $MDB $MDB_CON -cNewsPapers
+    cat data/${ca}/bCubeCategory.json | $MDB $MDB_CON -cbCubeCategory
+    cat data/${ca}/bCubePIMetaData.json | $MDB $MDB_CON -cbCubePIMetaData
+    cat data/${ca}/NewsArticles.json | $MDB $MDB_CON -cNewsArticles
+    cat data/${ca}/data_${ca}.json | $MDB $MDB_CON -cdata_${ca} --drop
     #set +x
 done
