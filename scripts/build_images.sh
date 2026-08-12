@@ -1,10 +1,14 @@
 #!/bin/sh
 
-docker compose stop news_api news_dashboard
-docker compose rm news_api news_dashboard
+TIMESTAMP=$(date '+%Y%m%d-%H%M%S')
+REGISTRY="mirror.lcsc.csic.es/lcsc"
 
-docker rmi general_news_crawler_api general_news_crawler_dashboard
-docker compose build
-docker compose create news_api news_dashboard
-docker compose start news_api news_dashboard
+docker build -t ${REGISTRY}/general_news_crawler_api:${TIMESTAMP} -t ${REGISTRY}/general_news_crawler_api:latest .
+docker build -t ${REGISTRY}/general_news_crawler_dashboard:${TIMESTAMP} -t ${REGISTRY}/general_news_crawler_dashboard:latest ./dashboard
+
+docker push ${REGISTRY}/general_news_crawler_api:${TIMESTAMP}
+docker push ${REGISTRY}/general_news_crawler_api:latest
+docker push ${REGISTRY}/general_news_crawler_dashboard:${TIMESTAMP}
+docker push ${REGISTRY}/general_news_crawler_dashboard:latest
+
 

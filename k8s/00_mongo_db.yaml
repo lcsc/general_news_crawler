@@ -58,11 +58,11 @@ spec:
           args: ["--dbpath", "/data/db"]
           resources:
             limits:
-              cpu: "600m"
-              memory: "1Gi"
+              cpu: "7000m"
+              memory: "60Gi"
             requests:
-              cpu: "300m"
-              memory: "1Gi"
+              cpu: "1000m"
+              memory: "10Gi"
           livenessProbe:
             exec:
               command:

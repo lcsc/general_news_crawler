@@ -9,3 +9,10 @@
 [INFO]: candidates to check: 0
 [INFO]: Found 0 NewsPapers for extractor VocentoInfoExtractor
 [INFO]: Total Duration: 0:00:00.012363
+
+
+docker run --rm \
+   -v ./dashboard/vue-router-nginx.conf:/etc/nginx/conf.d/default.conf\
+   -p 8080:80 \
+   mirror.lcsc.csic.es/lcsc/general_news_crawler_dashboard:latest
+

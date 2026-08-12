@@ -2,33 +2,36 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: mongo-express
-  name: mongo-express
-  namespace: mongodb
+    app: news-crawler
+    component: mongodb-express
+  name: mongodb-express
+  namespace: news-crawler
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongo-express
+      app: news-crawler
+      component: mongodb-express
   strategy: {}
   template:
     metadata:
       labels:
-        app: mongo-express
+        app: news-crawler
+        component: mongodb-express
     spec:
       containers:
-        - name: mongo-express
+        - name: mongodb-express
           image: mongo-express:1.0.2-20
           resources:
             limits:
-              cpu: "600m"
-              memory: "1Gi"
+              cpu: "1000m"
+              memory: "2Gi"
             requests:
-              cpu: "300m"
+              cpu: "500m"
               memory: "1Gi"
           livenessProbe:
             httpGet:
-              path: /mongodb
+              path: /news/mongo
               port: 8081
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -37,7 +40,7 @@ spec:
             failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /mongodb
+              path: /news/mongo
               port: 8081
             initialDelaySeconds: 30
             periodSeconds: 10
@@ -48,50 +51,51 @@ spec:
             - name: ME_CONFIG_MONGODB_ADMINUSERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mongo-creds
+                  name: mongodb-creds
                   key: username
             - name: ME_CONFIG_MONGODB_ADMINPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mongo-creds
+                  name: mongodb-creds
                   key: password
             - name: ME_CONFIG_MONGODB_URL
-              value: "mongodb://$(ME_CONFIG_MONGODB_ADMINUSERNAME):$(ME_CONFIG_MONGODB_ADMINPASSWORD)@mongo-nodeport-svc:27017"
+              value: "mongodb://$(ME_CONFIG_MONGODB_ADMINUSERNAME):$(ME_CONFIG_MONGODB_ADMINPASSWORD)@mongodb-nodeport-svc:27017"
             - name: ME_CONFIG_BASICAUTH
               value: "false"
             - name: ME_CONFIG_SITE_BASEURL
-              value: "/mongodb/"
+              value: "/news/mongo"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: mongo-express
-  name: mongo-express-svc
-  namespace: mongodb
+    app: news-crawler
+    component: mongodb-express
+  name: mongodb-express-svc
+  namespace: news-crawler
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 8081
       protocol: TCP
       targetPort: 8081
-      nodePort: 32001
   selector:
-    app: mongo-express
+    app: news-crawler
+    component: mongodb-express
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mongo-express-ingress
-  namespace: mongodb
+  name: mongodb-express-ingress
+  namespace: news-crawler
 spec:
   rules:
     - http:
         paths:
-          - path: /mongodb
+          - path: /news/mongo
             pathType: Prefix
             backend:
               service:
-                name: mongo-express-svc
+                name: mongodb-express-svc
                 port:
                   number: 8081

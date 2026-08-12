@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: news-crawler
+    component: news-api
+  name: news-api
+  namespace: news-crawler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: news-crawler
+      component: news-api
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: news-crawler
+        component: news-api
+    spec:
+      containers:
+        - name: news-api
+          image: mirror.lcsc.csic.es/lcsc/general_news_crawler_api:latest
+          resources:
+            limits:
+              cpu: "2000m"
+              memory: "10Gi"
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /news/api
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /news/api
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          env:
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-creds
+                  key: username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-creds
+                  key: password
+            - name: MONGODB_URL
+              value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-nodeport-svc:27017"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: news-crawler
+    component: news-api
+  name: news-api-svc
+  namespace: news-crawler
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      protocol: TCP
+      targetPort: 5000
+  selector:
+    app: news-crawler
+    component: news-api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: news-api-ingress
+  namespace: news-crawler
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /news/api
+            pathType: Prefix
+            backend:
+              service:
+                name: news-api-svc
+                port:
+                  number: 5000
