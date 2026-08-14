@@ -5,6 +5,12 @@ import vue from "@vitejs/plugin-vue";
 import vueDevTools from "vite-plugin-vue-devtools";
 import { hasOnlyExpressionInitializer } from "typescript";
 
+let apiTarget = "http://" + process.env.API_HOST
+
+if (process.env.API_HOST === undefined) {
+  apiTarget = "https://lisuarte.eead.csic.es"
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), vueDevTools()],
@@ -17,7 +23,7 @@ export default defineConfig({
     host: true,
     proxy: {
       "/news/api": {
-        target: "http://host.docker.internal:5000",
+        target: apiTarget,
         changeOrigin: false,
         secure: false,
         ws: true,

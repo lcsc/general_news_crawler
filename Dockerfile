@@ -11,7 +11,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_CACHE_DIR='/var/cache/pypoetry' \
   POETRY_HOME='/usr/local' \
-  POETRY_VERSION=2.0.1
+  POETRY_VERSION=2.4.1
 
 RUN curl -sSL https://install.python-poetry.org | python3 -
 

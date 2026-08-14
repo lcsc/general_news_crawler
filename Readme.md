@@ -19,6 +19,25 @@ Pasos para hacer una captura :
 docker run -it --rm -e https_proxy=socks5h://172.17.0.1:1080 python:3.11 bash
 
 
+## Inicilizacion Dev Python
+
+```bash
+python3 -m venv --upgrade-deps .venv
+. .venv/bin/activate
+pip install poetry
+poetry self update
+deactivate
+. .venv/bin/activate
+poetry install 
+pip install -e .
+```
+
+## UBUNTU NOTE
+
+Si poetry falla y se cuelga sin hacer nada aparente, hay que deshabilitar el keyring
+
+export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring
+
 ## Cliente MongoDB
 
 ### Instalación

@@ -6,6 +6,8 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "build-only": "vite build",
     "dev": "vite",
+    "dev-local": "API_HOST=localhost:30080 vite",
+    "dev-api": "API_HOST=localhost:5000 vite",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
     "gen-client": "openapi-ts"
