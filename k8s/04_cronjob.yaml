@@ -1,6 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  namespace: news-crawler
   name: cronjob-script
   labels:
     app: news-crawler
@@ -22,7 +23,7 @@ kind: Job
 apiVersion: batch/v1
 metadata:
   name: test-job
-  namespace: default
+  namespace: news-crawler
   labels:
     app: news-crawler
     component: cronjob
@@ -59,6 +60,19 @@ spec:
             - name: cronjob-script
               mountPath: /bin/get-yesterday-params.py
               subPath: get-yesterday-params.py
+          env:
+            - name: MONGODB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-creds
+                  key: username
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-creds
+                  key: password
+            - name: MONGODB_URL
+              value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-nodeport-svc:27017"
       volumes:
         - name: cronjob-script
           configMap:

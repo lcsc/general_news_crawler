@@ -6,7 +6,8 @@ TAG=$1
 
 MONGO_PASS=$(kubectl -n news-crawler get secret mongodb-creds -o jsonpath='{.data.password}' | base64 -d)
 MONGO_USER=$(kubectl -n news-crawler get secret mongodb-creds -o jsonpath='{.data.username}' | base64 -d)
-MONGO_HOST=dana-monzondb:32717
+#MONGO_HOST=dana-monzondb:32717
+MONGO_HOST=$(kubectl get nodes -o jsonpath='{.items[0].metadata.name}'):32717
 
 MSH="mongosh"
 MSH_CON="mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/general_news --authenticationDatabase=admin"
@@ -14,7 +15,7 @@ MSH_CON="mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/general_news --auth
 MDB="mongoimport"
 MDB_CON="--uri=mongodb://${MONGO_USER}:${MONGO_PASS}@${MONGO_HOST}/general_news --authenticationDatabase=admin"
 
-echo "MDB_CON: $MDB_CON"
+#echo "MDB_CON: $MDB_CON"
 
 if [ $# -lt 1 ]; then
     echo "At least require the tag to load"
@@ -51,4 +52,5 @@ do
     cat data/${ca}/NewsArticles.json | $MDB $MDB_CON -cNewsArticles
     cat data/${ca}/data_${ca}.json | $MDB $MDB_CON -cdata_${ca} --drop
     #set +x
+    rm -r data/$ca
 done
