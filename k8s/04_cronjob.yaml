@@ -19,69 +19,72 @@ data:
     if __name__ == '__main__':
       main()
 ---
-kind: Job
+kind: CronJob
 apiVersion: batch/v1
 metadata:
-  name: test-job
+  name: daily-backfill-job
   namespace: news-crawler
   labels:
     app: news-crawler
     component: cronjob
 spec:
-  parallelism: 1
-  completions: 1
-  backoffLimit: 6
-  template:
+  schedule: "15 3 * * *"
+  timeZone: "Europe/Madrid"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 366
+  failedJobsHistoryLimit: 3
+  jobTemplate:
     metadata:
       labels:
         app: news-crawler
         component: cronjob
     spec:
-      containers:
-        - name: echo
-          image: mirror.lcsc.csic.es/lcsc/general_news_crawler_api:latest
-          command:
-            - sh
-            - /bin/launch-yesterday-job.sh
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: "7000m"
-              memory: "10Gi"
-            requests:
-              cpu: "3000m"
-              memory: "2Gi"
-          volumeMounts:
+      parallelism: 1
+      completions: 1
+      backoffLimit: 6
+      template:
+        metadata:
+          labels:
+            app: news-crawler
+            component: cronjob
+        spec:
+          containers:
+            - name: echo
+              image: mirror.lcsc.csic.es/lcsc/general_news_crawler_api:latest
+              imagePullPolicy: Always
+              command:
+                - sh
+                - /bin/launch-yesterday-job.sh
+              resources:
+                limits:
+                  cpu: "7000m"
+                  memory: "10Gi"
+                requests:
+                  cpu: "3000m"
+                  memory: "2Gi"
+              volumeMounts:
+                - name: cronjob-script
+                  mountPath: /bin/launch-yesterday-job.sh
+                  subPath: launch-yesterday-job.sh
+                - name: cronjob-script
+                  mountPath: /bin/get-yesterday-params.py
+                  subPath: get-yesterday-params.py
+              env:
+                - name: MONGODB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: mongodb-creds
+                      key: username
+                - name: MONGODB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: mongodb-creds
+                      key: password
+                - name: MONGODB_URL
+                  value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-nodeport-svc:27017"
+          volumes:
             - name: cronjob-script
-              mountPath: /bin/launch-yesterday-job.sh
-              subPath: launch-yesterday-job.sh
-            - name: cronjob-script
-              mountPath: /bin/get-yesterday-params.py
-              subPath: get-yesterday-params.py
-          env:
-            - name: MONGODB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: mongodb-creds
-                  key: username
-            - name: MONGODB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: mongodb-creds
-                  key: password
-            - name: MONGODB_URL
-              value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-nodeport-svc:27017"
-      volumes:
-        - name: cronjob-script
-          configMap:
-            name: cronjob-script
-      restartPolicy: Never
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      securityContext: {}
-      schedulerName: default-scheduler
-  completionMode: NonIndexed
-  suspend: false
-  podReplacementPolicy: TerminatingOrFailed
+              configMap:
+                name: cronjob-script
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 30
