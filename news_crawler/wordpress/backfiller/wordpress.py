@@ -28,6 +28,12 @@ class WpBackFiller(BackFiller):
             cnt=0
             while page<=tope:
                 response = self._downloader.wp_get_dates(ctx,page,start,end)
+                if response.status_code !=200:
+                    LOG.warning(f"Respuesta {response.status_code} != 200, salgo")
+                    ret= NewsPaperBackFill(status=BfStatus_ERROR,msg="Respuesta {response.status_code} != 200, salgo")
+                    tope=page
+                    page+=1
+                    continue
                 if ctx._n_pages > tope:
                     tope=ctx._n_pages
                 tmp = ctx.getArticleCount()

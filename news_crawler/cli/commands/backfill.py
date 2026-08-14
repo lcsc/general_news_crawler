@@ -66,7 +66,7 @@ def doBackFillMp(jobs:List[BackFillJob]):
         month_jobs = grouped[key]
         base = month_jobs[0]
         nps = getNewsPapers(month_jobs)
-        mgr.backfillManyNews(nps,base.year,base.month)
+        mgr.backfillManyNews(nps,base.year,base.month,base.day)
 
 
 class BackFillWorker(NewsWorker):

@@ -115,9 +115,9 @@ class WpDownlader():
                 if ctx._n_pages is None or n_pages > ctx._n_pages:
                     ctx._n_pages=n_pages
 
-            json = response.json()         
+            json = response.json()
             articles =self._reader.extract_list(ctx,json)
-            
+
             if articles is None:
                 return response
             ctx._histogram=build_monthly_histogram(articles,ctx._histogram)
