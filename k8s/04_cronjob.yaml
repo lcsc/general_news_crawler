@@ -28,7 +28,7 @@ metadata:
     app: news-crawler
     component: cronjob
 spec:
-  schedule: "15 3 * * *"
+  schedule: "15 1 * * *"
   timeZone: "Europe/Madrid"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 366

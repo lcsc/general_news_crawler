@@ -36,7 +36,7 @@ case $comp in
         kubectl -n news-crawler apply -f 04_cronjob.yaml
         ;;
     *)
-        echo "Usage: $0 [mongodb|mongo-express|api|dashboard]"
+        echo "Usage: $0 [mongodb|mongo-express|api|dashboard|cronjob]"
         exit 1
         ;;
 esac 
