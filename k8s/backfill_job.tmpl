@@ -1,0 +1,47 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: backfill-job-YEAR-MONTH-TS
+  namespace: news-crawler
+  labels:
+    app: news-crawler
+    component: backfill-job
+spec:
+  backoffLimit: 6
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: news-crawler
+        component: backfill-job
+    spec:
+        restartPolicy: OnFailure
+        containers:
+        - image: mirror.lcsc.csic.es/lcsc/general_news_crawler_api:latest
+          imagePullPolicy: Always
+          name: crawler-bf-YEAR-MONTH
+          command:
+            - crawler
+            - backfillnews
+            - "YEAR"
+            - "MONTH"
+          resources:
+            limits:
+              cpu: "7000m"
+              memory: "10Gi"
+            requests:
+              cpu: "3000m"
+              memory: "2Gi"
+          env:
+          - name: MONGODB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-creds
+                key: username
+          - name: MONGODB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongodb-creds
+                key: password
+          - name: MONGODB_URL
+            value: "mongodb://$(MONGODB_USERNAME):$(MONGODB_PASSWORD)@mongodb-nodeport-svc:27017"
