@@ -164,16 +164,17 @@ def run_downloadnews_day(obj:GeneralOptions,args:CommonArgs):
 @click.option('-se',"sub_engine",type=click.Choice(sub_engines, case_sensitive=False), default=None)
 @click.option('-w',"workers",type=int,default=10)
 @click.option('-d',"delay",type=float,default=13.0)
+@click.option('--headline_drought', 'headline_drought', flag_value=True, default=False)
 @click.argument('year',type=int)
 @click.argument('month',type=int,required=False)
 @click.argument('day',type=int, required=False)
 @click.pass_obj
-def downloadnews(obj:GeneralOptions,engine:str,sub_engine:str,delay:float,workers:int,year:int,month:int,day:int):
+def downloadnews(obj:GeneralOptions,engine:str,sub_engine:str,delay:float,workers:int,headline_drought:bool,year:int,month:int,day:int):
     start = datetime.now()
 
     LOG.info("Downloading news")
     args = DownloadNewsArgs(engine=engine,sub_engine=sub_engine,
-        year=year,month=month,day=day,workers=workers, delay=delay)
+        year=year,month=month,day=day,workers=workers, delay=delay, headline_drought=headline_drought)
 
     if  obj.ccaa is not None and obj.short_name is not None:
          # nos piden un Periodico concreto

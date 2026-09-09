@@ -12,6 +12,7 @@ data:
     echo "Backfilling News ${PARAMS}"
     crawler backfillnews ${PARAMS}
     crawler classifyheadlines
+    crawler downloadnews --headline_drought ${PARAMS}
   get-yesterday-params.py: |
     import datetime
     def main():
@@ -24,6 +25,7 @@ data:
     echo "Backfilling News ${PARAMS}"
     crawler backfillnews ${PARAMS}
     crawler classifyheadlines
+    crawler downloadnews --headline_drought ${PARAMS}
   get-previous-month-params.py: |
     import datetime
     import dateutil.relativedelta

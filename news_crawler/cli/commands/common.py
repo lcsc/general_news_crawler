@@ -61,7 +61,7 @@ class CommonCmd():
 
         return ret
 
-    def buildFilterArticles(self, np_short_name:str=None) -> dict:
+    def buildFilterArticles(self, np_short_name:str=None,np_ccaa:str=None) -> dict:
         ret = self.buildFilterNewsPaper()
         if "ccaa" in ret:
             ret.update({"np_ccaa": ret["ccaa"]})
@@ -74,4 +74,6 @@ class CommonCmd():
             ret.pop("short_name", None)
         if np_short_name is not None:
             ret.update({"np_name": np_short_name})
+        if np_ccaa is not None:
+            ret.update({"np_ccaa": np_ccaa})
         return ret

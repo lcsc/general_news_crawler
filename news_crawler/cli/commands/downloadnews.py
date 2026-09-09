@@ -14,13 +14,14 @@ from news_crawler.common.consts import DownloadStatus_NOT_FOUND
 LOG:logging.Logger=logging.getLogger(__name__)
 
 class DownloadNewsArgs(CommonArgs):
-    def __init__(self, engine:str,sub_engine:str,year:int,month:int,day:int, workers:int,delay:float):
+    def __init__(self, engine:str,sub_engine:str,year:int,month:int,day:int, workers:int,delay:float,headline_drought:bool):
         super().__init__(engine=engine,sub_engine=sub_engine)
         self.year=year
         self.month=month
         self.day=day
         self.workers=workers
         self.delay=delay
+        self.headline_drought=headline_drought
         #self._bfillers:Dict[str,BackFiller]
 
 
@@ -92,8 +93,11 @@ class DownloadNewsCmd(CommonCmd):
             if np.n_articulos is None or np.n_articulos < 1:
                 LOG.warning(f"Newspaper {np.name} has no articles to download, skipping")
                 continue
-            filter= self.buildFilterArticles(np_short_name=np.short_name)
+            filter= self.buildFilterArticles(np_short_name=np.short_name,np_ccaa=np.ccaa)
             filter["date"] = {"$gte": start, "$lt": end}
+            if self.args.headline_drought:
+                filter["is_headline_drought"] = True
+            #LOG.info(f"Query to Mongo: {filter}") 
             articles = repos.articles.find_by(filter)
             articles = [article for article in articles if self._isArticleDownloable(article)]
             

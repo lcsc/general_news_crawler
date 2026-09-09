@@ -12,5 +12,5 @@ RUN vite build --base=/news/dashboard
 
 FROM nginx:stable-alpine
 
-COPY --from=builder /src/${VIEWER}/dist /usr/share/nginx/html/news/dashboard
+COPY --from=builder /src/dist /usr/share/nginx/html/news/dashboard
 COPY vue-router-nginx.conf /etc/nginx/conf.d/default.conf
