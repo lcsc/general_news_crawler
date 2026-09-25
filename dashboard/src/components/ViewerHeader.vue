@@ -44,6 +44,11 @@ const menuItems = ref<MenuItem[]>([
     },
   },
   {
+    label: "Sequias",
+    icon: "pi pi-file",
+    route: "/drought_news",
+  },
+  {
     label: "Categorias",
     icon: "pi pi-tags",
     // route: "/categories/andalucia/elcorreoweb",

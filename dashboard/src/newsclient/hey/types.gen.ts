@@ -8,6 +8,7 @@ export type BcubeCategory = {
     } | null;
     id?: string | null;
     ccaa: string;
+    provincia?: string | null;
     short_name: string;
     cat_name: string;
     cat_url: string;
@@ -37,6 +38,7 @@ export type NewsArticle = {
     article_data?: string | null;
     categories?: Array<string> | null;
     is_headline_drought?: boolean | null;
+    download_status?: string | null;
 };
 
 export type NewsPaper = {
@@ -342,6 +344,40 @@ export type NewsGetResponses = {
 };
 
 export type NewsGetResponse = NewsGetResponses[keyof NewsGetResponses];
+
+export type DroughtNewsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        page?: number | null;
+        rowsPerPage?: number | null;
+        sortBy?: string | Array<string> | null;
+        sortType?: SortTypeEnum | Array<SortTypeEnum> | null;
+        notBefore?: string | null;
+        notAfter?: string | null;
+        category?: Array<string> | null;
+        headlineDrought?: BoolEmptyEnum | null;
+    };
+    url: '/drought/';
+};
+
+export type DroughtNewsListErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DroughtNewsListError = DroughtNewsListErrors[keyof DroughtNewsListErrors];
+
+export type DroughtNewsListResponses = {
+    /**
+     * Successful Response
+     */
+    200: NewsSearchResult;
+};
+
+export type DroughtNewsListResponse = DroughtNewsListResponses[keyof DroughtNewsListResponses];
 
 export type CatListData = {
     body?: never;

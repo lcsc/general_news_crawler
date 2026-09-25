@@ -16,6 +16,7 @@ import {
   npListCcaa,
   npListCcaaProv,
   newsList,
+  droughtNewsList,
   catList,
   getFile,
 } from "./hey/sdk.gen";
@@ -253,6 +254,29 @@ export class NewsClient {
     if (res.data) {
       return res.data;
     }
+    throw new Error("Server error");
+  }
+
+  public async listDroughtArticles(
+    search: NewsSearch
+  ): Promise<NewsSearchResult> {
+    let res = await droughtNewsList({
+      client: this.apiClient,
+      query: {
+        page: search.page,
+        rowsPerPage: search.rowsPerPage,
+        sortBy: search.sortBy,
+        sortType: search.sortType,
+        //        notAfter: search.notAfter?.toISOString().slice(0, 10),
+        //        notBefore: search.notBefore?.toISOString().slice(0, 10),
+        notAfter: this.formatDate(search.notAfter),
+        notBefore: this.formatDate(search.notBefore),
+      },
+    });
+    if (res.data) {
+      return res.data;
+    }
+
     throw new Error("Server error");
   }
 }

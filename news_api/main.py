@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 
 # Importing the routers after logging is initialized
 from .newspapers import api_np
-from .news_articles import api_arti
+from .news_articles import api_arti, api_arti_dro
 from .categories import api_cats
 from .files import api_files
 
@@ -34,5 +34,6 @@ async def get_options()->OptionsResult:
 
 app.include_router(api_np)
 app.include_router(api_arti)
+app.include_router(api_arti_dro)
 app.include_router(api_cats)
 app.include_router(api_files)
