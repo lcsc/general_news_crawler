@@ -19,6 +19,7 @@ $MSH $MSH_CON -eval "db.bCubeCategory.createIndex({'ccaa':1,'short_name':1})"
 
 $MSH $MSH_CON -eval "db.NewsArticles.createIndex({'np_ccaa':1,'np_name':1})"
 $MSH $MSH_CON -eval "db.NewsArticles.createIndex({'np_ccaa':1,'np_name':1,'article_id':1})"
+$MSH $MSH_CON -eval "db.NewsArticles.createIndex({'date':1})"
 
 $MSH $MSH_CON -eval "db.NewsPapers.createIndex({'ccaa':1})"
 $MSH $MSH_CON -eval "db.NewsPapers.createIndex({'ccaa':1,'provincia':1})"
