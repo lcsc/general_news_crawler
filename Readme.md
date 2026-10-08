@@ -15,7 +15,6 @@ Pasos para hacer una captura :
 
 ```
 
-
 docker run -it --rm -e https_proxy=socks5h://172.17.0.1:1080 python:3.11 bash
 
 
@@ -24,12 +23,26 @@ docker run -it --rm -e https_proxy=socks5h://172.17.0.1:1080 python:3.11 bash
 ```bash
 python3 -m venv --upgrade-deps .venv
 . .venv/bin/activate
-pip install poetry
+poetry -V
+```
+> *CHECK POETRY VERSION*, requires 2.5.1 or newer. 
+
+If you need to install or update poetry:
+
+```bash
+pip3 install poetry
 poetry self update
 deactivate
 . .venv/bin/activate
-poetry install 
-pip install -e .
+poetry -V
+
+```
+When ready:
+
+```bash 
+# . .venv/bin/activate (ensure active)
+poetry -C general_news_crawler install 
+pip install -e general_news_crawler
 ```
 
 ## UBUNTU NOTE
