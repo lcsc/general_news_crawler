@@ -815,6 +815,20 @@ trio = ["trio (>=0.30)"]
 wmi = ["wmi (>=1.5.1) ; platform_system == \"Windows\""]
 
 [[package]]
+name = "dotenv"
+version = "0.9.9"
+description = "Deprecated package"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "dotenv-0.9.9-py2.py3-none-any.whl", hash = "sha256:29cf74a087b31dafdb5a446b6d7e11cbce8ed2741540e2339c69fbef92c94ce9"},
+]
+
+[package.dependencies]
+python-dotenv = "*"
+
+[[package]]
 name = "exceptiongroup"
 version = "1.3.1"
 description = "Backport of PEP 654 (exception groups)"
@@ -1956,6 +1970,20 @@ click = ">=3.0"
 [package.extras]
 dev = ["check-manifest"]
 test = ["hypothesis", "pytest"]
+
+[[package]]
+name = "mongo"
+version = "0.2.0"
+description = "Minimalistic pymongo object wrapper"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "mongo-0.2.0.tar.gz", hash = "sha256:4a2bf0448da7bd2b34f69058c8380baed1e2916454814b3d6253ed6cf5a36c57"},
+]
+
+[package.dependencies]
+pymongo = "*"
 
 [[package]]
 name = "narwhals"
@@ -3156,6 +3184,21 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-dotenv"
+version = "1.2.4"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "python_dotenv-1.2.4-py3-none-any.whl", hash = "sha256:42269a8a5b3fd54ffa6f3d84b18abed50064717576b4ecf03dc4a55d8aa04fdc"},
+    {file = "python_dotenv-1.2.4.tar.gz", hash = "sha256:f0d53e69935a851c0dcc78f3ab7aaccd8cabef0b92382b576b824212902873c0"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
+
+[[package]]
 name = "pytz"
 version = "2026.5"
 description = "World timezone definitions, modern and historical"
@@ -4008,4 +4051,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10"
-content-hash = "5e4b97aefd4a3dd0172b821142e00d86c942280dd85c18ae2777b1dc5954e17e"
+content-hash = "3d909d7691c3707c3f4c9ab7f7a45a74a252e73aa5223944dc87d37345600033"
