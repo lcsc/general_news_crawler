@@ -9,3 +9,4 @@ from .downloadnews import DownloadNewsArgs, DownloadNewsCmd
 from .fixArticlesProvinces import FixArticlesProvs
 from .classifyHeadLines import ClassifyHeadLines
 from .stats import stats_cmd,color_map_cmd
+from .cienallm import CienaCommand

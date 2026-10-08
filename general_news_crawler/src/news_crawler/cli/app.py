@@ -14,6 +14,7 @@ from .commands import DownloadNewsArgs, DownloadNewsCmd
 from .commands import FixArticlesProvs
 from .commands import ClassifyHeadLines
 from .commands import stats_cmd, color_map_cmd
+from .commands import CienaCommand
 from ..core.newspapers import Listers
 
 from datetime import datetime
@@ -254,3 +255,15 @@ def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None
         else:
             geo_file="dashboard/src/assets/provinces.geojson"
     color_map_cmd(mode, csv_file, geo_file)
+
+
+@main.group()
+def cienallm():
+    pass
+
+@cienallm.command()
+@click.pass_obj
+def ls(obj:GeneralOptions):
+    #print(obj)
+    cienallm = CienaCommand()
+    cienallm.ls()

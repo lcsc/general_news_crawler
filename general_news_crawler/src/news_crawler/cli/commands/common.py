@@ -19,6 +19,8 @@ class GeneralOptions():
         self.mongo_user: str = mongo_user
         self.mongo_passwd: str = mongo_passwd
 
+    def __str__(self):
+        return f"GeneralOptions(ccaa={self.ccaa}, provincia={self.provincia}, short_name={self.short_name}, mongo_url={self.mongo_url}, mongo_user={self.mongo_user}, mongo_passwd=****)"
 
 class CommonArgs():
     def __init__(self, engine: str, sub_engine: str):
