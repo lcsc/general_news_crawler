@@ -17,6 +17,8 @@ from .commands import stats_cmd, color_map_cmd
 from .commands import CienaCommand
 from ..core.newspapers import Listers
 
+from ..core.cienallm import CIENA_TASK_DETECT, CIENA_TASK_CLASSIFY
+
 from datetime import datetime
 
 import logging
@@ -267,3 +269,13 @@ def ls(obj:GeneralOptions):
     #print(obj)
     cienallm = CienaCommand()
     cienallm.ls()
+
+@cienallm.command()
+@click.pass_obj
+@click.argument('task', type=click.Choice([CIENA_TASK_DETECT, CIENA_TASK_CLASSIFY], case_sensitive=False), required=True)
+@click.argument('name', type=str, required=True)
+@click.option('--model', type=str, required=False)
+def get_ciena_config(obj:GeneralOptions, task:str, name:str, model:str=None):
+    #print(obj)
+    cienallm = CienaCommand()
+    cienallm.get_ciena_config(task, name, model)

@@ -21,7 +21,8 @@ dependencies = [
     "uvicorn (>=0.34.0)",
     "requests (>=2.32.3)",
     "geopandas (>=1.1.1)",
-    "geoplot (>=0.5.1)"
+    "geoplot (>=0.5.1)",
+    "pyyaml (>=6.0.3,<7.0.0)"
 ]
 
 [project.scripts]

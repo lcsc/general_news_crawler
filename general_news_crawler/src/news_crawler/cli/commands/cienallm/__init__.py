@@ -1,1 +1,1 @@
-from .ciena import CienaCommand
+from .ciena import CienaCommand, CIENA_TASK_DETECT, CIENA_TASK_CLASSIFY
