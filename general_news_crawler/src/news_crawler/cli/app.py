@@ -231,21 +231,24 @@ def classifyHeadLines(obj:GeneralOptions):
 
 @main.command()
 @click.pass_obj
-@click.argument('mode',type=click.Choice(["ccaa","provs","papers"], case_sensitive=False), required=True)
-@click.argument('year',type=int, required=False, default=2024)
+@click.argument('mode',type=click.Choice(["ccaa","provs","papers","drought"], case_sensitive=False), required=True)
+@click.argument('year',type=int, required=False, default=None)
 def stats(obj:GeneralOptions, mode:str, year:int):    
     stats_cmd(obj, mode, year)
 
 @main.command()
 @click.pass_obj
 @click.argument('mode',type=click.Choice(["ccaa","provs"], case_sensitive=False), required=True)
+@click.option('-d','--drought', is_flag=True, default=False)
 @click.option('-c','--csv_file', type=click.Path(), required=False)
 @click.option('-g','--geo_file', type=click.Path(), required=False)
-def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None):
+def color_map(obj:GeneralOptions, mode:str, drought:bool=False, csv_file:str=None, geo_file:str=None):
     print ("Color Map")
     if mode not in ["ccaa","provs"]:
         LOG.error(f"Modo desconocido {mode}")
         return 
+    if drought:
+        csv_file="./out/stats_drought_all.csv"
     if csv_file is None:
         if mode=="ccaa":
             csv_file="./out/stats_ccaa_2024.csv"
@@ -256,7 +259,7 @@ def color_map(obj:GeneralOptions, mode:str, csv_file:str=None, geo_file:str=None
             geo_file="dashboard/src/assets/communities.geojson"
         else:
             geo_file="dashboard/src/assets/provinces.geojson"
-    color_map_cmd(mode, csv_file, geo_file)
+    color_map_cmd(mode, csv_file, geo_file, drought)
 
 
 @main.group()

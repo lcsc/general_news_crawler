@@ -24,6 +24,26 @@ def stats_provs(repos:CrawlerRepos, year:int):
             data.append( {"ccaa":ccaa,"provincia":provincia,"newspaper_count":np_count,"article_count":art_count} )
     return data
 
+def stats_drought(repos:CrawlerRepos, year:int):
+    data = []
+    
+    for ccaa in provincias:
+        for provincia in provincias[ccaa]:
+            LOG.info(f"Processing {ccaa} - {provincia}")
+            np_count = len( list( repos.newspaper.find_by( {"ccaa":ccaa,"provincia":provincia} ) ) )
+            if np_count==0:
+                provincia= None
+                np_count = len( list( repos.newspaper.find_by( {"ccaa":ccaa,"provincia":provincia} ) ) )
+            _filter = {"np_ccaa":ccaa,"np_provincia":provincia,"is_headline_drought":True} 
+            if year is not None:
+                start,end = get_range(year)
+                _filter["date"]={"$gte": start, "$lt": end}
+                
+            art_count = len( list( repos.articles.find_by( _filter ) ) )
+            
+            data.append( {"ccaa":ccaa,"provincia":provincia,"newspaper_count":np_count,"article_count":art_count} )
+    return data
+
 def stats_ccaa(repos:CrawlerRepos, year:int):
     data = []
     start,end = get_range(year)
@@ -82,24 +102,34 @@ def stats_papers(cmd:CommonCmd, repos:CrawlerRepos, year:int):
 def stats_cmd(args:GeneralOptions, mode, year:int):
     cmd = CommonCmd(general=args,args=None)
     repos:CrawlerRepos = cmd.connectMongo()
+    year_file=year
+    if year is None:
+        year_file="all"
     if mode=="provs":
         data = stats_provs(repos, year)
         keys = data[0].keys()
-        with open(f'./out/stats_provs_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_provs_{year_file}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
     elif mode=="ccaa":
         data = stats_ccaa(repos, year)
         keys = data[0].keys()
-        with open(f'./out/stats_ccaa_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_ccaa_{year_file}.csv', 'w', newline='', encoding='utf-8') as output_file:
+            dict_writer = csv.DictWriter(output_file, keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(data)
+    elif mode=="drought":
+        data = stats_drought(repos, year)
+        keys = data[0].keys()
+        with open(f'./out/stats_drought_{year_file}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
     else: # papers  
         data = stats_papers(cmd, repos, year)
         keys = data[0].keys()
-        with open(f'./out/stats_papers_{year}.csv', 'w', newline='', encoding='utf-8') as output_file:
+        with open(f'./out/stats_papers_{year_file}.csv', 'w', newline='', encoding='utf-8') as output_file:
             dict_writer = csv.DictWriter(output_file, keys)
             dict_writer.writeheader()
             dict_writer.writerows(data)
@@ -143,7 +173,7 @@ def move_canarias(data, cod_ccaa='05'):
             data.at[idx,'geometry'] = shapely.transform(geo, lambda x=None: x+[9,6.5] )
     return data
 
-def color_map_cmd(mode, csv_file, geo_file):
+def color_map_cmd(mode, csv_file, geo_file, drought:bool=False):
     import geopandas as gpd
     import geoplot
     import geoplot.crs as gcrs
@@ -154,11 +184,20 @@ def color_map_cmd(mode, csv_file, geo_file):
     )
 
     stats = pd.read_csv(csv_file)
+    if mode == 'ccaa' and drought:
+        # agregate stats, by colummn ccaa
+        # add the index as colummn
+        stats = stats.groupby('ccaa').agg({
+            'newspaper_count': 'sum',
+            'article_count': 'sum'
+        }).reset_index()
+    
+    if drought:
+        # quitamos los que no tienen articulos
+        stats = stats[stats['article_count'] > 0]
   
     data = move_canarias(data, cod_ccaa='05' if mode=="ccaa" else '04')
-    
-
-  
+      
     if mode=="ccaa":
         data["n_periodicos"] = data.apply(
             lambda row: get_ccaa_n(stats, row['cod_ccaa']), axis=1
@@ -185,10 +224,10 @@ def color_map_cmd(mode, csv_file, geo_file):
         linewidth=.3,
         legend=True,
         figsize=(12, 8),
-        cmap='coolwarm'
+        cmap='YlOrBr'
     )
-    plt.title(f"Mapa de Periodicos por {'Comunidades Autonomas' if mode == 'ccaa' else 'Provincias'} año 2024")
-    plt.savefig(f"color_map_papers_{mode}.png")
+    plt.title(f"Mapa de Periodicos por {'Comunidades Autonomas' if mode == 'ccaa' else 'Provincias'} {'de Sequia' if drought else 'año 2024'}")
+    plt.savefig(f"./out/color_map_papers_{mode}.png")
     ax = geoplot.choropleth(
         data,
         hue="n_articulos",
@@ -197,10 +236,10 @@ def color_map_cmd(mode, csv_file, geo_file):
         linewidth=.3,
         legend=True,
         figsize=(12, 8),
-        cmap='coolwarm'
+        cmap='YlOrBr'
         
     )
-    plt.title(f"Mapa de Articulos por {'Comunidades Autonomas' if mode == 'ccaa' else 'Provincias'} año 2024")
+    plt.title(f"Mapa de Articulos {'de sequia' if drought else ''} por {'Comunidades Autonomas' if mode == 'ccaa' else 'Provincias'} { 'año 2024' if not drought else ''}")
     plt.savefig(f"./out/color_map_articles_{mode}.png")
     pass
 

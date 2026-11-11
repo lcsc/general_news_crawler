@@ -181,3 +181,5 @@ color_map_papers_provs.png
 color_map_articles_provs.png
 .DS_Store
 stats_papers_*.csv
+out/*.csv
+out/*.png
